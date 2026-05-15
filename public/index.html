@@ -70,14 +70,14 @@
         <header class="h-16 flex items-center justify-between px-8 bg-darksurface/50 backdrop-blur-md border-b border-darkborder sticky top-0 z-10">
             <div class="relative w-full max-w-md">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
-                <input type="text" placeholder="Search across all drives..." class="w-full bg-darkbg border border-darkborder text-sm rounded-full pl-10 pr-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200 placeholder-slate-500 transition-all">
+                <input id="global-search" type="text" placeholder="Search across all drives..." class="w-full bg-darkbg border border-darkborder text-sm rounded-full pl-10 pr-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200 placeholder-slate-500 transition-all">
             </div>
             <div class="flex items-center gap-4">
-                <button class="relative p-2 text-slate-400 hover:text-white transition-colors">
+                <button id="btn-notifications" class="relative p-2 text-slate-400 hover:text-white transition-colors">
                     <i class="fa-regular fa-bell"></i>
                     <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-darksurface"></span>
                 </button>
-                <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border-2 border-darkborder flex items-center justify-center shadow-md cursor-pointer">
+                <div id="btn-profile" class="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border-2 border-darkborder flex items-center justify-center shadow-md cursor-pointer">
                     <span class="text-xs font-bold text-white">DM</span>
                 </div>
             </div>
@@ -137,7 +137,7 @@
                     <h2 class="text-lg font-semibold flex items-center gap-2">
                         Connected Accounts <span class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold" id="account-count-badge">0</span>
                     </h2>
-                    <button class="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"><i class="fa-solid fa-plus mr-1"></i> Add Account</button>
+                    <button id="btn-add-account" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"><i class="fa-solid fa-plus mr-1"></i> Add Account</button>
                 </div>
                 <div id="account-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     <!-- Accounts injected dynamically via JS -->
@@ -159,7 +159,7 @@
                 <div class="lg:col-span-2 bg-darksurface border border-darkborder rounded-2xl flex flex-col overflow-hidden">
                     <div class="p-5 border-b border-darkborder flex justify-between items-center">
                         <h3 class="text-slate-200 font-semibold flex items-center gap-2"><i class="fa-solid fa-weight-hanging text-slate-400"></i> Largest Files Across Accounts</h3>
-                        <button class="text-xs text-slate-400 hover:text-white transition-colors">See All</button>
+                        <button onclick="showToast('Navigating to full file view...') " class="text-xs text-slate-400 hover:text-white transition-colors">See All</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
@@ -183,7 +183,87 @@
         </div>
     </main>
 
+    <!-- Add Account Modal -->
+    <div id="add-account-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-darksurface border border-darkborder rounded-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-lg font-semibold text-white">Link New Drive</h3>
+                <button onclick="closeAddAccountModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="add-account-form" action="/accounts" method="POST">
+                <div class="mb-4">
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Account Label</label>
+                    <input type="text" name="label" required placeholder="e.g. Work Drive, Personal" class="w-full bg-darkbg border border-darkborder text-sm rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200 transition-all">
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="closeAddAccountModal()" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/20">
+                        Continue to Google <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+
     <script>
+        // UI Interaction Handlers
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let icon = 'fa-circle-info text-blue-400';
+            let borderClass = 'border-blue-500/20';
+            
+            toast.className = \`flex items-center gap-3 bg-darksurface border \${borderClass} shadow-lg rounded-xl px-4 py-3 transform translate-x-full opacity-0 transition-all duration-300 max-w-sm\`;
+            toast.innerHTML = \`<i class="fa-solid \${icon} text-lg"></i><p class="text-sm text-slate-200 font-medium">\${message}</p>\`;
+            
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            }, 10);
+            
+            // Auto remove
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function openAddAccountModal() {
+            const modal = document.getElementById('add-account-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.firstElementChild.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeAddAccountModal() {
+            const modal = document.getElementById('add-account-modal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        document.getElementById('btn-add-account').addEventListener('click', openAddAccountModal);
+        document.getElementById('btn-notifications').addEventListener('click', () => showToast('You have no new notifications.'));
+        document.getElementById('btn-profile').addEventListener('click', () => showToast('Profile settings coming soon.'));
+        
+        document.getElementById('global-search').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                showToast(\`Searching for "\${e.target.value}" across drives...\`);
+                e.target.value = '';
+            }
+        });
+
         // Formatter Utility
         function formatBytes(bytes) {
             if (!bytes || bytes === 0) return '0 B';
@@ -248,7 +328,7 @@
                             </div>
                             
                             <div class="pt-4 border-t border-darkborder flex justify-end">
-                                <button class="px-4 py-1.5 text-xs font-medium text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors group-hover:border-slate-600 shadow-sm">
+                                <button onclick="showToast('Loading file browser for \\'' + acc.email + '\\'...')" class="px-4 py-1.5 text-xs font-medium text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors group-hover:border-slate-600 shadow-sm">
                                     Browse <i class="fa-solid fa-arrow-right ml-1 text-slate-400"></i>
                                 </button>
                             </div>
@@ -335,7 +415,7 @@
                                     </span>
                                 </td>
                                 <td class="px-5 py-3 text-center">
-                                    <button class="w-7 h-7 rounded-md bg-darkbg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors inline-flex items-center justify-center">
+                                    <button onclick="showToast('Opened options for \\'' + file.name + '\\'')" class="w-7 h-7 rounded-md bg-darkbg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors inline-flex items-center justify-center">
                                         <i class="fa-solid fa-ellipsis"></i>
                                     </button>
                                 </td>
