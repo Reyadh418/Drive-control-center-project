@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Explorer | Drive Mesh</title>
+    <link rel="stylesheet" href="/tailwind.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base styles mimicking index.html */
+        :root {
+            --bg-dark: #0f111a;
+            --surface: #1e2130;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+        }
+        body {
+            background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif;
+            display: flex; height: 100vh; overflow: hidden; margin:0;
+        }
+        .sidebar { width: 260px; background-color: var(--surface); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; }
+        .nav-item { padding: 12px 20px; margin: 4px 12px; border-radius: 8px; color: var(--text-muted); display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 500; }
+        .nav-item:hover { background-color: rgba(255,255,255,0.03); color: var(--text-main); }
+        .nav-item.active { background-color: var(--primary); color: white; }
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        .topbar { height: 70px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; padding: 0 32px; background-color: rgba(15, 17, 26, 0.8); }
+    </style>
+</head>
+<body>
+    <aside class="sidebar py-6">
+        <div class="px-6 mb-8 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center"><i class="fa-solid fa-cloud text-white"></i></div>
+            <span class="text-xl font-bold tracking-tight">Drive Mesh</span>
+        </div>
+        <nav class="flex flex-col gap-1">
+            <a href="/index.html" class="nav-item"><i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard</a>
+            <a href="/accounts.html" class="nav-item"><i class="fa-solid fa-users w-5 text-center"></i> Accounts</a>
+            <a href="/fileview.html" class="nav-item active"><i class="fa-solid fa-folder-tree w-5 text-center"></i> File Explorer</a>
+            <a href="/settings.html" class="nav-item"><i class="fa-solid fa-gear w-5 text-center"></i> Settings</a>
+        </nav>
+    </aside>
+    <main class="main-content">
+        <header class="topbar">
+            <div><h1 class="text-lg font-semibold">File Explorer</h1></div>
+        </header>
+        <div class="p-8 text-center text-slate-500">
+            <i class="fa-solid fa-tools text-4xl mb-4"></i>
+            <h2 class="text-xl text-white mb-2">Work in Progress</h2>
+            <p>Will integrate the left-pane folder tree and right-pane file viewer here.</p>
+        </div>
+    </main>
+</body>
+</html>

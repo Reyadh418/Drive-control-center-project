@@ -122,38 +122,18 @@ function buildExplorerState(dbInstance, accountId, folderId) {
 
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
-// Serve static assets but disable automatic index file so server-side routes win
-app.use(express.static(path.join(ROOT_DIR, 'public'), { index: false }));
+// Serve static assets natively for index.html mapping
+app.use(express.static(path.join(ROOT_DIR, 'public')));
 
-// Templating (EJS) setup
-app.set('views', path.join(ROOT_DIR, 'views'));
-app.set('view engine', 'ejs');
+// Temporarily disabling EJS views as we pivot to HTML files
+// app.set('views', path.join(ROOT_DIR, 'views'));
+// app.set('view engine', 'ejs');
 
-// Pages
-app.get('/', (req, res) => {
-  try {
-    const dashboard = getDashboard(db);
-    renderPage(res, 'index', {
-      dashboard,
-      breadcrumbs: [{ label: 'Dashboard', href: '/' }]
-    });
-  } catch (error) {
-    res.status(500).send('Failed to render dashboard.');
-  }
-});
-
-// Accounts pages
-app.get('/accounts', (req, res) => {
-  try {
-    const accounts = listAccounts(db);
-    renderPage(res, 'accounts', {
-      accounts,
-      breadcrumbs: [{ label: 'Accounts', href: '/accounts' }]
-    });
-  } catch (error) {
-    res.status(500).send('Failed to render accounts.');
-  }
-});
+// Redirect the old roots to the new static pages if hit specifically
+app.get('/', (req, res) => res.redirect('/index.html'));
+app.get('/accounts', (req, res) => res.redirect('/accounts.html'));
+app.get('/files', (req, res) => res.redirect('/fileview.html'));
+app.get('/settings', (req, res) => res.redirect('/settings.html'));
 
 app.get('/accounts/:id', (req, res) => {
   try {
