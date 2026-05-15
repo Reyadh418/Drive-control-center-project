@@ -207,6 +207,20 @@
         </div>
     </div>
 
+        <!-- Confirmation Modal -->
+        <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+            <div class="bg-darksurface border border-darkborder rounded-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
+                <div class="mb-4">
+                    <h3 id="confirm-title" class="text-lg font-semibold text-white">Confirm</h3>
+                    <p id="confirm-message" class="text-sm text-slate-400 mt-2">Are you sure?</p>
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button id="confirm-cancel" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Cancel</button>
+                    <button id="confirm-ok" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-medium rounded-lg transition-colors shadow-lg">Yes, unlink</button>
+                </div>
+            </div>
+        </div>
+
     <!-- Toast Notifications -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
 
@@ -296,23 +310,23 @@
                     globalUsed += used;
                     globalTotal += total;
 
-                    const statusBadge = acc.status === 'Connected' 
-                        ? `<span class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Connected</span>`
-                        : `<span class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-red-500/10 text-red-400 text-xs font-medium border border-red-500/20"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Disconnected</span>`;
+                    const statusBadge = (acc.sync_state === 'linked' || acc.sync_state === 'synced')
+                        ? `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0"></span><span class="truncate max-w-[5.5rem]">Connected</span></span>`
+                        : `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-500/10 text-red-400 text-xs font-medium border border-red-500/20"><span class="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"></span><span class="truncate max-w-[5.5rem]">Disconnected</span></span>`;
 
                     grid.insertAdjacentHTML('beforeend', `
-                        <div class="bg-darksurface border border-darkborder rounded-2xl p-5 hover:border-slate-700 transition-colors group">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="flex items-center gap-3 w-3/4">
+                        <div class="bg-darksurface border border-darkborder rounded-2xl p-5 hover:border-slate-700 transition-colors group relative overflow-hidden">
+                            <div class="flex justify-between items-start mb-4 gap-2">
+                                <div class="flex items-center gap-3 flex-1 min-w-0">
                                     <div class="w-10 h-10 rounded-full bg-darkbg border border-darkborder flex items-center justify-center shrink-0">
                                         <i class="fa-brands fa-google text-slate-300"></i>
                                     </div>
-                                    <div class="overflow-hidden">
-                                        <h4 class="text-[13px] font-semibold text-slate-200 truncate pr-2 w-full" title="${acc.email}">${acc.email}</h4>
+                                    <div class="min-w-0">
+                                        <h4 class="text-[13px] font-semibold text-slate-200 truncate" title="${acc.email}">${acc.email}</h4>
                                         <p class="text-[11px] text-slate-500 mt-0.5">Google Drive</p>
                                     </div>
                                 </div>
-                                <div class="shrink-0">
+                                <div class="shrink-0 mt-0.5">
                                     ${statusBadge}
                                 </div>
                             </div>
@@ -356,6 +370,7 @@
         }
 
         // 2. Fetch Analytics & Aggregates
+        let typeChartInstance = null;
         async function fetchAnalytics() {
             try {
                 const res = await fetch('/api/storage-summary');
@@ -365,8 +380,11 @@
                 document.getElementById('stat-duplicates').innerText = (data.potentialDuplicates || 0).toLocaleString();
 
                 // Build Chart.js Pie
+                if (typeChartInstance) {
+                    typeChartInstance.destroy();
+                }
                 const ctx = document.getElementById('typeChart').getContext('2d');
-                new Chart(ctx, {
+                typeChartInstance = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
                         labels: Object.keys(data.fileTypes),
@@ -456,19 +474,55 @@
             }
         }
 
-        async function unlinkAccount(id) {
-            if (!confirm('Unlink this account? This will remove its files from the catalog.')) return;
-            try {
-                const res = await fetch(`/api/accounts/${id}/unlink`, { method: 'POST' });
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data.error || 'Unlink failed');
-                showToast('Account unlinked');
-                await fetchAccounts();
-                await fetchAnalytics();
-            } catch (err) {
-                console.error(err);
-                showToast('Unlink error: ' + err.message);
+        // Confirmation modal helpers
+        let __confirmCallback = null;
+        function openConfirm(message, title = 'Confirm', callback) {
+            __confirmCallback = callback;
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.firstElementChild.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeConfirm() {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 250);
+            __confirmCallback = null;
+        }
+
+        document.getElementById('confirm-cancel').addEventListener('click', () => closeConfirm());
+        document.getElementById('confirm-ok').addEventListener('click', async () => {
+            if (typeof __confirmCallback === 'function') {
+                try {
+                    await __confirmCallback();
+                } catch (err) {
+                    console.error(err);
+                    showToast('Action failed: ' + (err.message || String(err)));
+                }
             }
+            closeConfirm();
+        });
+
+        async function unlinkAccount(id) {
+            openConfirm('Unlink this account? This will remove its files from the catalog.', 'Unlink account', async () => {
+                try {
+                    const res = await fetch(`/api/accounts/${id}/unlink`, { method: 'POST' });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.error || 'Unlink failed');
+                    showToast('Account unlinked');
+                    await fetchAccounts();
+                    await fetchAnalytics();
+                } catch (err) {
+                    console.error(err);
+                    showToast('Unlink error: ' + err.message);
+                }
+            });
         }
 
         // Boot
