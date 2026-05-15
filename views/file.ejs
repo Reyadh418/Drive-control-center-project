@@ -1,0 +1,23 @@
+<%- include('partials/header', { title: file.name }) %>
+
+<section class="hero-card card-surface mb-6">
+  <div class="hero-copy">
+    <p class="eyebrow text-cyan-300/90">File detail</p>
+    <h2 class="hero-title"><%= file.name %></h2>
+    <p class="hero-text"><%= file.path || 'Root folder' %></p>
+  </div>
+  <div class="hero-actions-grid hero-actions-grid-compact">
+    <a href="/api/files/<%= file.id %>/download" class="button-primary button-link">Download</a>
+    <a href="/files" class="button-secondary button-link">Back to files</a>
+  </div>
+</section>
+
+<section class="card-surface p-6">
+  <div class="stack-tight">
+    <div class="status-line"><span>Size</span><strong><%= file.size ? Math.max(1, Math.round(file.size/1024/1024)) : 0 %> MB</strong></div>
+    <div class="status-line"><span>Account</span><strong><%= file.account_label || file.account_id %></strong></div>
+    <div class="status-line"><span>MIME type</span><strong><%= file.mime_type || 'Unknown' %></strong></div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

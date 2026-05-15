@@ -1,0 +1,22 @@
+{
+  "name": "drive-control-center",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "build:css": "tailwindcss -i src/styles/tailwind.css -o public/tailwind.css --minify",
+    "watch:css": "tailwindcss -i src/styles/tailwind.css -o public/tailwind.css --watch"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "googleapis": "^148.0.0",
+    "multer": "^2.0.2",
+    "ejs": "^3.1.9",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0"
+  }
+}

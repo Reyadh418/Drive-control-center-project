@@ -1,0 +1,101 @@
+<%- include('partials/header', { title: 'Dashboard' }) %>
+
+  <section class="hero-card card-surface mb-6">
+    <div class="hero-copy">
+      <p class="eyebrow text-cyan-300/90">Private storage mesh</p>
+      <h2 class="hero-title">All five drives, one local command center.</h2>
+      <p class="hero-text">Track ownership, search across accounts, move files, and keep the full system local to this machine.</p>
+    </div>
+    <div class="hero-actions-grid">
+      <a class="action-tile action-tile-primary" href="/accounts">
+        <span class="action-label">Accounts</span>
+        <strong><%= dashboard.accounts.length %></strong>
+        <span>Linked accounts</span>
+      </a>
+      <a class="action-tile" href="/files">
+        <span class="action-label">Files</span>
+        <strong><%= dashboard.totals.file_count %></strong>
+        <span>Total indexed files</span>
+      </a>
+      <a class="action-tile" href="/settings">
+        <span class="action-label">Storage</span>
+        <strong><%= Math.max(1, Math.round((dashboard.totals.storage_used || 0) / 1024 / 1024 / 1024)) %> GB</strong>
+        <span>Indexed usage</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="stats-grid mb-6">
+    <div class="stat-card card-surface">
+      <div class="stat-label">Connected Accounts</div>
+      <div class="stat-value"><%= dashboard.accounts.length %></div>
+      <div class="stat-sub">Visible in the local mesh</div>
+    </div>
+    <div class="stat-card card-surface">
+      <div class="stat-label">Total Files</div>
+      <div class="stat-value"><%= dashboard.totals.file_count %></div>
+      <div class="stat-sub">Indexed from Drive</div>
+    </div>
+    <div class="stat-card card-surface">
+      <div class="stat-label">Checksum Matches</div>
+      <div class="stat-value"><%= dashboard.totals.checksum_count %></div>
+      <div class="stat-sub">Useful for duplicate hunting</div>
+    </div>
+    <div class="stat-card card-surface">
+      <div class="stat-label">Duplicate Candidates</div>
+      <div class="stat-value"><%= dashboard.duplicate_candidates.length %></div>
+      <div class="stat-sub">High-confidence matches</div>
+    </div>
+  </section>
+
+  <section class="layout-grid">
+    <div class="card-surface p-6">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow text-cyan-300/90">Largest files</p>
+          <h3 class="panel-title">Heavy hitters across the mesh</h3>
+        </div>
+        <a href="/files" class="text-sm text-cyan-300 hover:text-cyan-200">Open file browser</a>
+      </div>
+      <div class="stack">
+        <% (dashboard.largest_files || []).slice(0, 8).forEach(function(file){ %>
+          <article class="list-row">
+            <div>
+              <div class="list-row-title"><%= file.name %></div>
+              <div class="list-row-meta"><%= file.account_label || 'Unknown account' %></div>
+            </div>
+              <div class="list-row-value"><%= file.size ? Math.max(1, Math.round(file.size / 1024 / 1024)) : 0 %> MB</div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+
+    <aside class="stack">
+      <section class="card-surface p-6">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow text-emerald-300/90">Shortcuts</p>
+            <h3 class="panel-title">Fast paths</h3>
+          </div>
+        </div>
+        <div class="stack-tight">
+          <a href="/accounts" class="shortcut-link">Manage linked accounts</a>
+          <a href="/accounts" class="shortcut-link">Create a new account link</a>
+          <a href="/files" class="shortcut-link">Search and review files</a>
+          <a href="/settings" class="shortcut-link">Check local configuration</a>
+        </div>
+      </section>
+
+      <section class="card-surface p-6">
+        <p class="eyebrow text-cyan-300/90">Status</p>
+        <h3 class="panel-title mb-4">Storage posture</h3>
+        <div class="stack-tight">
+          <div class="status-line"><span>Files in trash</span><strong><%= dashboard.totals.deleted_count %></strong></div>
+          <div class="status-line"><span>Accounts synced</span><strong><%= dashboard.accounts.filter(function(a){ return a.refresh_token; }).length %></strong></div>
+          <div class="status-line"><span>Duplicate groups</span><strong><%= dashboard.duplicate_candidates.length %></strong></div>
+        </div>
+      </section>
+    </aside>
+  </section>
+
+<%- include('partials/footer') %>

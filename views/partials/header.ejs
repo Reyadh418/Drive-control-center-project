@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title><%= typeof title !== 'undefined' ? title : 'Drive Control Center' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="site-shell text-gray-100">
+  <div class="page-glow page-glow-a"></div>
+  <div class="page-glow page-glow-b"></div>
+  <header class="sticky top-0 z-20 border-b border-white/10 bg-slate-950/72 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p class="eyebrow text-cyan-300/90">Local drive mesh</p>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">Drive Control Center</h1>
+      </div>
+      <nav class="flex flex-wrap gap-2 text-sm">
+        <a href="/" class="nav-pill <%= typeof title !== 'undefined' && title === 'Dashboard' ? 'nav-pill-active' : '' %>">Dashboard</a>
+        <a href="/accounts" class="nav-pill <%= typeof title !== 'undefined' && title === 'Accounts' ? 'nav-pill-active' : '' %>">Accounts</a>
+        <a href="/files" class="nav-pill <%= typeof title !== 'undefined' && title === 'Files' ? 'nav-pill-active' : '' %>">Files</a>
+        <a href="/settings" class="nav-pill <%= typeof title !== 'undefined' && title === 'Settings' ? 'nav-pill-active' : '' %>">Settings</a>
+      </nav>
+    </div>
+    <% if (typeof breadcrumbs !== 'undefined' && breadcrumbs && breadcrumbs.length) { %>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-4">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <% breadcrumbs.forEach(function(item, index) { %>
+            <% if (item.href && index < breadcrumbs.length - 1) { %>
+              <a href="<%= item.href %>" class="breadcrumb-link"><%= item.label %></a>
+              <span class="breadcrumb-separator">/</span>
+            <% } else { %>
+              <span class="breadcrumb-current"><%= item.label %></span>
+            <% } %>
+          <% }) %>
+        </nav>
+      </div>
+    <% } %>
+  </header>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-8">

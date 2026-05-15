@@ -1,0 +1,26 @@
+<%- include('partials/header', { title: 'Settings' }) %>
+
+<section class="hero-card card-surface mb-6">
+  <div class="hero-copy">
+    <p class="eyebrow text-cyan-300/90">Settings</p>
+    <h2 class="hero-title">Local runtime and OAuth wiring.</h2>
+    <p class="hero-text">These values describe where the app is running and where Google redirects after a link flow.</p>
+  </div>
+</section>
+
+<section class="card-surface p-6">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow text-cyan-300/90">Configuration</p>
+      <h3 class="panel-title">Current local environment</h3>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="status-line"><span>App URL</span><strong><%= config.appUrl %></strong></div>
+    <div class="status-line"><span>Redirect URI</span><strong><%= config.redirectUri %></strong></div>
+    <div class="status-line"><span>Database path</span><strong><%= config.databasePath %></strong></div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

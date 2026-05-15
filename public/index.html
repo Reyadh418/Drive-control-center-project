@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Drive Control Center</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="backdrop backdrop-a"></div>
+    <div class="backdrop backdrop-b"></div>
+    <main class="shell">
+      <header class="hero card">
+        <div>
+          <p class="eyebrow">Local multi-account drive manager</p>
+          <h1>See all five Drive accounts in one place.</h1>
+          <p class="lede">
+            Link each account locally, index files into SQLite, search fast, and keep storage under control without publishing anything online.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button id="linkAccountBtn" class="primary">Link account</button>
+          <button id="syncAllBtn" class="secondary">Sync all</button>
+          <button id="refreshBtn" class="secondary">Refresh</button>
+        </div>
+      </header>
+
+      <section class="stats-grid" id="statsGrid"></section>
+
+      <section class="layout">
+        <aside class="sidebar card">
+          <div class="panel-head">
+            <h2>Accounts</h2>
+            <span id="accountCount"></span>
+          </div>
+          <div id="accountsList" class="accounts-list"></div>
+        </aside>
+
+        <section class="content card">
+          <div class="panel-head">
+            <h2>Search</h2>
+            <span id="searchHint">Unified file map</span>
+          </div>
+
+          <div class="searchbar">
+            <input id="searchInput" type="search" placeholder="Search by file name, path, or type" />
+            <select id="accountFilter">
+              <option value="all">All accounts</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Account</th>
+                  <th>Path</th>
+                  <th>Size</th>
+                  <th>Modified</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="filesTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="layout lower">
+        <section class="card">
+          <div class="panel-head">
+            <h2>Largest files</h2>
+            <span>Top 10</span>
+          </div>
+          <div id="largestFiles" class="stack"></div>
+        </section>
+
+        <section class="card">
+          <div class="panel-head">
+            <h2>Duplicate candidates</h2>
+            <span>Checksum matches</span>
+          </div>
+          <div id="duplicateFiles" class="stack"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

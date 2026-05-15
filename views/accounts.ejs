@@ -1,0 +1,45 @@
+<%- include('partials/header', { title: 'Accounts' }) %>
+
+<section class="hero-card card-surface mb-6">
+  <div class="hero-copy">
+    <p class="eyebrow text-cyan-300/90">Accounts</p>
+    <h2 class="hero-title">Link up to five drives and keep ownership obvious.</h2>
+    <p class="hero-text">Create a local account shell, then jump straight into the Google OAuth flow from this page.</p>
+  </div>
+  <form method="POST" action="/accounts" class="hero-form">
+    <label class="form-label" for="label">New account label</label>
+    <div class="form-row">
+      <input id="label" name="label" placeholder="Finance, Archive, Team A..." class="form-input" required />
+      <button type="submit" class="button-primary">Create and link</button>
+    </div>
+    <p class="form-help">You will be redirected to Google to authorize the new account.</p>
+  </form>
+</section>
+
+<section class="card-surface p-6">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow text-cyan-300/90">Linked accounts</p>
+      <h3 class="panel-title">Current mesh nodes</h3>
+    </div>
+  </div>
+  <div class="stack">
+    <% (accounts || []).forEach(function(a){ %>
+      <article class="list-row list-row-account">
+        <div>
+          <div class="list-row-title"><%= a.label %></div>
+          <div class="list-row-meta"><%= a.email || 'No email yet' %></div>
+        </div>
+        <div class="account-actions">
+          <span class="status-chip <%= a.sync_state %>"><%= a.sync_state %></span>
+          <a href="/accounts/<%= a.id %>" class="shortcut-link">Open</a>
+          <form method="POST" action="/accounts/<%= a.id %>/link">
+            <button type="submit" class="button-secondary">Re-link</button>
+          </form>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

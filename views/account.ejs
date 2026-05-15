@@ -1,0 +1,103 @@
+<%
+  const explorerAccount = typeof account !== 'undefined' ? account : null;
+  const explorerFolders = typeof folders !== 'undefined' ? folders : [];
+  const explorerFiles = typeof files !== 'undefined' ? files : [];
+  const explorerAllFiles = typeof allFiles !== 'undefined' ? allFiles : [];
+  const explorerCurrentFolder = typeof currentFolder !== 'undefined' ? currentFolder : null;
+%>
+
+<%- include('partials/header', { title: explorerAccount ? explorerAccount.label : 'Account' }) %>
+
+<section class="hero-card card-surface mb-6">
+  <div class="hero-copy">
+    <p class="eyebrow text-cyan-300/90">Explorer</p>
+    <h2 class="hero-title"><%= explorerAccount ? explorerAccount.label : 'Account' %></h2>
+    <p class="hero-text"><%= explorerAccount && explorerAccount.email ? explorerAccount.email : 'Not linked yet' %></p>
+  </div>
+  <div class="hero-actions-grid hero-actions-grid-compact">
+    <form method="POST" action="/accounts/<%= explorerAccount ? explorerAccount.id : '' %>/link">
+      <button type="submit" class="button-primary">Re-link account</button>
+    </form>
+    <% if (explorerCurrentFolder) { %>
+      <a href="/accounts/<%= explorerAccount ? explorerAccount.id : '' %>" class="button-secondary button-link">Back to root</a>
+    <% } else { %>
+      <a href="/files?accountId=<%= explorerAccount ? explorerAccount.id : '' %>" class="button-secondary button-link">Global search</a>
+    <% } %>
+  </div>
+</section>
+
+<section class="stats-grid mb-6">
+  <div class="stat-card card-surface">
+    <div class="stat-label">Folders</div>
+    <div class="stat-value"><%= explorerFolders.length %></div>
+    <div class="stat-sub">Clickable directory nodes</div>
+  </div>
+  <div class="stat-card card-surface">
+    <div class="stat-label">Files</div>
+    <div class="stat-value"><%= explorerFiles.length %></div>
+    <div class="stat-sub">Direct children only</div>
+  </div>
+  <div class="stat-card card-surface">
+    <div class="stat-label">Current Path</div>
+    <div class="stat-value"><%= explorerCurrentFolder ? 'Folder' : 'Root' %></div>
+    <div class="stat-sub"><%= explorerCurrentFolder ? explorerCurrentFolder.path : 'Top level' %></div>
+  </div>
+  <div class="stat-card card-surface">
+    <div class="stat-label">Indexed Items</div>
+    <div class="stat-value"><%= explorerAllFiles.length %></div>
+    <div class="stat-sub">Account file index</div>
+  </div>
+</section>
+
+<section class="layout-grid explorer-grid">
+  <section class="card-surface p-6 explorer-pane">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow text-cyan-300/90">Folders</p>
+        <h3 class="panel-title"><%= explorerCurrentFolder ? 'Inside ' + explorerCurrentFolder.name : 'Top-level folders' %></h3>
+      </div>
+    </div>
+    <div class="stack">
+      <% if (explorerFolders.length === 0) { %>
+        <div class="empty-state">No child folders here.</div>
+      <% } %>
+      <% explorerFolders.forEach(function(folder){ %>
+        <article class="list-row folder-row">
+          <div>
+            <div class="list-row-title">📁 <a href="/accounts/<%= explorerAccount ? explorerAccount.id : '' %>?folder=<%= folder.id %>"><%= folder.name %></a></div>
+            <div class="list-row-meta"><%= folder.path %></div>
+          </div>
+          <div class="list-row-value">Folder</div>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="card-surface p-6 explorer-pane">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow text-cyan-300/90">Files</p>
+        <h3 class="panel-title"><%= explorerCurrentFolder ? 'In ' + explorerCurrentFolder.name : 'Root files' %></h3>
+      </div>
+    </div>
+    <div class="stack">
+      <% if (explorerFiles.length === 0) { %>
+        <div class="empty-state">No files in this folder.</div>
+      <% } %>
+      <% explorerFiles.forEach(function(file){ %>
+        <article class="list-row file-row">
+          <div>
+            <div class="list-row-title"><a href="/files/<%= file.id %>"><%= file.name %></a></div>
+            <div class="list-row-meta"><%= file.mime_type || 'Unknown type' %></div>
+          </div>
+          <div class="file-row-actions">
+            <div class="list-row-value"><%= file.size ? Math.max(1, Math.round(file.size / 1024 / 1024)) : 0 %> MB</div>
+            <a href="/api/files/<%= file.id %>/download" class="shortcut-link">Download</a>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+</section>
+
+<%- include('partials/footer') %>

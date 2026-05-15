@@ -1,0 +1,49 @@
+<%- include('partials/header', { title: 'Files' }) %>
+
+<section class="hero-card card-surface mb-6">
+  <div class="hero-copy">
+    <p class="eyebrow text-cyan-300/90">Files</p>
+    <h2 class="hero-title">Search the merged index without leaving the app.</h2>
+    <p class="hero-text">Find large files, inspect ownership, and jump into downloads or transfers from a single place.</p>
+  </div>
+  <form method="GET" action="/files" class="hero-form hero-form-wide">
+    <label class="form-label" for="q">Search files</label>
+    <div class="form-row">
+      <input id="q" name="q" value="<%= query %>" placeholder="Name, path, checksum, or owner" class="form-input" />
+      <button class="button-primary" type="submit">Search</button>
+    </div>
+  </form>
+</section>
+
+<section class="card-surface p-6">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow text-cyan-300/90">Results</p>
+      <h3 class="panel-title"><%= files.length %> files indexed in the local mesh</h3>
+    </div>
+  </div>
+  <div class="stack">
+    <% (files || []).forEach(function(f){ %>
+      <article class="list-row">
+        <div>
+          <% if (f.mime_type === 'application/vnd.google-apps.folder') { %>
+            <div class="list-row-title">📁 <a href="/accounts/<%= f.account_id %>?folder=<%= f.id %>"><%= f.name %></a></div>
+          <% } else { %>
+            <div class="list-row-title"><a href="/files/<%= f.id %>"><%= f.name %></a></div>
+          <% } %>
+          <div class="list-row-meta"><%= f.account_label || f.account_id %> · <%= f.path || 'Root folder' %></div>
+        </div>
+        <div class="file-row-actions">
+          <div class="list-row-value"><%= f.size ? Math.max(1, Math.round(f.size/1024/1024)) : 0 %> MB</div>
+          <% if (f.mime_type === 'application/vnd.google-apps.folder') { %>
+            <a href="/accounts/<%= f.account_id %>?folder=<%= f.id %>" class="shortcut-link">Open</a>
+          <% } else { %>
+            <a href="/api/files/<%= f.id %>/download" class="shortcut-link">Download</a>
+          <% } %>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
