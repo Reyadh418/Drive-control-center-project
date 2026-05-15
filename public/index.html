@@ -288,10 +288,10 @@
                 let globalTotal = 0;
 
                 accounts.forEach(acc => {
-                    // API returns dynamically sized array
-                    const used = parseInt(acc.spaceUsed || 0);
-                    const total = parseInt(acc.spaceTotal || 1);
-                    const ratio = ((used / total) * 100).toFixed(1);
+                    // Use server storage fields
+                    const used = parseInt(acc.storage_used || acc.storage_used_in_drive || 0) || 0;
+                    const total = parseInt(acc.storage_total || 0) || 0;
+                    const ratio = total > 0 ? ((used / total) * 100).toFixed(1) : 0;
                     
                     globalUsed += used;
                     globalTotal += total;
@@ -327,8 +327,10 @@
                                 </div>
                             </div>
                             
-                            <div class="pt-4 border-t border-darkborder flex justify-end">
-                                <button onclick="showToast('Loading file browser for \\'' + acc.email + '\\'...')" class="px-4 py-1.5 text-xs font-medium text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors group-hover:border-slate-600 shadow-sm">
+                            <div class="pt-4 border-t border-darkborder flex justify-end items-center gap-3">
+                                <button onclick="syncAccount(${acc.id})" class="px-3 py-1 text-xs font-medium text-slate-200 bg-emerald-600 hover:bg-emerald-500 rounded-md">Sync</button>
+                                <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1 text-xs font-medium text-slate-200 bg-red-600 hover:bg-red-500 rounded-md">Disconnect</button>
+                                <button onclick="showToast('Loading file browser for \\\' + acc.email + '\\'...')" class="px-4 py-1.5 text-xs font-medium text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors group-hover:border-slate-600 shadow-sm">
                                     Browse <i class="fa-solid fa-arrow-right ml-1 text-slate-400"></i>
                                 </button>
                             </div>
@@ -436,6 +438,37 @@
             if (['png','jpg','jpeg','fig'].includes(ext)) return 'fa-solid fa-file-image text-emerald-400';
             if (['zip','tar','gz','iso'].includes(ext)) return 'fa-solid fa-file-zipper text-amber-400';
             return 'fa-solid fa-file-lines text-blue-400';
+        }
+
+        // Helpers for syncing and unlinking
+        async function syncAccount(id) {
+            try {
+                showToast('Starting sync for account ' + id + '...');
+                const res = await fetch(`/api/accounts/${id}/sync`, { method: 'POST' });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || 'Sync failed');
+                showToast('Sync completed: ' + (data.files_synced || 0) + ' files');
+                await fetchAccounts();
+                await fetchAnalytics();
+            } catch (err) {
+                console.error(err);
+                showToast('Sync error: ' + err.message);
+            }
+        }
+
+        async function unlinkAccount(id) {
+            if (!confirm('Unlink this account? This will remove its files from the catalog.')) return;
+            try {
+                const res = await fetch(`/api/accounts/${id}/unlink`, { method: 'POST' });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || 'Unlink failed');
+                showToast('Account unlinked');
+                await fetchAccounts();
+                await fetchAnalytics();
+            } catch (err) {
+                console.error(err);
+                showToast('Unlink error: ' + err.message);
+            }
         }
 
         // Boot

@@ -210,7 +210,9 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/api/accounts', (req, res) => {
-  res.json({ accounts: listAccounts(db) });
+  // Return an array for simpler client usage (also backward compatible with
+  // older clients expecting { accounts: [...] }).
+  res.json(listAccounts(db));
 });
 
 app.post('/api/accounts', (req, res) => {
@@ -350,6 +352,41 @@ app.post('/api/sync-all', async (req, res) => {
 
 app.get('/api/dashboard', (req, res) => {
   res.json(getDashboard(db));
+});
+
+app.get('/api/storage-summary', (req, res) => {
+  try {
+    const dash = getDashboard(db);
+
+    // File type aggregation by mime_type prefix
+    const rows = db.prepare(`
+      SELECT mime_type, COUNT(*) AS cnt
+      FROM files
+      GROUP BY mime_type
+    `).all();
+
+    const fileTypes = {};
+    for (const row of rows) {
+      const mt = String(row.mime_type || '').toLowerCase();
+      let bucket = 'Other';
+      if (mt.startsWith('image/')) bucket = 'Images';
+      else if (mt.startsWith('video/')) bucket = 'Video';
+      else if (mt.startsWith('audio/')) bucket = 'Audio';
+      else if (mt.startsWith('text/') || mt.includes('pdf') || mt.includes('word') || mt.includes('excel') || mt.includes('offic')) bucket = 'Documents';
+      fileTypes[bucket] = (fileTypes[bucket] || 0) + (row.cnt || 0);
+    }
+
+    const largestFiles = (dash.largest_files || []).map((f) => ({ name: f.name, size: f.size, account: f.account_label }));
+
+    res.json({
+      totalFiles: dash.totals.file_count || 0,
+      potentialDuplicates: (dash.duplicate_candidates || []).length || 0,
+      fileTypes,
+      largestFiles
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get('/api/files', (req, res) => {
@@ -510,4 +547,19 @@ app.get('/api/config', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Drive Control Center running at ${APP_URL}`);
+});
+
+// Unlink / remove an account and its files
+app.post('/api/accounts/:id/unlink', (req, res) => {
+  const accountId = Number(req.params.id);
+  const account = getAccount(db, accountId);
+  if (!account) return res.status(404).json({ error: 'Account not found.' });
+
+  try {
+    // Delete account will cascade to files (ON DELETE CASCADE)
+    db.prepare('DELETE FROM accounts WHERE id = ?').run(accountId);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });

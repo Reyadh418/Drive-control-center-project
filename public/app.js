@@ -206,7 +206,8 @@ async function refreshAll() {
     fetchJson('/api/dashboard')
   ]);
 
-  state.accounts = accountsResult.accounts || [];
+  // Accept either: [{...}, ...] or { accounts: [...] }
+  state.accounts = Array.isArray(accountsResult) ? accountsResult : (accountsResult.accounts || []);
   state.dashboard = dashboardResult;
 
   renderStats();
