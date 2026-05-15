@@ -218,8 +218,8 @@
             let icon = 'fa-circle-info text-blue-400';
             let borderClass = 'border-blue-500/20';
             
-            toast.className = \`flex items-center gap-3 bg-darksurface border \${borderClass} shadow-lg rounded-xl px-4 py-3 transform translate-x-full opacity-0 transition-all duration-300 max-w-sm\`;
-            toast.innerHTML = \`<i class="fa-solid \${icon} text-lg"></i><p class="text-sm text-slate-200 font-medium">\${message}</p>\`;
+            toast.className = `flex items-center gap-3 bg-darksurface border ${borderClass} shadow-lg rounded-xl px-4 py-3 transform translate-x-full opacity-0 transition-all duration-300 max-w-sm`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><p class="text-sm text-slate-200 font-medium">${message}</p>`;
             
             container.appendChild(toast);
             
@@ -259,7 +259,7 @@
         
         document.getElementById('global-search').addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && e.target.value.trim()) {
-                showToast(\`Searching for "\${e.target.value}" across drives...\`);
+                showToast(`Searching for "${e.target.value}" across drives...`);
                 e.target.value = '';
             }
         });
