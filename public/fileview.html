@@ -201,8 +201,14 @@
 
                 let html = '<ul><li class="expanded"><div class="flex items-center gap-2 py-1.5 px-2 hover:bg-slate-800 rounded cursor-default font-medium text-slate-200"><i class="fa-solid fa-layer-group text-slate-400"></i> Connected Accounts</div><ul class="mt-1">';
                 
+                let targetAccount = null;
+                const urlParams = new URLSearchParams(window.location.search);
+                const queryAccountId = urlParams.get('accountId');
+
                 accounts.forEach(acc => {
-                    // Start each account as unexpanded but clickable
+                    if (queryAccountId && acc.id.toString() === queryAccountId) {
+                        targetAccount = acc;
+                    }
                     html += `
                         <li class="mb-1" id="sb-acc-${acc.id}">
                             <div class="flex items-center gap-2 py-1.5 px-2 hover:bg-darkbg rounded cursor-pointer text-slate-300 transition" onclick="openAccountRoot(${acc.id}, '${acc.email}')">
@@ -215,6 +221,10 @@
                 
                 html += '</ul></li></ul>';
                 sb.innerHTML = html;
+
+                if (targetAccount) {
+                    openAccountRoot(targetAccount.id, targetAccount.email);
+                }
             } catch(e) {
                 console.error(e);
             }
