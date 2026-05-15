@@ -3,52 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Explorer | Drive Mesh</title>
-    <link rel="stylesheet" href="/tailwind.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Drive Control Center - File View</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0f172a',
+                        darksurface: '#1e293b',
+                        darkborder: '#334155'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Base styles mimicking index.html */
-        :root {
-            --bg-dark: #0f111a;
-            --surface: #1e2130;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #3b82f6;
-        }
-        body {
-            background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif;
-            display: flex; height: 100vh; overflow: hidden; margin:0;
-        }
-        .sidebar { width: 260px; background-color: var(--surface); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; }
-        .nav-item { padding: 12px 20px; margin: 4px 12px; border-radius: 8px; color: var(--text-muted); display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 500; }
-        .nav-item:hover { background-color: rgba(255,255,255,0.03); color: var(--text-main); }
-        .nav-item.active { background-color: var(--primary); color: white; }
-        .main-content { flex: 1; display: flex; flex-direction: column; }
-        .topbar { height: 70px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; padding: 0 32px; background-color: rgba(15, 17, 26, 0.8); }
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f1f5f9; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .folder-tree ul { padding-left: 1.2rem; border-left: 1px solid #334155; margin-left: 0.5rem; display: none; }
+        .folder-tree li.expanded > ul { display: block; }
     </style>
 </head>
-<body>
-    <aside class="sidebar py-6">
-        <div class="px-6 mb-8 flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center"><i class="fa-solid fa-cloud text-white"></i></div>
-            <span class="text-xl font-bold tracking-tight">Drive Mesh</span>
+<body class="h-screen flex flex-col overflow-hidden">
+    <!-- Navbar -->
+    <nav class="h-16 flex items-center justify-between px-6 bg-darksurface border-b border-darkborder shrink-0">
+        <div class="flex items-center gap-6 text-slate-300">
+            <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-cloud text-blue-500"></i> Drive CC
+            </h1>
+            <a href="/index.html" class="hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-house mr-1"></i> Dashboard</a>
+            <a href="/fileview.html" class="text-white text-sm font-semibold border-b-2 border-blue-500 pb-[21px] mt-[21px]"><i class="fa-brands fa-google-drive mr-1"></i> My Files</a>
         </div>
-        <nav class="flex flex-col gap-1">
-            <a href="/index.html" class="nav-item"><i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard</a>
-            <a href="/accounts.html" class="nav-item"><i class="fa-solid fa-users w-5 text-center"></i> Accounts</a>
-            <a href="/fileview.html" class="nav-item active"><i class="fa-solid fa-folder-tree w-5 text-center"></i> File Explorer</a>
-            <a href="/settings.html" class="nav-item"><i class="fa-solid fa-gear w-5 text-center"></i> Settings</a>
-        </nav>
-    </aside>
-    <main class="main-content">
-        <header class="topbar">
-            <div><h1 class="text-lg font-semibold">File Explorer</h1></div>
-        </header>
-        <div class="p-8 text-center text-slate-500">
-            <i class="fa-solid fa-tools text-4xl mb-4"></i>
-            <h2 class="text-xl text-white mb-2">Work in Progress</h2>
-            <p>Will integrate the left-pane folder tree and right-pane file viewer here.</p>
+        <div class="flex items-center gap-4">
+            <div class="relative items-center">
+                <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                <input type="text" id="local-search" placeholder="Filter current view..." 
+                    class="w-64 bg-darkbg border border-darkborder rounded-full py-1.5 pl-9 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+            </div>
         </div>
+    </nav>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Sidebar: Folder Tree -->
+        <aside class="w-64 bg-darksurface border-r border-darkborder flex flex-col shrink-0 flex-shrink-0">
+            <div class="p-4 border-b border-darkborder font-semibold text-sm text-slate-300 flex items-center justify-between">
+                <span>Directory Tree</span>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 text-sm folder-tree" id="sidebar-tree">
+                <!-- Injected via JS -->
+                 <div class="text-slate-500 text-xs text-center py-4">Loading accounts...</div>
+            </div>
+        </aside>
+
+        <!-- Center Pane: File Browser -->
+        <section class="flex-1 flex flex-col bg-darkbg overflow-hidden relative">
+            
+            <!-- Breadcrumbs & View Toggle Controls -->
+            <header class="h-14 px-6 border-b border-darkborder flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2 text-sm text-slate-400" id="breadcrumb-trail">
+                    <span>Select an account</span>
+                </div>
+                
+                <div class="flex items-center gap-2 bg-darksurface border border-darkborder rounded-lg p-1">
+                    <button class="w-7 h-7 rounded text-white bg-darkbg shadow items-center justify-center flex transition" id="btn-view-grid" title="Grid View">
+                        <i class="fa-solid fa-border-all"></i>
+                    </button>
+                    <button class="w-7 h-7 rounded text-slate-400 hover:text-white items-center justify-center flex transition" id="btn-view-list" title="List View">
+                        <i class="fa-solid fa-list-ul"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- File List Panel -->
+            <div class="flex-1 overflow-y-auto p-6" id="file-pane">
+                <div class="h-full flex flex-col items-center justify-center text-slate-500">
+                    <i class="fa-brands fa-google-drive text-4xl mb-4 text-slate-600"></i>
+                    <p>Select a folder from the sidebar to view its contents.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Sidebar: Details Panel -->
+        <aside class="w-80 bg-darksurface border-l border-darkborder flex flex-col shrink-0 translate-x-full transition-transform duration-300 absolute right-0 top-16 bottom-0 z-10 sm:relative sm:translate-x-0 sm:top-0 h-full" id="details-panel" style="display: none;">
+            <div class="p-4 border-b border-darkborder flex items-center justify-between">
+                <h3 class="font-semibold text-sm text-slate-300">File Details</h3>
+                <button class="text-slate-400 hover:text-white" id="btn-close-details"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="p-6 flex flex-col items-center border-b border-darkborder">
+                <div class="w-16 h-16 rounded-2xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4" id="detail-icon">
+                    <i class="fa-solid fa-file text-slate-500"></i>
+                </div>
+                <h4 class="text-white font-semibold text-center break-all w-full leading-tight mb-2" id="detail-name">No file selected</h4>
+                <div id="detail-badge" class="mt-1"></div>
+            </div>
+
+             <div class="p-6 flex-1 overflow-y-auto space-y-4 text-sm">
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Type</p>
+                    <p class="text-slate-300" id="detail-type">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Size</p>
+                    <p class="text-slate-300" id="detail-size">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Created</p>
+                    <p class="text-slate-300" id="detail-date">-</p>
+                </div>
+                
+                <div class="pt-4 mt-6 border-t border-darkborder">
+                     <a href="#" target="_blank" id="btn-drive-link" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center justify-center gap-2 transition-colors font-medium cursor-pointer shadow-sm opacity-50 pointer-events-none">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> View on Google Drive
+                    </a>
+                </div>
+            </div>
+        </aside>
     </main>
+
+    <!-- Client-side Logic -->
+    <script>
+        // State
+        let currentAccountId = null;
+        let currentFolderId = null;
+        let currentBreadcrumb = [];
+        let viewMode = 'grid'; // grid or list
+        let currentItems = []; // Array of file/folder objects currently in view
+
+        // Formats
+        function formatBytes(bytes, decimals = 2) {
+            if (!+bytes) return '0 Bytes';
+            const k = 1024, dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        }
+
+        function getIconClasses(mimeType) {
+            if (mimeType === 'application/vnd.google-apps.folder') return 'fa-solid fa-folder text-blue-400';
+            if (mimeType === 'application/pdf') return 'fa-solid fa-file-pdf text-red-500';
+            if (mimeType.startsWith('image/')) return 'fa-solid fa-file-image text-emerald-400';
+            if (mimeType.includes('spreadsheet') || mimeType === 'application/vnd.ms-excel') return 'fa-solid fa-file-excel text-green-500';
+            if (mimeType.includes('zip') || mimeType.includes('tar') || mimeType.includes('rar')) return 'fa-solid fa-file-zipper text-amber-500';
+            if (mimeType.startsWith('video/')) return 'fa-solid fa-file-video text-purple-400';
+            if (mimeType.startsWith('audio/')) return 'fa-solid fa-file-audio text-pink-400';
+            if (mimeType === 'application/vnd.google-apps.document' || mimeType.includes('word')) return 'fa-solid fa-file-word text-blue-500';
+            return 'fa-solid fa-file-lines text-slate-400';
+        }
+
+        // --- View & Render Toggles ---
+        const btnGrid = document.getElementById('btn-view-grid');
+        const btnList = document.getElementById('btn-view-list');
+        const pane = document.getElementById('file-pane');
+
+        btnGrid.addEventListener('click', () => setViewMode('grid'));
+        btnList.addEventListener('click', () => setViewMode('list'));
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            if (mode === 'grid') {
+                btnGrid.className = 'w-7 h-7 rounded text-white bg-darkbg shadow items-center justify-center flex transition';
+                btnList.className = 'w-7 h-7 rounded text-slate-400 hover:text-white items-center justify-center flex transition';
+            } else {
+                btnList.className = 'w-7 h-7 rounded text-white bg-darkbg shadow items-center justify-center flex transition';
+                btnGrid.className = 'w-7 h-7 rounded text-slate-400 hover:text-white items-center justify-center flex transition';
+            }
+            renderItems(currentItems);
+        }
+
+        // --- Fetch Accounts for Sidebar ---
+        async function loadSidebarAccounts() {
+            try {
+                const res = await fetch('/api/accounts');
+                const accountsData = await res.json();
+                const accounts = Array.isArray(accountsData) ? accountsData : accountsData.accounts;
+                
+                const sb = document.getElementById('sidebar-tree');
+                if (!accounts || accounts.length === 0) {
+                    sb.innerHTML = '<div class="text-slate-500 p-4 text-xs text-center">No linked accounts.</div>';
+                    return;
+                }
+
+                let html = '<ul><li class="expanded"><div class="flex items-center gap-2 py-1.5 px-2 hover:bg-slate-800 rounded cursor-default font-medium text-slate-200"><i class="fa-solid fa-layer-group text-slate-400"></i> Connected Accounts</div><ul class="mt-1">';
+                
+                accounts.forEach(acc => {
+                    // Start each account as unexpanded but clickable
+                    html += `
+                        <li class="mb-1" id="sb-acc-${acc.id}">
+                            <div class="flex items-center gap-2 py-1.5 px-2 hover:bg-darkbg rounded cursor-pointer text-slate-300 transition" onclick="openAccountRoot(${acc.id}, '${acc.email}')">
+                                <i class="fa-brands fa-google text-slate-400 text-xs w-4"></i>
+                                <span class="truncate">${acc.email}</span>
+                            </div>
+                        </li>
+                    `;
+                });
+                
+                html += '</ul></li></ul>';
+                sb.innerHTML = html;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        // --- Navigation ---
+        async function openAccountRoot(accountId, email) {
+            currentAccountId = accountId;
+            currentBreadcrumb = [{ name: email, id: 'root' }];
+            await navigateTo('root');
+        }
+
+        async function navigateTo(folderId, folderName = null) {
+            currentFolderId = folderId;
+
+            // Update Breadcrumbs
+            if (folderName && folderId !== 'root') {
+                // If it exists in breadcrumb, slice it back
+                const idx = currentBreadcrumb.findIndex(b => b.id === folderId);
+                if (idx !== -1) {
+                    currentBreadcrumb = currentBreadcrumb.slice(0, idx + 1);
+                } else {
+                    currentBreadcrumb.push({ name: folderName, id: folderId });
+                }
+            } else if (folderId === 'root') {
+                // Keep only the first element (the account)
+                currentBreadcrumb = currentBreadcrumb.slice(0, 1);
+            }
+
+            renderBreadcrumbs();
+            document.getElementById('local-search').value = ''; // clear filter
+
+            // Show Loading
+            pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-solid fa-spinner fa-spin text-3xl mb-4 text-blue-500"></i><p>Loading files...</p></div>';
+
+            try {
+                const res = await fetch(`/api/browse?accountId=${currentAccountId}&folderId=${folderId}`);
+                if (!res.ok) throw new Error("Failed to load");
+                const data = await res.json();
+                
+                currentItems = data.items || [];
+                // Sort: Folders first
+                currentItems.sort((a, b) => {
+                    const aIsF = a.mimeType === 'application/vnd.google-apps.folder';
+                    const bIsF = b.mimeType === 'application/vnd.google-apps.folder';
+                    if (aIsF && !bIsF) return -1;
+                    if (!aIsF && bIsF) return 1;
+                    return a.name.localeCompare(b.name);
+                });
+
+                renderItems(currentItems);
+            } catch (err) {
+                pane.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-red-400"><i class="fa-solid fa-triangle-exclamation text-3xl mb-4"></i><p>Error loading folder contents.</p></div>`;
+                console.error(err);
+            }
+        }
+
+        function renderBreadcrumbs() {
+            const bc = document.getElementById('breadcrumb-trail');
+            if (currentBreadcrumb.length === 0) {
+                bc.innerHTML = '<span>Select an account</span>';
+                return;
+            }
+            
+            let html = '';
+            currentBreadcrumb.forEach((item, index) => {
+                if (index > 0) html += ' <i class="fa-solid fa-chevron-right text-[10px] mx-1"></i> ';
+                
+                if (index === currentBreadcrumb.length - 1) {
+                    html += `<span class="text-slate-200 font-medium">${item.name}</span>`;
+                } else {
+                    html += `<a href="#" onclick="navigateTo('${item.id}'); return false;" class="hover:text-blue-400 transition cursor-pointer">${item.name}</a>`;
+                }
+            });
+            bc.innerHTML = html;
+        }
+
+        // --- Render Items ---
+        function renderItems(itemsToRender) {
+            if (itemsToRender.length === 0) {
+                pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-regular fa-folder-open text-4xl mb-4 text-slate-600"></i><p>This folder is empty.</p></div>';
+                return;
+            }
+
+            if (viewMode === 'grid') {
+                let html = '<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-12 w-full">';
+                itemsToRender.forEach(item => {
+                    const isFolder = item.mimeType === 'application/vnd.google-apps.folder';
+                    const icon = getIconClasses(item.mimeType);
+                    const safeItem = encodeURIComponent(JSON.stringify(item));
+
+                    if (isFolder) {
+                        html += `
+                            <div class="bg-darksurface border border-darkborder hover:border-blue-500/50 rounded-xl p-4 cursor-pointer transition select-none flex flex-col items-center text-center group min-w-0"
+                                onclick="navigateTo('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                                <i class="${icon} text-4xl mb-3 group-hover:scale-110 transition-transform duration-200"></i>
+                                <span class="text-sm text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="bg-darksurface border border-darkborder hover:border-slate-500 rounded-xl p-4 cursor-pointer transition select-none flex flex-col items-center text-center group min-w-0"
+                                onclick="selectFile('${safeItem}')">
+                                <i class="${icon} text-4xl mb-3 group-hover:scale-110 transition-transform duration-200"></i>
+                                <span class="text-sm text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
+                                <span class="text-[10px] text-slate-500 mt-1">${formatBytes(item.size)}</span>
+                            </div>
+                        `;
+                    }
+                });
+                html += '</div>';
+                pane.innerHTML = html;
+            } else {
+                // List View
+                let html = `
+                <div class="bg-darksurface border border-darkborder rounded-xl overflow-hidden pointer-events-auto">
+                    <table class="w-full text-left max-w-full" style="table-layout: fixed;">
+                        <thead class="bg-darkbg border-b border-darkborder text-xs text-slate-400 font-semibold uppercase">
+                            <tr>
+                                <th class="px-4 py-3 w-12 text-center"></th>
+                                <th class="px-4 py-3">Name</th>
+                                <th class="px-4 py-3 w-28 text-right">Size</th>
+                                <th class="px-4 py-3 w-32">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm divide-y divide-darkborder">
+                `;
+                itemsToRender.forEach(item => {
+                    const isFolder = item.mimeType === 'application/vnd.google-apps.folder';
+                    const icon = getIconClasses(item.mimeType);
+                    const safeItem = encodeURIComponent(JSON.stringify(item));
+                    const dateStr = item.created ? new Date(item.created).toLocaleDateString() : '-';
+
+                    if (isFolder) {
+                        html += `
+                            <tr class="hover:bg-darkbg/50 cursor-pointer transition-colors" onclick="navigateTo('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                                <td class="px-4 py-3 text-center"><i class="${icon} text-lg"></i></td>
+                                <td class="px-4 py-3 font-medium text-slate-200 truncate pr-4">${item.name}</td>
+                                <td class="px-4 py-3 text-right text-slate-500">-</td>
+                                <td class="px-4 py-3 text-slate-500 truncate">${dateStr}</td>
+                            </tr>
+                        `;
+                    } else {
+                        html += `
+                            <tr class="hover:bg-darkbg/50 cursor-pointer transition-colors" onclick="selectFile('${safeItem}')">
+                                <td class="px-4 py-3 text-center"><i class="${icon} text-lg"></i></td>
+                                <td class="px-4 py-3 font-medium text-slate-200 truncate pr-4">${item.name}</td>
+                                <td class="px-4 py-3 text-right text-slate-400">${formatBytes(item.size)}</td>
+                                <td class="px-4 py-3 text-slate-500 truncate">${dateStr}</td>
+                            </tr>
+                        `;
+                    }
+                });
+                html += '</tbody></table></div>';
+                pane.innerHTML = html;
+            }
+        }
+
+        // --- Filter ---
+        document.getElementById('local-search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = currentItems.filter(item => item.name.toLowerCase().includes(val));
+            renderItems(filtered);
+        });
+
+        // --- Details Panel ---
+        function selectFile(encodedItem) {
+            const item = JSON.parse(decodeURIComponent(encodedItem));
+            const icon = getIconClasses(item.mimeType);
+
+            document.getElementById('detail-icon').innerHTML = `<i class="${icon}"></i>`;
+            document.getElementById('detail-name').innerText = item.name;
+            document.getElementById('detail-type').innerText = item.mimeType;
+            document.getElementById('detail-size').innerText = item.size ? formatBytes(item.size) : '-';
+            document.getElementById('detail-date').innerText = item.created ? new Date(item.created).toLocaleString() : '-';
+            
+            // Current account email extraction from breadcrumb
+            const acctHtml = `<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-500/10 text-blue-400 text-[10px] font-medium border border-blue-500/20 max-w-full truncate"><i class="fa-brands fa-google shrink-0"></i> <span class="truncate">${currentBreadcrumb[0]?.name || 'Unknown'}</span></span>`;
+            document.getElementById('detail-badge').innerHTML = acctHtml;
+
+            const btnLink = document.getElementById('btn-drive-link');
+            if (item.driveUrl) {
+                btnLink.href = item.driveUrl;
+                btnLink.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                 btnLink.removeAttribute('href');
+                 btnLink.classList.add('opacity-50', 'pointer-events-none');
+            }
+
+            document.getElementById('details-panel').style.display = 'flex';
+        }
+
+        document.getElementById('btn-close-details').addEventListener('click', () => {
+            document.getElementById('details-panel').style.display = 'none';
+        });
+
+        // Init
+        loadSidebarAccounts();
+    </script>
 </body>
 </html>

@@ -389,6 +389,51 @@ app.get('/api/storage-summary', (req, res) => {
   }
 });
 
+app.get('/api/browse', (req, res) => {
+  const accountId = req.query.accountId;
+  const folderId = req.query.folderId || 'root';
+
+  if (!accountId) {
+    return res.status(400).json({ error: 'Missing accountId parameter.' });
+  }
+
+  // Generate some realistic mock data to test the navigation loop.
+  // In a complete implementation, this would query the local DB or Google Drive directly.
+  const mockItems = [];
+
+  if (folderId === 'root') {
+    mockItems.push(
+      { id: 'f-docs', name: 'My Documents', mimeType: 'application/vnd.google-apps.folder', parentId: 'root', created: new Date(Date.now() - 86400000 * 10).toISOString() },
+      { id: 'f-pics', name: 'Saved Pictures', mimeType: 'application/vnd.google-apps.folder', parentId: 'root', created: new Date(Date.now() - 86400000 * 30).toISOString() },
+      { id: 'f-proj', name: 'Projects & Work', mimeType: 'application/vnd.google-apps.folder', parentId: 'root', created: new Date(Date.now() - 86400000 * 5).toISOString() },
+      { id: 'file-1', name: 'Getting Started.pdf', mimeType: 'application/pdf', size: 1048576, parentId: 'root', created: new Date().toISOString(), driveUrl: '#' },
+      { id: 'file-2', name: 'Financials_2026.xlsx', mimeType: 'application/vnd.ms-excel', size: 512000, parentId: 'root', created: new Date(Date.now() - 86400000).toISOString(), driveUrl: '#' }
+    );
+  } else if (folderId === 'f-docs') {
+    mockItems.push(
+      { id: 'file-3', name: 'Resume.docx', mimeType: 'application/vnd.google-apps.document', size: 154000, parentId: 'f-docs', created: new Date(Date.now() - 86400000 * 2).toISOString(), driveUrl: '#' },
+      { id: 'file-4', name: 'Cover Letter.pdf', mimeType: 'application/pdf', size: 85200, parentId: 'f-docs', created: new Date(Date.now() - 86400000 * 2).toISOString(), driveUrl: '#' }
+    );
+  } else if (folderId === 'f-pics') {
+    mockItems.push(
+      { id: 'file-5', name: 'Vacation.jpg', mimeType: 'image/jpeg', size: 3450000, parentId: 'f-pics', created: new Date(Date.now() - 86400000 * 15).toISOString(), driveUrl: '#' },
+      { id: 'file-6', name: 'Family_Photo.png', mimeType: 'image/png', size: 5120000, parentId: 'f-pics', created: new Date(Date.now() - 86400000 * 12).toISOString(), driveUrl: '#' },
+      { id: 'file-7', name: 'Dog.mp4', mimeType: 'video/mp4', size: 104857600, parentId: 'f-pics', created: new Date(Date.now() - 86400000 * 10).toISOString(), driveUrl: '#' }
+    );
+  } else if (folderId === 'f-proj') {
+    mockItems.push(
+      { id: 'f-proj-sub', name: 'Archived', mimeType: 'application/vnd.google-apps.folder', parentId: 'f-proj', created: new Date(Date.now() - 86400000 * 20).toISOString() },
+      { id: 'file-8', name: 'SourceCode.zip', mimeType: 'application/zip', size: 25600000, parentId: 'f-proj', created: new Date(Date.now() - 86400000 * 1).toISOString(), driveUrl: '#' }
+    );
+  } else if (folderId === 'f-proj-sub') {
+    mockItems.push(
+      { id: 'file-9', name: 'OldProject.tar.gz', mimeType: 'application/gzip', size: 15400000, parentId: 'f-proj-sub', created: new Date(Date.now() - 86400000 * 50).toISOString(), driveUrl: '#' }
+    );
+  }
+
+  res.json({ items: mockItems });
+});
+
 app.get('/api/files', (req, res) => {
   const accountId = req.query.accountId || 'all';
   const q = String(req.query.q || '').trim();
