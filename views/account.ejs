@@ -50,39 +50,39 @@
 </section>
 
 <section class="layout-grid explorer-grid">
-  <section class="card-surface p-6 explorer-pane">
+  <aside class="card-surface tree-pane compact">
     <div class="panel-head">
-      <div>
-        <p class="eyebrow text-cyan-300/90">Folders</p>
-        <h3 class="panel-title"><%= explorerCurrentFolder ? 'Inside ' + explorerCurrentFolder.name : 'Top-level folders' %></h3>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span class="tree-toggle" id="treeToggle" onclick="document.getElementById('treeList').classList.toggle('tree-collapsed')">▼</span>
+        <div>
+          <p class="eyebrow text-cyan-300/90"><%= explorerAccount ? explorerAccount.label : 'Account' %></p>
+          <h4 class="panel-title"><%= explorerFolders.length %> Folders</h4>
+        </div>
       </div>
     </div>
-    <div class="stack">
+    <div class="tree-list" id="treeList">
       <% if (explorerFolders.length === 0) { %>
-        <div class="empty-state">No child folders here.</div>
+        <div class="empty-state compact">No folders</div>
       <% } %>
       <% explorerFolders.forEach(function(folder){ %>
-        <article class="list-row folder-row">
-          <div>
-            <div class="list-row-title">📁 <a href="/accounts/<%= explorerAccount ? explorerAccount.id : '' %>?folder=<%= folder.id %>"><%= folder.name %></a></div>
-            <div class="list-row-meta"><%= folder.path %></div>
-          </div>
-          <div class="list-row-value">Folder</div>
-        </article>
+        <div class="tree-item">
+          📁 <a href="/accounts/<%= explorerAccount ? explorerAccount.id : '' %>?folder=<%= folder.id %>"><%= folder.name %></a>
+          <div class="list-row-meta" style="font-size:0.82rem; color:var(--muted); margin-top:6px;"><%= folder.path %></div>
+        </div>
       <% }) %>
     </div>
-  </section>
+  </aside>
 
-  <section class="card-surface p-6 explorer-pane">
+  <main class="card-surface p-4" style="overflow-y: auto; max-height: 80vh;">
     <div class="panel-head">
       <div>
         <p class="eyebrow text-cyan-300/90">Files</p>
-        <h3 class="panel-title"><%= explorerCurrentFolder ? 'In ' + explorerCurrentFolder.name : 'Root files' %></h3>
+        <h3 class="panel-title"><%= explorerCurrentFolder ? 'In ' + explorerCurrentFolder.name : 'Files' %></h3>
       </div>
     </div>
     <div class="stack">
       <% if (explorerFiles.length === 0) { %>
-        <div class="empty-state">No files in this folder.</div>
+        <div class="empty-state compact">No files in this folder.</div>
       <% } %>
       <% explorerFiles.forEach(function(file){ %>
         <article class="list-row file-row">
@@ -97,7 +97,7 @@
         </article>
       <% }) %>
     </div>
-  </section>
+  </main>
 </section>
 
 <%- include('partials/footer') %>
