@@ -443,6 +443,61 @@ app.get('/api/browse', (req, res) => {
   }
 });
 
+app.get('/api/tree/subfolders', (req, res) => {
+  const accountId = Number(req.query.accountId);
+  const folderId = req.query.folderId || 'root';
+
+  if (!accountId) {
+    return res.status(400).json({ error: 'Missing accountId parameter.' });
+  }
+
+  try {
+    let query;
+    let params;
+    const folderMime = 'application/vnd.google-apps.folder';
+
+    if (folderId === 'root') {
+      query = `
+        SELECT drive_file_id, name 
+        FROM files
+        WHERE account_id = ?
+          AND mime_type = ?
+          AND (
+            json_extract(parents_json, '$[0]') IS NULL 
+            OR json_extract(parents_json, '$[0]') NOT IN (
+              SELECT drive_file_id FROM files WHERE account_id = ?
+            )
+          )
+        ORDER BY name ASC
+      `;
+      params = [accountId, folderMime, accountId];
+    } else {
+      query = `
+        SELECT drive_file_id, name 
+        FROM files
+        WHERE account_id = ? 
+          AND mime_type = ?
+          AND json_extract(parents_json, '$[0]') = ?
+        ORDER BY name ASC
+      `;
+      params = [accountId, folderMime, folderId];
+    }
+
+    const rows = db.prepare(query).all(...params);
+
+    const folders = rows.map((row) => ({
+      id: row.drive_file_id,
+      name: row.name,
+      accountId: accountId
+    }));
+
+    res.json({ folders });
+  } catch (err) {
+    console.error('Error fetching tree subfolders:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/files', (req, res) => {
   const accountId = req.query.accountId || 'all';
   const q = String(req.query.q || '').trim();
