@@ -47,10 +47,10 @@
             <a href="/fileview.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
                 <i class="fa-solid fa-folder-tree w-5 text-center"></i> All Files
             </a>
-            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+            <a href="/accounts.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
                 <i class="fa-solid fa-users w-5 text-center"></i> Accounts
             </a>
-            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+            <a href="/settings.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
                 <i class="fa-solid fa-gear w-5 text-center"></i> Settings
             </a>
         </nav>
@@ -122,9 +122,9 @@
                     <div class="text-3xl font-bold" id="stat-files">0</div>
                 </div>
 
-                <div class="bg-darksurface border border-darkborder rounded-2xl p-6 flex flex-col justify-center">
+                <div onclick="openDuplicatesModal()" class="bg-darksurface border border-darkborder hover:border-amber-500/50 rounded-2xl p-6 flex flex-col justify-center cursor-pointer transition-colors group">
                     <div class="flex items-center gap-4 mb-3">
-                        <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl"><i class="fa-solid fa-clone text-xl"></i></div>
+                        <div class="p-3 bg-amber-500/10 text-amber-400 group-hover:bg-amber-500/20 rounded-xl transition-colors"><i class="fa-solid fa-clone text-xl"></i></div>
                         <h3 class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Potential Duplicates</h3>
                     </div>
                     <div class="text-3xl font-bold" id="stat-duplicates">0</div>
@@ -159,7 +159,7 @@
                 <div class="lg:col-span-2 bg-darksurface border border-darkborder rounded-2xl flex flex-col overflow-hidden">
                     <div class="p-5 border-b border-darkborder flex justify-between items-center">
                         <h3 class="text-slate-200 font-semibold flex items-center gap-2"><i class="fa-solid fa-weight-hanging text-slate-400"></i> Largest Files Across Accounts</h3>
-                        <button onclick="showToast('Navigating to full file view...') " class="text-xs text-slate-400 hover:text-white transition-colors">See All</button>
+                        <button onclick="window.location.href='/fileview.html'" class="text-xs text-slate-400 hover:text-white transition-colors">See All</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
@@ -221,6 +221,24 @@
             </div>
         </div>
 
+    <!-- Duplicates Modal -->
+    <div id="duplicates-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-darksurface border border-darkborder rounded-2xl w-full max-w-4xl p-6 transform scale-95 transition-transform duration-300 shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-5 shrink-0 border-b border-darkborder pb-4">
+                <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clone text-amber-400"></i> Duplicate File Catalog
+                </h3>
+                <button onclick="closeDuplicatesModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto scrollbar-hide space-y-4 pr-1" id="duplicates-modal-list">
+                <!-- Grouped duplicates injected dynamically -->
+                <p class="text-slate-500 text-sm italic text-center py-4">No duplicates found.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notifications -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
 
@@ -273,10 +291,136 @@
         
         document.getElementById('global-search').addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && e.target.value.trim()) {
-                showToast(`Searching for "${e.target.value}" across drives...`);
-                e.target.value = '';
+                window.location.href = `/fileview.html?q=${encodeURIComponent(e.target.value.trim())}`;
             }
         });
+
+        // Duplicates Modal logic
+        let duplicateCandidatesGlobal = [];
+
+        function openDuplicatesModal() {
+            const modal = document.getElementById('duplicates-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.firstElementChild.classList.remove('scale-95');
+            }, 10);
+            loadDuplicatesList();
+        }
+
+        function closeDuplicatesModal() {
+            const modal = document.getElementById('duplicates-modal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        async function loadDuplicatesList() {
+            const listEl = document.getElementById('duplicates-modal-list');
+            listEl.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-blue-500 mb-2"></i><p class="text-xs text-slate-400">Analyzing database checksums...</p></div>';
+            
+            try {
+                const res = await fetch('/api/dashboard');
+                const dash = await res.json();
+                const candidates = dash.duplicate_candidates || [];
+                duplicateCandidatesGlobal = candidates;
+                
+                if (candidates.length === 0) {
+                    listEl.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">No duplicate file candidates found. All files have unique checksums.</div>';
+                    return;
+                }
+                
+                listEl.innerHTML = '';
+                
+                for (const candidate of candidates) {
+                    const groupContainerId = `dup-group-${candidate.md5_checksum}`;
+                    listEl.insertAdjacentHTML('beforeend', `
+                        <div class="bg-darkbg border border-darkborder rounded-xl p-4 space-y-3" id="${groupContainerId}">
+                            <div class="flex justify-between items-center border-b border-darkborder/50 pb-2">
+                                <div class="text-xs font-semibold text-amber-400 font-mono">MD5: ${candidate.md5_checksum}</div>
+                                <div class="text-[11px] text-slate-400 bg-darksurface px-2 py-0.5 rounded border border-darkborder">
+                                    ${candidate.copies} copies · Total Potential Waste: ${formatBytes(candidate.total_size - (candidate.total_size / candidate.copies))}
+                                </div>
+                            </div>
+                            <div class="divide-y divide-darkborder/30" id="files-list-${candidate.md5_checksum}">
+                                <div class="text-center py-2 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Loading copies...</div>
+                            </div>
+                        </div>
+                    `);
+                    
+                    // Fetch files details for this MD5 checksum asynchronously
+                    fetch(`/api/files/checksum/${candidate.md5_checksum}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            const filesContainer = document.getElementById(`files-list-${candidate.md5_checksum}`);
+                            if (!filesContainer) return;
+                            filesContainer.innerHTML = '';
+                            
+                            if (!data.files || data.files.length === 0) {
+                                document.getElementById(groupContainerId).remove();
+                                return;
+                            }
+                            
+                            data.files.forEach(f => {
+                                filesContainer.insertAdjacentHTML('beforeend', `
+                                    <div class="py-2.5 flex items-center justify-between gap-4 text-xs hover:bg-darksurface/30 px-2 rounded-lg transition-colors">
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-medium text-slate-200 truncate flex items-center gap-2">
+                                                <i class="${getFileIcon(f.name)}"></i>
+                                                <span class="truncate text-[13px]">${f.name}</span>
+                                            </div>
+                                            <div class="text-slate-500 text-[11px] mt-0.5 truncate">${f.path || '/' + f.name}</div>
+                                        </div>
+                                        <div class="flex items-center gap-3 shrink-0">
+                                            <span class="text-slate-300 font-semibold">${formatBytes(f.size)}</span>
+                                            <span class="px-2 py-0.5 bg-darksurface text-[10px] text-slate-400 rounded-md border border-darkborder truncate max-w-[120px]" title="${f.account_label}">${f.account_label}</span>
+                                            <button onclick="deleteDuplicateCopy(${f.id}, '${candidate.md5_checksum}')" class="w-8 h-8 rounded-lg bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-red-300 transition-all flex items-center justify-center" title="Delete redundant copy from Google Drive">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `);
+                            });
+                        })
+                        .catch(err => {
+                            const filesContainer = document.getElementById(`files-list-${candidate.md5_checksum}`);
+                            if (filesContainer) filesContainer.innerHTML = '<div class="text-red-400 py-2 text-xs">Failed to load copies.</div>';
+                        });
+                }
+            } catch (err) {
+                console.error(err);
+                listEl.innerHTML = '<div class="text-center py-8 text-red-400 text-sm">Failed to load duplicate catalog.</div>';
+            }
+        }
+
+        async function deleteDuplicateCopy(fileId, checksum) {
+            openConfirm('Delete this duplicate file from Google Drive? This action cannot be undone.', 'Delete Duplicate Copy', async () => {
+                try {
+                    showToast('Deleting duplicate copy from Drive...');
+                    const res = await fetch(`/api/files/${fileId}/delete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ confirm: true })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.error || 'Deletion failed');
+                    
+                    showToast('File deleted successfully');
+                    
+                    // Refresh Dashboard counters
+                    await fetchAccounts();
+                    await fetchAnalytics();
+                    
+                    // Refresh Duplicates modal details
+                    await loadDuplicatesList();
+                } catch (err) {
+                    console.error(err);
+                    showToast('Delete error: ' + err.message);
+                }
+            });
+        }
 
         // Formatter Utility
         function formatBytes(bytes) {

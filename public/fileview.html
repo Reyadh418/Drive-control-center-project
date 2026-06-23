@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drive Control Center - File View</title>
-    <!-- Tailwind CSS -->
+    <title>File Explorer | Drive Mesh</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,9 +11,9 @@
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#0f172a',
-                        darksurface: '#1e293b',
-                        darkborder: '#334155'
+                        darkbg: '#0b0f19',
+                        darksurface: '#151a28',
+                        darkborder: '#232a3f'
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -23,154 +22,285 @@
             }
         }
     </script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f1f5f9; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f1f5f9; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #232a3f; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
         
         .tree-chevron { transition: transform 0.2s ease; font-size: 0.75rem; width: 20px; text-align: center; }
         .tree-chevron.open { transform: rotate(90deg); }
         .tree-node { display: flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.5rem; border-radius: 0.375rem; cursor: pointer; color: #cbd5e1; user-select: none; transition: background-color 0.15s; margin-bottom: 2px;}
-        .tree-node:hover { background-color: #1e293b; color: #f8fafc; }
+        .tree-node:hover { background-color: #151a28; color: #f8fafc; }
         .tree-node.active { background-color: #2563eb; color: #ffffff !important; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
         .tree-node.active .tree-chevron, .tree-node.active i { color: #ffffff !important; }
-        .tree-children { display: none; padding-left: 0.5rem; border-left: 1px solid #334155; margin-left: 0.8rem; margin-top: 2px; }
+        .tree-children { display: none; padding-left: 0.5rem; border-left: 1px solid #232a3f; margin-left: 0.8rem; margin-top: 2px; }
         .tree-children.open { display: block; }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
-    <!-- Navbar -->
-    <nav class="h-16 flex items-center justify-between px-6 bg-darksurface border-b border-darkborder shrink-0">
-        <div class="flex items-center gap-6 text-slate-300">
-            <h1 class="text-xl font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-cloud text-blue-500"></i> Drive CC
-            </h1>
-            <a href="/index.html" class="hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-house mr-1"></i> Dashboard</a>
-            <a href="/fileview.html" class="text-white text-sm font-semibold border-b-2 border-blue-500 pb-[21px] mt-[21px]"><i class="fa-brands fa-google-drive mr-1"></i> My Files</a>
+<body class="h-screen flex overflow-hidden antialiased selection:bg-blue-500 selection:text-white">
+    <!-- Primary Sidebar -->
+    <aside class="w-64 bg-darksurface border-r border-darkborder flex flex-col transition-all duration-300 z-20 shrink-0">
+        <div class="h-16 flex items-center px-6 border-b border-darkborder">
+            <div class="w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-cloud text-white text-sm"></i>
+            </div>
+            <span class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Drive Mesh</span>
         </div>
-        <div class="flex items-center gap-4">
-            <div class="relative items-center">
-                <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                <input type="text" id="local-search" placeholder="Filter current view..." 
-                    class="w-64 bg-darkbg border border-darkborder rounded-full py-1.5 pl-9 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
+            <a href="/index.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
+            </a>
+            <a href="/fileview.html" class="flex items-center gap-3 px-3 py-2.5 bg-blue-500/10 text-blue-400 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-folder-tree w-5 text-center"></i> All Files
+            </a>
+            <a href="/accounts.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-users w-5 text-center"></i> Accounts
+            </a>
+            <a href="/settings.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-gear w-5 text-center"></i> Settings
+            </a>
+        </nav>
+        <div class="p-4 border-t border-darkborder">
+            <div class="bg-blue-900/20 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-200">
+                <div class="flex border-b border-blue-500/20 pb-2 mb-2 font-semibold items-center gap-2 text-blue-400">
+                    <i class="fa-solid fa-shield-halved"></i> Privacy First
+                </div>
+                Running locally. Total control.
             </div>
         </div>
-    </nav>
+    </aside>
 
     <!-- Main Workspace -->
-    <main class="flex-1 flex overflow-hidden">
-        
-        <!-- Left Sidebar: Folder Tree -->
-        <aside class="w-64 bg-darksurface border-r border-darkborder flex flex-col shrink-0 flex-shrink-0">
-            <div class="flex-1 overflow-y-auto p-3 text-sm folder-tree" id="sidebar-tree">
-                <!-- Injected via JS -->
-                 <div class="text-slate-500 text-xs text-center py-4">Loading accounts...</div>
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-darkbg relative">
+        <!-- Global Header -->
+        <header class="h-16 flex items-center justify-between px-8 bg-darksurface/50 backdrop-blur-md border-b border-darkborder sticky top-0 z-10 shrink-0">
+            <div class="relative w-full max-w-md">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+                <input id="global-search" type="text" placeholder="Search across all drives..." class="w-full bg-darkbg border border-darkborder text-sm rounded-full pl-10 pr-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200 placeholder-slate-500 transition-all">
             </div>
-        </aside>
+            <div class="flex items-center gap-4">
+                <button id="btn-notifications" class="relative p-2 text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-darksurface"></span>
+                </button>
+                <div id="btn-profile" class="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border-2 border-darkborder flex items-center justify-center shadow-md cursor-pointer">
+                    <span class="text-xs font-bold text-white">DM</span>
+                </div>
+            </div>
+        </header>
 
-        <!-- Center Pane: File Browser -->
-        <section class="flex-1 flex flex-col bg-darkbg overflow-hidden relative">
+        <!-- Nested Workspace Panels -->
+        <div class="flex-1 flex overflow-hidden relative">
             
-            <!-- Breadcrumbs & View Toggle Controls -->
-            <header class="h-14 px-6 border-b border-darkborder flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-2 text-sm text-slate-400" id="breadcrumb-trail">
-                    <span>Select an account</span>
+            <!-- Left Sidebar: Folder Tree -->
+            <aside class="w-64 bg-darksurface border-r border-darkborder flex flex-col shrink-0">
+                <div class="flex-1 overflow-y-auto p-3 text-sm folder-tree" id="sidebar-tree">
+                     <div class="text-slate-500 text-xs text-center py-4">Loading accounts...</div>
+                </div>
+            </aside>
+
+            <!-- Center Pane: File Browser -->
+            <section class="flex-1 flex flex-col bg-darkbg overflow-hidden relative">
+                
+                <!-- Breadcrumbs & View Toggle Controls -->
+                <header class="h-14 px-6 border-b border-darkborder flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-2 text-sm text-slate-400 min-w-0" id="breadcrumb-trail">
+                        <span>Select an account</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 shrink-0">
+                        <!-- Upload Controls -->
+                        <div id="upload-container" class="hidden">
+                            <input type="file" id="file-upload-input" class="hidden">
+                            <button id="btn-upload" onclick="triggerFileUpload()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-md shadow-blue-500/10">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload File
+                            </button>
+                        </div>
+
+                        <!-- Local Filter -->
+                        <div class="relative items-center">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                            <input type="text" id="local-search" placeholder="Filter current view..." 
+                                class="w-48 bg-darksurface border border-darkborder rounded-lg py-1 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+
+                        <!-- Grid/List toggle -->
+                        <div class="flex items-center gap-1 bg-darksurface border border-darkborder rounded-lg p-0.5">
+                            <button class="w-6 h-6 rounded text-white bg-darkbg shadow items-center justify-center flex transition text-xs" id="btn-view-grid" title="Grid View">
+                                <i class="fa-solid fa-border-all"></i>
+                            </button>
+                            <button class="w-6 h-6 rounded text-slate-400 hover:text-white items-center justify-center flex transition text-xs" id="btn-view-list" title="List View">
+                                <i class="fa-solid fa-list-ul"></i>
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- File List Panel -->
+                <div class="flex-1 overflow-y-auto p-6" id="file-pane">
+                    <div class="h-full flex flex-col items-center justify-center text-slate-500">
+                        <i class="fa-brands fa-google-drive text-4xl mb-4 text-slate-600"></i>
+                        <p>Select a folder from the sidebar to view its contents.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Sidebar: Details Panel -->
+            <aside class="w-80 bg-darksurface border-l border-darkborder flex flex-col shrink-0 hidden" id="details-panel">
+                <div class="p-4 border-b border-darkborder flex items-center justify-between">
+                    <h3 class="font-semibold text-sm text-slate-300">File Details</h3>
+                    <button class="text-slate-400 hover:text-white" id="btn-close-details"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 
-                <div class="flex items-center gap-2 bg-darksurface border border-darkborder rounded-lg p-1">
-                    <button class="w-7 h-7 rounded text-white bg-darkbg shadow items-center justify-center flex transition" id="btn-view-grid" title="Grid View">
-                        <i class="fa-solid fa-border-all"></i>
-                    </button>
-                    <button class="w-7 h-7 rounded text-slate-400 hover:text-white items-center justify-center flex transition" id="btn-view-list" title="List View">
-                        <i class="fa-solid fa-list-ul"></i>
-                    </button>
+                <div class="p-6 flex flex-col items-center border-b border-darkborder text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4 text-slate-400" id="detail-icon">
+                        <i class="fa-solid fa-file"></i>
+                    </div>
+                    <h4 class="text-white font-semibold break-all w-full leading-tight mb-2 text-sm" id="detail-name">-</h4>
+                    <div id="detail-badge" class="mt-1"></div>
                 </div>
-            </header>
 
-            <!-- File List Panel -->
-            <div class="flex-1 overflow-y-auto p-6" id="file-pane">
-                <div class="h-full flex flex-col items-center justify-center text-slate-500">
-                    <i class="fa-brands fa-google-drive text-4xl mb-4 text-slate-600"></i>
-                    <p>Select a folder from the sidebar to view its contents.</p>
+                <div class="p-6 flex-1 overflow-y-auto space-y-4 text-xs">
+                    <div>
+                        <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Type</p>
+                        <p class="text-slate-300 font-medium" id="detail-type">-</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Size</p>
+                        <p class="text-slate-300 font-medium" id="detail-size">-</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Created</p>
+                        <p class="text-slate-300 font-medium" id="detail-date">-</p>
+                    </div>
+                    
+                    <div class="pt-4 mt-6 border-t border-darkborder space-y-2">
+                        <a href="#" target="_blank" id="btn-detail-download" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold shadow-sm text-center">
+                            <i class="fa-solid fa-cloud-arrow-down"></i> Download File
+                        </a>
+                        <button id="btn-detail-transfer" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold border border-darkborder">
+                            <i class="fa-solid fa-shuffle"></i> Copy or Move
+                        </button>
+                        <button id="btn-detail-delete" class="w-full py-2 bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-red-300 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold">
+                            <i class="fa-solid fa-trash-can"></i> Delete File
+                        </button>
+                        <a href="#" target="_blank" id="btn-drive-link" class="w-full py-2 bg-darkbg hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-darkborder font-semibold">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Drive
+                        </a>
+                    </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- Right Sidebar: Details Panel -->
-        <aside class="w-80 bg-darksurface border-l border-darkborder flex flex-col shrink-0 translate-x-full transition-transform duration-300 absolute right-0 top-16 bottom-0 z-10 sm:relative sm:translate-x-0 sm:top-0 h-full" id="details-panel" style="display: none;">
-            <div class="p-4 border-b border-darkborder flex items-center justify-between">
-                <h3 class="font-semibold text-sm text-slate-300">File Details</h3>
-                <button class="text-slate-400 hover:text-white" id="btn-close-details"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            
-            <div class="p-6 flex flex-col items-center border-b border-darkborder">
-                <div class="w-16 h-16 rounded-2xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4" id="detail-icon">
-                    <i class="fa-solid fa-file text-slate-500"></i>
-                </div>
-                <h4 class="text-white font-semibold text-center break-all w-full leading-tight mb-2" id="detail-name">No file selected</h4>
-                <div id="detail-badge" class="mt-1"></div>
-            </div>
-
-             <div class="p-6 flex-1 overflow-y-auto space-y-4 text-sm">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Type</p>
-                    <p class="text-slate-300" id="detail-type">-</p>
-                </div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Size</p>
-                    <p class="text-slate-300" id="detail-size">-</p>
-                </div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Created</p>
-                    <p class="text-slate-300" id="detail-date">-</p>
-                </div>
-                
-                <div class="pt-4 mt-6 border-t border-darkborder">
-                     <a href="#" target="_blank" id="btn-drive-link" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center justify-center gap-2 transition-colors font-medium cursor-pointer shadow-sm opacity-50 pointer-events-none">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> View on Google Drive
-                    </a>
-                </div>
-            </div>
-        </aside>
+            </aside>
+        </div>
     </main>
 
-    <!-- Client-side Logic -->
+    <!-- Transfer Modal -->
+    <div id="transfer-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-darksurface border border-darkborder rounded-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
+            <div class="flex justify-between items-center mb-5 border-b border-darkborder pb-3">
+                <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-shuffle text-blue-400"></i> Cross-Account Transfer
+                </h3>
+                <button onclick="closeTransferModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-sm">
+                <div>
+                    <span class="text-slate-400 text-xs block mb-1">Source File</span>
+                    <div id="transfer-source-name" class="bg-darkbg p-2 rounded-lg text-slate-300 font-medium truncate">Name</div>
+                </div>
+                
+                <div>
+                    <span class="text-slate-400 text-xs block mb-2">Transfer Mode</span>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 text-slate-300 cursor-pointer">
+                            <input type="radio" name="transfer-mode" value="copy" checked class="text-blue-500"> Copy (Keep source file)
+                        </label>
+                        <label class="flex items-center gap-2 text-slate-300 cursor-pointer">
+                            <input type="radio" name="transfer-mode" value="move" class="text-blue-500"> Move (Delete source file)
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-slate-400 text-xs block mb-1">Target Account</label>
+                    <select id="transfer-target-account" class="w-full bg-darkbg border border-darkborder rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-slate-200">
+                        <option value="">Select target account...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-slate-400 text-xs block mb-1">Target Folder ID <span class="text-slate-600">(Optional, defaults to Root)</span></label>
+                    <input type="text" id="transfer-target-folder" placeholder="Enter folder ID or leave blank" class="w-full bg-darkbg border border-darkborder rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-slate-200">
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <button onclick="closeTransferModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors">Cancel</button>
+                    <button onclick="executeTransfer()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition-colors shadow-lg shadow-blue-500/20">
+                        Start Transfer <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-darksurface border border-darkborder rounded-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
+            <div class="mb-4">
+                <h3 id="confirm-title" class="text-lg font-semibold text-white">Confirm Action</h3>
+                <p id="confirm-message" class="text-sm text-slate-400 mt-2">Are you sure?</p>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="confirm-cancel" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors">Cancel</button>
+                <button id="confirm-ok" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold rounded-lg transition-colors shadow-lg">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+
     <script>
         // State
         let currentAccountId = null;
         let currentFolderId = null;
         let currentBreadcrumb = [];
         let viewMode = 'grid'; // grid or list
-        let currentItems = []; // Array of file/folder objects currently in view
+        let currentItems = []; // Current directory files
+        let selectedFileObject = null;
+        let accountsCached = [];
 
-        // Formats
-        function formatBytes(bytes, decimals = 2) {
-            if (!+bytes) return '0 Bytes';
-            const k = 1024, dm = decimals < 0 ? 0 : decimals;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        // UI Toast Helpers
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let icon = 'fa-circle-info text-blue-400';
+            
+            toast.className = `flex items-center gap-3 bg-darksurface border border-blue-500/20 shadow-lg rounded-xl px-4 py-3 transform translate-x-full opacity-0 transition-all duration-300 max-w-sm`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><p class="text-sm text-slate-200 font-medium">${message}</p>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-x-full', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
-        function getIconClasses(mimeType) {
-            if (mimeType === 'application/vnd.google-apps.folder') return 'fa-solid fa-folder text-blue-400';
-            if (mimeType === 'application/pdf') return 'fa-solid fa-file-pdf text-red-500';
-            if (mimeType.startsWith('image/')) return 'fa-solid fa-file-image text-emerald-400';
-            if (mimeType.includes('spreadsheet') || mimeType === 'application/vnd.ms-excel') return 'fa-solid fa-file-excel text-green-500';
-            if (mimeType.includes('zip') || mimeType.includes('tar') || mimeType.includes('rar')) return 'fa-solid fa-file-zipper text-amber-500';
-            if (mimeType.startsWith('video/')) return 'fa-solid fa-file-video text-purple-400';
-            if (mimeType.startsWith('audio/')) return 'fa-solid fa-file-audio text-pink-400';
-            if (mimeType === 'application/vnd.google-apps.document' || mimeType.includes('word')) return 'fa-solid fa-file-word text-blue-500';
-            return 'fa-solid fa-file-lines text-slate-400';
-        }
+        // Global search redirect
+        document.getElementById('global-search').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                const query = e.target.value.trim();
+                triggerGlobalSearch(query);
+            }
+        });
 
-        // --- View & Render Toggles ---
+        // Toggle Grid/List
         const btnGrid = document.getElementById('btn-view-grid');
         const btnList = document.getElementById('btn-view-list');
         const pane = document.getElementById('file-pane');
@@ -181,40 +311,63 @@
         function setViewMode(mode) {
             viewMode = mode;
             if (mode === 'grid') {
-                btnGrid.className = 'w-7 h-7 rounded text-white bg-darkbg shadow items-center justify-center flex transition';
-                btnList.className = 'w-7 h-7 rounded text-slate-400 hover:text-white items-center justify-center flex transition';
+                btnGrid.className = 'w-6 h-6 rounded text-white bg-darkbg shadow items-center justify-center flex transition text-xs';
+                btnList.className = 'w-6 h-6 rounded text-slate-400 hover:text-white items-center justify-center flex transition text-xs';
             } else {
-                btnList.className = 'w-7 h-7 rounded text-white bg-darkbg shadow items-center justify-center flex transition';
-                btnGrid.className = 'w-7 h-7 rounded text-slate-400 hover:text-white items-center justify-center flex transition';
+                btnList.className = 'w-6 h-6 rounded text-white bg-darkbg shadow items-center justify-center flex transition text-xs';
+                btnGrid.className = 'w-6 h-6 rounded text-slate-400 hover:text-white items-center justify-center flex transition text-xs';
             }
             renderItems(currentItems);
         }
 
-        // --- Fetch Accounts for Sidebar ---
+        // Format Utilities
+        function formatBytes(bytes, decimals = 2) {
+            if (!+bytes) return '0 B';
+            const k = 1024, dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        }
+
+        function getIconClasses(mimeType) {
+            if (mimeType === 'application/vnd.google-apps.folder') return 'fa-solid fa-folder text-blue-400';
+            if (mimeType === 'application/pdf') return 'fa-solid fa-file-pdf text-red-500';
+            if (mimeType && mimeType.startsWith('image/')) return 'fa-solid fa-file-image text-emerald-400';
+            if (mimeType && (mimeType.includes('spreadsheet') || mimeType === 'application/vnd.ms-excel')) return 'fa-solid fa-file-excel text-green-500';
+            if (mimeType && (mimeType.includes('zip') || mimeType.includes('tar') || mimeType.includes('rar'))) return 'fa-solid fa-file-zipper text-amber-500';
+            if (mimeType && mimeType.startsWith('video/')) return 'fa-solid fa-file-video text-purple-400';
+            if (mimeType && mimeType.startsWith('audio/')) return 'fa-solid fa-file-audio text-pink-400';
+            if (mimeType && (mimeType === 'application/vnd.google-apps.document' || mimeType.includes('word'))) return 'fa-solid fa-file-word text-blue-500';
+            return 'fa-solid fa-file-lines text-slate-400';
+        }
+
+        // Load Accounts & Expand Target
         async function loadSidebarAccounts() {
             try {
                 const res = await fetch('/api/accounts');
                 const accountsData = await res.json();
-                const accounts = Array.isArray(accountsData) ? accountsData : accountsData.accounts;
+                accountsCached = Array.isArray(accountsData) ? accountsData : (accountsData.accounts || []);
                 
                 const sb = document.getElementById('sidebar-tree');
-                if (!accounts || accounts.length === 0) {
+                if (accountsCached.length === 0) {
                     sb.innerHTML = '<div class="text-slate-500 p-4 text-xs text-center">No linked accounts.</div>';
                     return;
                 }
 
                 let html = `
-                    <div class="font-semibold text-slate-200 py-2 px-2 mb-3 flex items-center gap-2 cursor-default shrink-0">
+                    <div class="font-semibold text-slate-400 text-xs uppercase tracking-wider py-2 px-2 mb-2 flex items-center gap-2 cursor-default">
                         <i class="fa-solid fa-hard-drive text-blue-500"></i> Connected Accounts
                     </div>
                     <ul id="tree-root" class="space-y-1">
                 `;
                 
-                let targetAccount = null;
                 const urlParams = new URLSearchParams(window.location.search);
                 const queryAccountId = urlParams.get('accountId');
+                const querySearch = urlParams.get('q');
+                
+                let targetAccount = null;
 
-                accounts.forEach(acc => {
+                accountsCached.forEach(acc => {
                     if (queryAccountId && acc.id.toString() === queryAccountId) {
                         targetAccount = acc;
                     }
@@ -225,7 +378,7 @@
                                     <i class="fa-solid fa-caret-right"></i>
                                 </div>
                                 <i class="fa-brands fa-google text-slate-400 group-[.active]:text-white transition-colors flex-shrink-0"></i>
-                                <span class="truncate text-sm flex-1 text-slate-300 group-hover:text-slate-100 group-[.active]:text-white">${acc.email}</span>
+                                <span class="truncate text-xs flex-1 text-slate-300 group-hover:text-slate-100 group-[.active]:text-white">${acc.label || acc.email}</span>
                             </div>
                             <ul class="tree-children" id="children-${acc.id}-root" data-loaded="false"></ul>
                         </li>
@@ -235,17 +388,22 @@
                 html += '</ul>';
                 sb.innerHTML = html;
 
-                if (targetAccount) {
+                if (querySearch) {
+                    document.getElementById('global-search').value = querySearch;
+                    triggerGlobalSearch(querySearch);
+                } else if (targetAccount) {
                     loadFolderContents(targetAccount.id, 'root');
+                } else if (accountsCached.length > 0) {
+                    loadFolderContents(accountsCached[0].id, 'root');
                 }
             } catch(e) {
                 console.error(e);
             }
         }
 
-        // --- Tree Interactivity and Navigation ---
+        // Tree Expansion
         async function toggleNode(e, chevronEl, accountId, folderId) {
-            e.stopPropagation(); // prevent triggering the node click (which loads right pane)
+            e.stopPropagation();
             const childrenContainer = document.getElementById(`children-${accountId}-${folderId}`);
             if (!childrenContainer) return;
 
@@ -254,13 +412,11 @@
             const iconEl = chevronEl.querySelector('i');
 
             if (isOpen) {
-                // Close node visually
                 childrenContainer.classList.remove('open');
                 chevronEl.classList.remove('open');
                 return;
             }
 
-            // Open node visually
             chevronEl.classList.add('open');
             childrenContainer.classList.add('open');
 
@@ -280,8 +436,8 @@
                                         <div class="tree-chevron text-slate-500 hover:text-slate-300 flex-shrink-0" onclick="toggleNode(event, this, ${accountId}, '${f.id}')">
                                             <i class="fa-solid fa-caret-right"></i>
                                         </div>
-                                        <i class="fa-solid fa-folder text-blue-400 group-[.active]:text-white flex-shrink-0"></i>
-                                        <span class="truncate text-sm flex-1 text-slate-300 group-hover:text-slate-100 group-[.active]:text-white">${f.name}</span>
+                                        <i class="fa-solid fa-folder text-blue-400 group-[.active]:text-white flex-shrink-0 text-xs"></i>
+                                        <span class="truncate text-xs flex-1 text-slate-300 group-hover:text-slate-100 group-[.active]:text-white">${f.name}</span>
                                     </div>
                                     <ul class="tree-children" id="children-${accountId}-${f.id}" data-loaded="false"></ul>
                                 </li>
@@ -289,27 +445,27 @@
                         });
                         childrenContainer.innerHTML = html;
                     } else {
-                        childrenContainer.innerHTML = '<li class="text-[11px] text-slate-600 ml-8 py-1 italic cursor-default">No subfolders</li>';
+                        childrenContainer.innerHTML = '<li class="text-[10px] text-slate-600 ml-6 py-1 italic cursor-default">No subfolders</li>';
                     }
                     childrenContainer.setAttribute('data-loaded', 'true');
                 } catch (err) {
-                    childrenContainer.innerHTML = '<li class="text-xs text-red-500 ml-8 py-1">Failed to load</li>';
+                    childrenContainer.innerHTML = '<li class="text-xs text-red-500 ml-6 py-1">Failed to load</li>';
                 } finally {
                     if (iconEl) iconEl.className = 'fa-solid fa-caret-right';
                 }
             }
         }
 
+        // Folder Browsing
         async function loadFolderContents(accountId, folderId) {
-            // Apply visual active state in tree
             document.querySelectorAll('.tree-node.active').forEach(el => el.classList.remove('active'));
             const activeNode = document.getElementById(`node-${accountId}-${folderId}`);
             if (activeNode) activeNode.classList.add('active');
 
             if (currentAccountId !== accountId) {
                 currentAccountId = accountId;
-                const emailSpan = activeNode ? activeNode.querySelector('span').innerText : 'Account';
-                currentBreadcrumb = [{ name: emailSpan, id: 'root' }];
+                const accName = activeNode ? activeNode.querySelector('span').innerText : 'Account';
+                currentBreadcrumb = [{ name: accName, id: 'root' }];
             }
 
             const folderName = activeNode ? activeNode.querySelector('span').innerText : null;
@@ -318,10 +474,9 @@
 
         async function navigateTo(folderId, folderName = null) {
             currentFolderId = folderId;
+            document.getElementById('upload-container').classList.remove('hidden');
 
-            // Update Breadcrumbs
             if (folderName && folderId !== 'root') {
-                // If it exists in breadcrumb, slice it back
                 const idx = currentBreadcrumb.findIndex(b => b.id === folderId);
                 if (idx !== -1) {
                     currentBreadcrumb = currentBreadcrumb.slice(0, idx + 1);
@@ -329,23 +484,21 @@
                     currentBreadcrumb.push({ name: folderName, id: folderId });
                 }
             } else if (folderId === 'root') {
-                // Keep only the first element (the account)
                 currentBreadcrumb = currentBreadcrumb.slice(0, 1);
             }
 
             renderBreadcrumbs();
-            document.getElementById('local-search').value = ''; // clear filter
+            document.getElementById('local-search').value = '';
 
-            // Show Loading
-            pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-solid fa-spinner fa-spin text-3xl mb-4 text-blue-500"></i><p>Loading files...</p></div>';
+            pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-4 text-blue-500"></i><p>Loading files...</p></div>';
 
             try {
                 const res = await fetch(`/api/browse?accountId=${currentAccountId}&folderId=${folderId}`);
-                if (!res.ok) throw new Error("Failed to load");
+                if (!res.ok) throw new Error("Failed to load browse items");
                 const data = await res.json();
                 
                 currentItems = data.items || [];
-                // Sort: Folders first
+                // Sort: Folders first, then alphabetically
                 currentItems.sort((a, b) => {
                     const aIsF = a.mimeType === 'application/vnd.google-apps.folder';
                     const bIsF = b.mimeType === 'application/vnd.google-apps.folder';
@@ -371,9 +524,8 @@
             let html = '';
             currentBreadcrumb.forEach((item, index) => {
                 if (index > 0) html += ' <i class="fa-solid fa-chevron-right text-[10px] mx-1"></i> ';
-                
                 if (index === currentBreadcrumb.length - 1) {
-                    html += `<span class="text-slate-200 font-medium">${item.name}</span>`;
+                    html += `<span class="text-slate-200 font-semibold truncate max-w-[150px] inline-block">${item.name}</span>`;
                 } else {
                     html += `<a href="#" onclick="navigateTo('${item.id}'); return false;" class="hover:text-blue-400 transition cursor-pointer">${item.name}</a>`;
                 }
@@ -381,10 +533,53 @@
             bc.innerHTML = html;
         }
 
-        // --- Render Items ---
-        function renderItems(itemsToRender) {
+        // Global Search execution
+        async function triggerGlobalSearch(query) {
+            if (!query.trim()) return;
+            
+            document.getElementById('upload-container').classList.add('hidden');
+            document.querySelectorAll('.tree-node.active').forEach(el => el.classList.remove('active'));
+            
+            const bc = document.getElementById('breadcrumb-trail');
+            bc.innerHTML = `<span class="text-slate-400">Search results for</span> <i class="fa-solid fa-chevron-right text-[10px] mx-1 text-slate-600"></i> <span class="text-blue-400 font-semibold">"${query}"</span>`;
+            bc.insertAdjacentHTML('beforeend', `
+                <button onclick="loadSidebarAccounts();" class="ml-4 px-2 py-0.5 border border-darkborder text-[10px] text-slate-400 hover:text-white rounded bg-darksurface transition">
+                    Clear Search
+                </button>
+            `);
+
+            pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-4 text-blue-500"></i><p>Searching cross-account catalog...</p></div>';
+
+            try {
+                const res = await fetch(`/api/files?q=${encodeURIComponent(query)}&limit=150`);
+                const data = await res.json();
+                const files = data.files || [];
+                
+                // Map API keys to matches format
+                currentItems = files.map(f => ({
+                    id: f.drive_file_id,
+                    dbId: f.id,
+                    name: f.name,
+                    mimeType: f.mime_type,
+                    size: f.size,
+                    created: f.created_time,
+                    driveUrl: f.web_view_link,
+                    accountLabel: f.account_label,
+                    accountId: f.account_id,
+                    filePath: f.path
+                }));
+
+                renderItems(currentItems, true);
+            } catch (err) {
+                console.error(err);
+                pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-red-400"><i class="fa-solid fa-circle-exclamation text-3xl mb-4"></i><p>Failed to execute search.</p></div>';
+            }
+        }
+
+        // Render File Browser Grid/List
+        function renderItems(itemsToRender, isSearchResults = false) {
             if (itemsToRender.length === 0) {
-                pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-regular fa-folder-open text-4xl mb-4 text-slate-600"></i><p>This folder is empty.</p></div>';
+                pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-regular fa-folder-open text-4xl mb-4 text-slate-600"></i><p>No matches or files found.</p></div>';
                 return;
             }
 
@@ -399,17 +594,19 @@
                         html += `
                             <div class="bg-darksurface border border-darkborder hover:border-blue-500/50 rounded-xl p-4 cursor-pointer transition select-none flex flex-col items-center text-center group min-w-0"
                                 onclick="navigateTo('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
-                                <i class="${icon} text-4xl mb-3 group-hover:scale-110 transition-transform duration-200"></i>
-                                <span class="text-sm text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
+                                <i class="${icon} text-3xl mb-2.5 group-hover:scale-105 transition-transform duration-200"></i>
+                                <span class="text-xs text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
+                                ${isSearchResults ? `<span class="text-[9px] bg-darkbg text-slate-500 border border-darkborder px-1.5 py-0.5 rounded mt-2 truncate w-full max-w-full">${item.accountLabel}</span>` : ''}
                             </div>
                         `;
                     } else {
                         html += `
                             <div class="bg-darksurface border border-darkborder hover:border-slate-500 rounded-xl p-4 cursor-pointer transition select-none flex flex-col items-center text-center group min-w-0"
                                 onclick="selectFile('${safeItem}')">
-                                <i class="${icon} text-4xl mb-3 group-hover:scale-110 transition-transform duration-200"></i>
-                                <span class="text-sm text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
+                                <i class="${icon} text-3xl mb-2.5 group-hover:scale-105 transition-transform duration-200"></i>
+                                <span class="text-xs text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
                                 <span class="text-[10px] text-slate-500 mt-1">${formatBytes(item.size)}</span>
+                                ${isSearchResults ? `<span class="text-[9px] bg-darkbg text-slate-500 border border-darkborder px-1.5 py-0.5 rounded mt-2 truncate w-full max-w-full">${item.accountLabel}</span>` : ''}
                             </div>
                         `;
                     }
@@ -419,17 +616,18 @@
             } else {
                 // List View
                 let html = `
-                <div class="bg-darksurface border border-darkborder rounded-xl overflow-hidden pointer-events-auto">
-                    <table class="w-full text-left max-w-full" style="table-layout: fixed;">
-                        <thead class="bg-darkbg border-b border-darkborder text-xs text-slate-400 font-semibold uppercase">
+                <div class="bg-darksurface border border-darkborder rounded-xl overflow-hidden">
+                    <table class="w-full text-left" style="table-layout: fixed;">
+                        <thead class="bg-darkbg border-b border-darkborder text-[10px] text-slate-400 font-semibold uppercase">
                             <tr>
-                                <th class="px-4 py-3 w-12 text-center"></th>
-                                <th class="px-4 py-3">Name</th>
-                                <th class="px-4 py-3 w-28 text-right">Size</th>
-                                <th class="px-4 py-3 w-32">Date</th>
+                                <th class="px-4 py-2.5 w-10 text-center"></th>
+                                <th class="px-4 py-2.5">Name</th>
+                                ${isSearchResults ? '<th class="px-4 py-2.5 w-32">Origin</th>' : ''}
+                                <th class="px-4 py-2.5 w-24 text-right">Size</th>
+                                <th class="px-4 py-2.5 w-28">Date</th>
                             </tr>
                         </thead>
-                        <tbody class="text-sm divide-y divide-darkborder">
+                        <tbody class="text-xs divide-y divide-darkborder">
                 `;
                 itemsToRender.forEach(item => {
                     const isFolder = item.mimeType === 'application/vnd.google-apps.folder';
@@ -440,19 +638,21 @@
                     if (isFolder) {
                         html += `
                             <tr class="hover:bg-darkbg/50 cursor-pointer transition-colors" onclick="navigateTo('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
-                                <td class="px-4 py-3 text-center"><i class="${icon} text-lg"></i></td>
-                                <td class="px-4 py-3 font-medium text-slate-200 truncate pr-4">${item.name}</td>
-                                <td class="px-4 py-3 text-right text-slate-500">-</td>
-                                <td class="px-4 py-3 text-slate-500 truncate">${dateStr}</td>
+                                <td class="px-4 py-2.5 text-center"><i class="${icon} text-base"></i></td>
+                                <td class="px-4 py-2.5 font-medium text-slate-200 truncate pr-4">${item.name}</td>
+                                ${isSearchResults ? `<td class="px-4 py-2.5 text-slate-400 truncate text-[11px]">${item.accountLabel}</td>` : ''}
+                                <td class="px-4 py-2.5 text-right text-slate-500">-</td>
+                                <td class="px-4 py-2.5 text-slate-500 truncate">${dateStr}</td>
                             </tr>
                         `;
                     } else {
                         html += `
                             <tr class="hover:bg-darkbg/50 cursor-pointer transition-colors" onclick="selectFile('${safeItem}')">
-                                <td class="px-4 py-3 text-center"><i class="${icon} text-lg"></i></td>
-                                <td class="px-4 py-3 font-medium text-slate-200 truncate pr-4">${item.name}</td>
-                                <td class="px-4 py-3 text-right text-slate-400">${formatBytes(item.size)}</td>
-                                <td class="px-4 py-3 text-slate-500 truncate">${dateStr}</td>
+                                <td class="px-4 py-2.5 text-center"><i class="${icon} text-base"></i></td>
+                                <td class="px-4 py-2.5 font-medium text-slate-200 truncate pr-4">${item.name}</td>
+                                ${isSearchResults ? `<td class="px-4 py-2.5 text-slate-400 truncate text-[11px]">${item.accountLabel}</td>` : ''}
+                                <td class="px-4 py-2.5 text-right text-slate-400">${formatBytes(item.size)}</td>
+                                <td class="px-4 py-2.5 text-slate-500 truncate">${dateStr}</td>
                             </tr>
                         `;
                     }
@@ -462,28 +662,54 @@
             }
         }
 
-        // --- Filter ---
+        // Local filter keypress
         document.getElementById('local-search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             const filtered = currentItems.filter(item => item.name.toLowerCase().includes(val));
-            renderItems(filtered);
+            renderItems(filtered, !currentFolderId);
         });
 
-        // --- Details Panel ---
-        function selectFile(encodedItem) {
+        // Detail Panel Selection
+        async function selectFile(encodedItem) {
             const item = JSON.parse(decodeURIComponent(encodedItem));
-            const icon = getIconClasses(item.mimeType);
+            selectedFileObject = item;
+            
+            // To support operations, we need the internal SQLite row ID.
+            // If the row doesn't have dbId, we must resolve it from database via drive_file_id.
+            if (!item.dbId) {
+                try {
+                    // Try to fetch file database details via API using driveFileId
+                    const response = await fetch(`/api/files`);
+                    const data = await response.json();
+                    const matchedFile = data.files.find(f => f.drive_file_id === item.id);
+                    if (matchedFile) {
+                        item.dbId = matchedFile.id;
+                        item.accountId = matchedFile.account_id;
+                        item.accountLabel = matchedFile.account_label;
+                    }
+                } catch(e) {
+                    console.error('Failed to resolve db ID:', e);
+                }
+            }
 
+            const icon = getIconClasses(item.mimeType);
             document.getElementById('detail-icon').innerHTML = `<i class="${icon}"></i>`;
             document.getElementById('detail-name').innerText = item.name;
-            document.getElementById('detail-type').innerText = item.mimeType;
+            document.getElementById('detail-type').innerText = item.mimeType || 'Unknown';
             document.getElementById('detail-size').innerText = item.size ? formatBytes(item.size) : '-';
             document.getElementById('detail-date').innerText = item.created ? new Date(item.created).toLocaleString() : '-';
-            
-            // Current account email extraction from breadcrumb
-            const acctHtml = `<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-500/10 text-blue-400 text-[10px] font-medium border border-blue-500/20 max-w-full truncate"><i class="fa-brands fa-google shrink-0"></i> <span class="truncate">${currentBreadcrumb[0]?.name || 'Unknown'}</span></span>`;
-            document.getElementById('detail-badge').innerHTML = acctHtml;
 
+            // Resolve account name
+            let accountName = item.accountLabel;
+            if(!accountName && currentAccountId) {
+                const matchedAcc = accountsCached.find(a => a.id === currentAccountId);
+                accountName = matchedAcc ? matchedAcc.label : 'Unknown';
+            }
+            
+            const badgeHtml = `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[10px] font-semibold border border-blue-500/20 max-w-full truncate"><i class="fa-brands fa-google shrink-0"></i> <span class="truncate">${accountName}</span></span>`;
+            document.getElementById('detail-badge').innerHTML = badgeHtml;
+
+            // Open in Google Drive Link
             const btnLink = document.getElementById('btn-drive-link');
             if (item.driveUrl) {
                 btnLink.href = item.driveUrl;
@@ -493,14 +719,223 @@
                  btnLink.classList.add('opacity-50', 'pointer-events-none');
             }
 
-            document.getElementById('details-panel').style.display = 'flex';
+            // Download Button
+            const btnDownload = document.getElementById('btn-detail-download');
+            if (item.dbId) {
+                btnDownload.href = `/api/files/${item.dbId}/download`;
+                btnDownload.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                btnDownload.removeAttribute('href');
+                btnDownload.classList.add('opacity-50', 'pointer-events-none');
+            }
+
+            // Transfer / Delete Buttons
+            const btnTransfer = document.getElementById('btn-detail-transfer');
+            const btnDelete = document.getElementById('btn-detail-delete');
+            [btnTransfer, btnDelete].forEach(btn => {
+                if (item.dbId) {
+                    btn.classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    btn.classList.add('opacity-50', 'pointer-events-none');
+                }
+            });
+
+            // Wire delete & transfer click handlers directly
+            btnDelete.onclick = () => deleteSelectedFile(item.dbId);
+            btnTransfer.onclick = () => openTransferModal(item.dbId, item.name, item.accountId || currentAccountId);
+
+            const detailsPanel = document.getElementById('details-panel');
+            detailsPanel.classList.remove('hidden');
         }
 
         document.getElementById('btn-close-details').addEventListener('click', () => {
-            document.getElementById('details-panel').style.display = 'none';
+            document.getElementById('details-panel').classList.add('hidden');
         });
 
-        // Init
+        // 1. UPLOAD LOGIC
+        function triggerFileUpload() {
+            document.getElementById('file-upload-input').click();
+        }
+
+        document.getElementById('file-upload-input').addEventListener('change', async (e) => {
+            const files = e.target.files;
+            if (files.length === 0) return;
+
+            const file = files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            if (currentFolderId && currentFolderId !== 'root') {
+                formData.append('folderId', currentFolderId);
+            }
+
+            try {
+                showToast(`Uploading "${file.name}" to Drive...`);
+                const res = await fetch(`/api/accounts/${currentAccountId}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || 'Upload failed');
+                
+                showToast('Upload completed successfully!');
+                
+                // Triggers local folder refresh immediately
+                await navigateTo(currentFolderId);
+            } catch (err) {
+                console.error(err);
+                showToast('Upload failed: ' + err.message);
+            } finally {
+                // Clear input value so upload can be re-triggered for same file
+                e.target.value = '';
+            }
+        });
+
+        // 2. DELETE LOGIC
+        async function deleteSelectedFile(fileId) {
+            if (!fileId) return;
+            openConfirm('Delete this file from Google Drive? This action cannot be undone.', 'Delete File', async () => {
+                try {
+                    showToast('Deleting file from Drive...');
+                    const res = await fetch(`/api/files/${fileId}/delete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ confirm: true })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.error || 'Deletion failed');
+                    
+                    showToast('File deleted successfully.');
+                    document.getElementById('details-panel').classList.add('hidden');
+                    
+                    // Refresh active view
+                    if (currentFolderId) {
+                        await navigateTo(currentFolderId);
+                    } else {
+                        const searchVal = document.getElementById('global-search').value;
+                        if(searchVal) triggerGlobalSearch(searchVal);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast('Deletion error: ' + err.message);
+                }
+            });
+        }
+
+        // 3. TRANSFER LOGIC
+        let transferFileId = null;
+
+        function openTransferModal(fileId, fileName, sourceAccountId) {
+            transferFileId = fileId;
+            document.getElementById('transfer-source-name').innerText = fileName;
+            
+            // Populate Target Accounts list (exclude current source account)
+            const selectEl = document.getElementById('transfer-target-account');
+            selectEl.innerHTML = '<option value="">Select target account...</option>';
+            
+            accountsCached.forEach(acc => {
+                if (acc.id !== Number(sourceAccountId)) {
+                    selectEl.insertAdjacentHTML('beforeend', `<option value="${acc.id}">${acc.label} (${acc.email})</option>`);
+                }
+            });
+
+            document.getElementById('transfer-target-folder').value = '';
+
+            const modal = document.getElementById('transfer-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.firstElementChild.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeTransferModal() {
+            const modal = document.getElementById('transfer-modal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+            transferFileId = null;
+        }
+
+        async function executeTransfer() {
+            const targetAccountId = document.getElementById('transfer-target-account').value;
+            const mode = document.querySelector('input[name="transfer-mode"]:checked').value;
+            const targetFolderId = document.getElementById('transfer-target-folder').value.trim();
+
+            if (!targetAccountId) {
+                showToast('Please select a target Google Drive account.');
+                return;
+            }
+
+            try {
+                showToast('Initiating file transfer. Downloading and uploading between drives...');
+                closeTransferModal();
+                
+                const res = await fetch(`/api/files/${transferFileId}/transfer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        targetAccountId: Number(targetAccountId),
+                        mode: mode,
+                        targetFolderId: targetFolderId || 'root'
+                    })
+                });
+
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || 'Transfer failed');
+                
+                showToast(`Transfer complete! File successfully ${mode === 'copy' ? 'copied' : 'moved'}.`);
+                document.getElementById('details-panel').classList.add('hidden');
+
+                // Refresh current view
+                if (currentFolderId) {
+                    await navigateTo(currentFolderId);
+                } else {
+                    const searchVal = document.getElementById('global-search').value;
+                    if(searchVal) triggerGlobalSearch(searchVal);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Transfer failed: ' + err.message);
+            }
+        }
+
+        // Action confirmation dialog handlers
+        let __confirmCallback = null;
+        function openConfirm(message, title = 'Confirm', callback) {
+            __confirmCallback = callback;
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.firstElementChild.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeConfirm() {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 250);
+            __confirmCallback = null;
+        }
+
+        document.getElementById('confirm-cancel').addEventListener('click', () => closeConfirm());
+        document.getElementById('confirm-ok').addEventListener('click', async () => {
+            if (typeof __confirmCallback === 'function') {
+                try {
+                    await __confirmCallback();
+                } catch (err) {
+                    console.error(err);
+                    showToast('Action failed: ' + err.message);
+                }
+            }
+            closeConfirm();
+        });
+
+        // Initialize Page
         loadSidebarAccounts();
     </script>
 </body>

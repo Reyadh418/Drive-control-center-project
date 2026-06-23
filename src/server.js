@@ -498,6 +498,22 @@ app.get('/api/tree/subfolders', (req, res) => {
   }
 });
 
+app.get('/api/files/checksum/:md5', (req, res) => {
+  try {
+    const md5 = req.params.md5;
+    const files = db.prepare(`
+      SELECT files.id, files.name, files.size, files.path, files.account_id, accounts.label AS account_label, accounts.email AS account_email
+      FROM files
+      JOIN accounts ON accounts.id = files.account_id
+      WHERE files.md5_checksum = ?
+      ORDER BY files.name ASC
+    `).all(md5);
+    res.json({ files });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/files', (req, res) => {
   const accountId = req.query.accountId || 'all';
   const q = String(req.query.q || '').trim();
@@ -599,10 +615,12 @@ app.post('/api/files/:id/transfer', async (req, res) => {
       stream.on('error', reject);
     });
 
+    const targetFolderId = req.body.targetFolderId || req.body.folderId;
     const buffer = fs.readFileSync(tempPath);
     const uploaded = await uploadDriveFile(ROOT_DIR, REDIRECT_URI, targetAccount, buffer, {
       name: file.name,
-      mimeType: file.mime_type || 'application/octet-stream'
+      mimeType: file.mime_type || 'application/octet-stream',
+      parents: targetFolderId && targetFolderId !== 'root' ? [targetFolderId] : undefined
     });
 
     if (mode === 'move') {
@@ -629,10 +647,14 @@ app.post('/api/accounts/:id/upload', upload.single('file'), async (req, res) => 
     return res.status(400).json({ error: 'Upload a file first.' });
   }
 
+  const folderId = req.body.folderId || req.query.folderId;
+  const parents = folderId && folderId !== 'root' ? [folderId] : undefined;
+
   try {
     const uploaded = await uploadDriveFile(ROOT_DIR, REDIRECT_URI, account, req.file.buffer, {
       name: req.file.originalname,
-      mimeType: req.file.mimetype
+      mimeType: req.file.mimetype,
+      parents
     });
 
     res.json({ ok: true, uploaded });
