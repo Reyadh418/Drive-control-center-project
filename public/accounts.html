@@ -150,6 +150,14 @@
             let icon = 'fa-circle-info text-blue-400';
             let borderClass = 'border-blue-500/20';
             
+            if (type === 'error') {
+                icon = 'fa-circle-exclamation text-red-400';
+                borderClass = 'border-red-500/20';
+            } else if (type === 'success') {
+                icon = 'fa-circle-check text-emerald-400';
+                borderClass = 'border-emerald-500/20';
+            }
+            
             toast.className = `flex items-center gap-3 bg-darksurface border ${borderClass} shadow-lg rounded-xl px-4 py-3 transform translate-x-full opacity-0 transition-all duration-300 max-w-sm`;
             toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><p class="text-sm text-slate-200 font-medium">${message}</p>`;
             
@@ -158,7 +166,7 @@
             setTimeout(() => {
                 toast.classList.add('translate-x-full', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 4000);
         }
 
         function openAddAccountModal() {
@@ -222,13 +230,54 @@
                     
                     const isLinked = acc.sync_state === 'linked' || acc.sync_state === 'synced';
                     const statusText = acc.sync_state.charAt(0).toUpperCase() + acc.sync_state.slice(1);
-                    const statusBadge = isLinked
-                        ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse"></span>Connected</span>`
-                        : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-500/10 text-red-400 text-xs font-semibold border border-red-500/20"><span class="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"></span>${statusText}</span>`;
+                    const statusBadge = acc.sync_state === 'syncing'
+                        ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-400 text-xs font-semibold border border-blue-500/20"><i class="fa-solid fa-arrows-rotate animate-spin text-[10px]"></i>Syncing</span>`
+                        : isLinked
+                            ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse"></span>Connected</span>`
+                            : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-500/10 text-red-400 text-xs font-semibold border border-red-500/20"><span class="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"></span>${statusText}</span>`;
 
                     const avatar = acc.picture_url 
                         ? `<img src="${acc.picture_url}" class="w-10 h-10 rounded-full border border-darkborder shrink-0" referrerPolicy="no-referrer">`
                         : `<div class="w-10 h-10 rounded-full bg-darkbg border border-darkborder flex items-center justify-center shrink-0"><i class="fa-brands fa-google text-slate-400"></i></div>`;
+
+                    let actionButtons = '';
+                    if (acc.sync_state === 'syncing') {
+                        actionButtons = `
+                            <button disabled class="px-3 py-1.5 text-xs font-semibold text-slate-400 bg-slate-800 border border-slate-700 rounded-lg cursor-not-allowed flex items-center gap-1">
+                                <i class="fa-solid fa-spinner animate-spin"></i> Syncing
+                            </button>
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-link-slash"></i> Unlink
+                            </button>
+                            <a href="/fileview.html?accountId=${acc.id}" class="px-3 py-1.5 text-xs font-semibold text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors inline-flex items-center gap-1">
+                                Browse <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        `;
+                    } else if (acc.sync_state === 'error' || acc.sync_state === 'needs-auth') {
+                        actionButtons = `
+                            <button onclick="relinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-lg shadow-blue-500/10">
+                                <i class="fa-solid fa-key"></i> Re-link
+                            </button>
+                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-arrows-rotate"></i> Sync
+                            </button>
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-link-slash"></i> Unlink
+                            </button>
+                        `;
+                    } else {
+                        actionButtons = `
+                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-arrows-rotate"></i> Sync
+                            </button>
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-link-slash"></i> Unlink
+                            </button>
+                            <a href="/fileview.html?accountId=${acc.id}" class="px-3 py-1.5 text-xs font-semibold text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors inline-flex items-center gap-1">
+                                Browse <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        `;
+                    }
 
                     grid.insertAdjacentHTML('beforeend', `
                         <div class="bg-darksurface border border-darkborder rounded-2xl p-6 hover:border-slate-700 transition-colors group relative flex flex-col justify-between">
@@ -261,16 +310,8 @@
                                 </div>
                             </div>
                             
-                            <div class="pt-4 border-t border-darkborder flex justify-between items-center gap-2">
-                                <button onclick="syncAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors flex items-center gap-1">
-                                    <i class="fa-solid fa-arrows-rotate"></i> Sync
-                                </button>
-                                <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 rounded-lg transition-colors flex items-center gap-1">
-                                    <i class="fa-solid fa-link-slash"></i> Unlink
-                                </button>
-                                <a href="/fileview.html?accountId=${acc.id}" class="px-3 py-1.5 text-xs font-semibold text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors inline-flex items-center gap-1">
-                                    Browse <i class="fa-solid fa-arrow-right"></i>
-                                </a>
+                            <div class="pt-4 border-t border-darkborder flex flex-wrap justify-between items-center gap-2">
+                                ${actionButtons}
                             </div>
                         </div>
                     `);
@@ -284,15 +325,15 @@
         // Sync Account
         async function syncAccount(id) {
             try {
-                showToast(`Starting synchronization...`);
+                showToast(`Starting synchronization...`, 'info');
                 const res = await fetch(`/api/accounts/${id}/sync`, { method: 'POST' });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.error || 'Sync failed');
-                showToast(`Sync completed! Indexed ${data.files_synced} files.`);
+                showToast(`Sync completed! Indexed ${data.files_synced} files.`, 'success');
                 await fetchAccounts();
             } catch (err) {
                 console.error(err);
-                showToast('Sync failed: ' + err.message);
+                showToast('Sync failed: ' + err.message, 'error');
                 await fetchAccounts();
             }
         }
@@ -337,13 +378,35 @@
                 const res = await fetch(`/api/accounts/${id}/unlink`, { method: 'POST' });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.error || 'Unlink failed');
-                showToast('Account unlinked successfully.');
+                showToast('Account unlinked successfully.', 'success');
                 await fetchAccounts();
             });
         }
 
+        function relinkAccount(id) {
+            showToast('Redirecting to Google for re-authorization...', 'info');
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/accounts/${id}/link`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+
         // Initialize Page
         fetchAccounts();
+
+        // Handle error parameters in URL (e.g. missing scopes)
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMsg = urlParams.get('error');
+        if (errorMsg) {
+            if (errorMsg === 'missing_drive_scope') {
+                showToast('Authorization failed: Google Drive permission was not granted. Please make sure to check the Google Drive permission box during authorization.', 'error');
+            } else {
+                showToast('Error: ' + errorMsg, 'error');
+            }
+            // Clean up the URL query params so they don't persist on page reload
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
     </script>
 </body>
 </html>

@@ -40,6 +40,21 @@ const db = initDatabase(DATABASE_PATH);
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 100 * 1024 * 1024 } });
 const app = express();
 
+function makeTokenRefreshHandler(accountId) {
+  return (tokens) => {
+    try {
+      updateAccountTokens(db, accountId, {
+        refresh_token: tokens.refresh_token || null,
+        access_token: tokens.access_token || null,
+        expiry_date: tokens.expiry_date || null,
+        scope: tokens.scope || null
+      });
+    } catch (error) {
+      console.error(`Failed to automatically update refreshed tokens for account ${accountId}:`, error);
+    }
+  };
+}
+
 const GOOGLE_FOLDER_MIME = 'application/vnd.google-apps.folder';
 
 function isFolder(file) {
@@ -281,6 +296,23 @@ app.get('/oauth2/callback', async (req, res) => {
     const { oauth2Client, tokens } = await exchangeCode(ROOT_DIR, REDIRECT_URI, code);
     const profile = await fetchGoogleProfile(oauth2Client);
 
+    const grantedScopes = (tokens.scope || '').split(' ');
+    const hasDriveScope = grantedScopes.some(s => 
+      s === 'https://www.googleapis.com/auth/drive' || 
+      s === 'https://www.googleapis.com/auth/drive.readonly' ||
+      s === 'https://www.googleapis.com/auth/drive.file'
+    );
+
+    if (!hasDriveScope) {
+      updateAccountTokens(db, accountId, {
+        email: profile.email || null,
+        display_name: profile.name || null,
+        picture_url: profile.picture || null,
+        sync_state: 'error'
+      });
+      return res.redirect('/accounts.html?error=missing_drive_scope');
+    }
+
     updateAccountTokens(db, accountId, {
       email: profile.email || null,
       display_name: profile.name || null,
@@ -313,7 +345,7 @@ app.post('/api/accounts/:id/sync', async (req, res) => {
 
   try {
     setAccountSyncState(db, accountId, 'syncing');
-    const result = await syncDriveAccount(ROOT_DIR, REDIRECT_URI, account, () => {});
+    const result = await syncDriveAccount(ROOT_DIR, REDIRECT_URI, account, () => {}, makeTokenRefreshHandler(accountId));
     replaceAccountFiles(db, accountId, result.files);
     rebuildPaths(db, accountId);
     updateAccountSyncSummary(db, accountId, result.summary);
@@ -336,7 +368,7 @@ app.post('/api/sync-all', async (req, res) => {
   for (const account of accounts) {
     try {
       setAccountSyncState(db, account.id, 'syncing');
-      const result = await syncDriveAccount(ROOT_DIR, REDIRECT_URI, account, () => {});
+      const result = await syncDriveAccount(ROOT_DIR, REDIRECT_URI, account, () => {}, makeTokenRefreshHandler(account.id));
       replaceAccountFiles(db, account.id, result.files);
       rebuildPaths(db, account.id);
       updateAccountSyncSummary(db, account.id, result.summary);
@@ -551,7 +583,7 @@ app.get('/api/files/:id/download', async (req, res) => {
   }
 
   try {
-    const response = await downloadDriveFile(ROOT_DIR, REDIRECT_URI, account, file);
+    const response = await downloadDriveFile(ROOT_DIR, REDIRECT_URI, account, file, makeTokenRefreshHandler(account.id));
     const fileName = file.name.replace(/[\\/:*?"<>|]/g, '_');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     response.data.pipe(res);
@@ -574,7 +606,7 @@ app.post('/api/files/:id/delete', async (req, res) => {
   const account = getAccount(db, file.account_id);
 
   try {
-    await deleteDriveFile(ROOT_DIR, REDIRECT_URI, account, file);
+    await deleteDriveFile(ROOT_DIR, REDIRECT_URI, account, file, makeTokenRefreshHandler(account.id));
     deleteFileRecord(db, file.id);
     res.json({ ok: true });
   } catch (error) {
@@ -605,7 +637,7 @@ app.post('/api/files/:id/transfer', async (req, res) => {
   try {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'drive-center-'));
     const tempPath = path.join(tempDir, crypto.randomUUID());
-    const downloadResponse = await downloadDriveFile(ROOT_DIR, REDIRECT_URI, sourceAccount, file);
+    const downloadResponse = await downloadDriveFile(ROOT_DIR, REDIRECT_URI, sourceAccount, file, makeTokenRefreshHandler(sourceAccount.id));
 
     await new Promise((resolve, reject) => {
       const stream = fs.createWriteStream(tempPath);
@@ -621,10 +653,10 @@ app.post('/api/files/:id/transfer', async (req, res) => {
       name: file.name,
       mimeType: file.mime_type || 'application/octet-stream',
       parents: targetFolderId && targetFolderId !== 'root' ? [targetFolderId] : undefined
-    });
+    }, makeTokenRefreshHandler(targetAccountId));
 
     if (mode === 'move') {
-      await deleteDriveFile(ROOT_DIR, REDIRECT_URI, sourceAccount, file);
+      await deleteDriveFile(ROOT_DIR, REDIRECT_URI, sourceAccount, file, makeTokenRefreshHandler(sourceAccount.id));
       deleteFileRecord(db, file.id);
     }
 
@@ -655,7 +687,7 @@ app.post('/api/accounts/:id/upload', upload.single('file'), async (req, res) => 
       name: req.file.originalname,
       mimeType: req.file.mimetype,
       parents
-    });
+    }, makeTokenRefreshHandler(accountId));
 
     res.json({ ok: true, uploaded });
   } catch (error) {
