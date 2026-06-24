@@ -341,14 +341,27 @@
         let selectedFileObject = null;
         let accountsCached = [];
 
+        // Dynamic sidebar sizes
+        let savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width')) || 256;
+        let savedDetailsWidth = parseInt(localStorage.getItem('details-panel-width')) || 320;
+
         // UI Toast Helpers
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             let icon = 'fa-circle-info text-blue-400';
+            let borderClass = 'border-blue-500/20';
             
-            toast.className = `flex items-center gap-3 bg-darksurface border border-blue-500/20 shadow-lg rounded-xl px-4 py-3 transform translate-x-full opacity-0 transition-all duration-300 max-w-sm`;
-            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><p class="text-sm text-slate-200 font-medium">${message}</p>`;
+            if (type === 'success') {
+                icon = 'fa-circle-check text-emerald-400';
+                borderClass = 'border-emerald-500/30';
+            } else if (type === 'error') {
+                icon = 'fa-triangle-exclamation text-rose-400';
+                borderClass = 'border-rose-500/30';
+            }
+            
+            toast.className = `flex items-center gap-3 bg-darksurface border ${borderClass} shadow-lg shadow-black/40 rounded-xl px-4 py-3 transform translate-x-full opacity-0 transition-all duration-300 max-w-sm`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg shrink-0"></i><p class="text-sm text-slate-200 font-medium">${message}</p>`;
             
             container.appendChild(toast);
             setTimeout(() => toast.classList.remove('translate-x-full', 'opacity-0'), 10);
@@ -651,25 +664,27 @@
 
             if (viewMode === 'grid') {
                 let html = '<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-12 w-full">';
-                itemsToRender.forEach(item => {
+                itemsToRender.forEach((item, index) => {
                     const isFolder = item.mimeType === 'application/vnd.google-apps.folder';
                     const icon = getIconClasses(item.mimeType);
                     const safeItem = encodeURIComponent(JSON.stringify(item));
 
                     if (isFolder) {
                         html += `
-                            <div class="bg-darksurface border border-darkborder hover:border-blue-500/50 rounded-xl p-4 cursor-pointer transition select-none flex flex-col items-center text-center group min-w-0"
+                            <div class="file-card animate-fade-in bg-darksurface border border-darkborder rounded-xl p-4 cursor-pointer select-none flex flex-col items-center text-center group min-w-0"
+                                style="animation-delay: ${index * 20}ms; opacity: 0;"
                                 onclick="navigateTo('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
-                                <i class="${icon} text-3xl mb-2.5 group-hover:scale-105 transition-transform duration-200"></i>
+                                <i class="${icon} text-3xl mb-2.5 group-hover:scale-110 transition-transform duration-200"></i>
                                 <span class="text-xs text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
                                 ${isSearchResults ? `<span class="text-[9px] bg-darkbg text-slate-500 border border-darkborder px-1.5 py-0.5 rounded mt-2 truncate w-full max-w-full">${item.accountLabel}</span>` : ''}
                             </div>
                         `;
                     } else {
                         html += `
-                            <div class="bg-darksurface border border-darkborder hover:border-slate-500 rounded-xl p-4 cursor-pointer transition select-none flex flex-col items-center text-center group min-w-0"
+                            <div class="file-card animate-fade-in bg-darksurface border border-darkborder rounded-xl p-4 cursor-pointer select-none flex flex-col items-center text-center group min-w-0"
+                                style="animation-delay: ${index * 20}ms; opacity: 0;"
                                 onclick="selectFile('${safeItem}')">
-                                <i class="${icon} text-3xl mb-2.5 group-hover:scale-105 transition-transform duration-200"></i>
+                                <i class="${icon} text-3xl mb-2.5 group-hover:scale-110 transition-transform duration-200"></i>
                                 <span class="text-xs text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
                                 <span class="text-[10px] text-slate-500 mt-1">${formatBytes(item.size)}</span>
                                 ${isSearchResults ? `<span class="text-[9px] bg-darkbg text-slate-500 border border-darkborder px-1.5 py-0.5 rounded mt-2 truncate w-full max-w-full">${item.accountLabel}</span>` : ''}
@@ -695,7 +710,7 @@
                         </thead>
                         <tbody class="text-xs divide-y divide-darkborder">
                 `;
-                itemsToRender.forEach(item => {
+                itemsToRender.forEach((item, index) => {
                     const isFolder = item.mimeType === 'application/vnd.google-apps.folder';
                     const icon = getIconClasses(item.mimeType);
                     const safeItem = encodeURIComponent(JSON.stringify(item));
@@ -703,7 +718,9 @@
 
                     if (isFolder) {
                         html += `
-                            <tr class="hover:bg-darkbg/50 cursor-pointer transition-colors" onclick="navigateTo('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                            <tr class="animate-fade-in hover:bg-darkbg/50 cursor-pointer transition-colors"
+                                style="animation-delay: ${index * 20}ms; opacity: 0; display: table-row;"
+                                onclick="navigateTo('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
                                 <td class="px-4 py-2.5 text-center"><i class="${icon} text-base"></i></td>
                                 <td class="px-4 py-2.5 font-medium text-slate-200 truncate pr-4">${item.name}</td>
                                 ${isSearchResults ? `<td class="px-4 py-2.5 text-slate-400 truncate text-[11px]">${item.accountLabel}</td>` : ''}
@@ -713,7 +730,9 @@
                         `;
                     } else {
                         html += `
-                            <tr class="hover:bg-darkbg/50 cursor-pointer transition-colors" onclick="selectFile('${safeItem}')">
+                            <tr class="animate-fade-in hover:bg-darkbg/50 cursor-pointer transition-colors"
+                                style="animation-delay: ${index * 20}ms; opacity: 0; display: table-row;"
+                                onclick="selectFile('${safeItem}')">
                                 <td class="px-4 py-2.5 text-center"><i class="${icon} text-base"></i></td>
                                 <td class="px-4 py-2.5 font-medium text-slate-200 truncate pr-4">${item.name}</td>
                                 ${isSearchResults ? `<td class="px-4 py-2.5 text-slate-400 truncate text-[11px]">${item.accountLabel}</td>` : ''}
@@ -810,12 +829,40 @@
             btnDelete.onclick = () => deleteSelectedFile(item.dbId);
             btnTransfer.onclick = () => openTransferModal(item.dbId, item.name, item.accountId || currentAccountId);
 
+            showDetails();
+        }
+
+        function showDetails() {
             const detailsPanel = document.getElementById('details-panel');
+            const resizerRight = document.getElementById('resizer-right');
+            
             detailsPanel.classList.remove('hidden');
+            resizerRight.classList.remove('hidden');
+            
+            // Force a reflow
+            detailsPanel.offsetHeight;
+            
+            detailsPanel.style.width = `${savedDetailsWidth}px`;
+            detailsPanel.style.opacity = '1';
+        }
+
+        function hideDetails() {
+            const detailsPanel = document.getElementById('details-panel');
+            const resizerRight = document.getElementById('resizer-right');
+            
+            detailsPanel.style.width = '0px';
+            detailsPanel.style.opacity = '0';
+            
+            setTimeout(() => {
+                if (detailsPanel.style.width === '0px') {
+                    detailsPanel.classList.add('hidden');
+                    resizerRight.classList.add('hidden');
+                }
+            }, 300);
         }
 
         document.getElementById('btn-close-details').addEventListener('click', () => {
-            document.getElementById('details-panel').classList.add('hidden');
+            hideDetails();
         });
 
         // 1. UPLOAD LOGIC
@@ -844,13 +891,13 @@
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.error || 'Upload failed');
                 
-                showToast('Upload completed successfully!');
+                showToast('Upload completed successfully!', 'success');
                 
                 // Triggers local folder refresh immediately
                 await navigateTo(currentFolderId);
             } catch (err) {
                 console.error(err);
-                showToast('Upload failed: ' + err.message);
+                showToast('Upload failed: ' + err.message, 'error');
             } finally {
                 // Clear input value so upload can be re-triggered for same file
                 e.target.value = '';
@@ -871,8 +918,8 @@
                     const data = await res.json().catch(() => ({}));
                     if (!res.ok) throw new Error(data.error || 'Deletion failed');
                     
-                    showToast('File deleted successfully.');
-                    document.getElementById('details-panel').classList.add('hidden');
+                    showToast('File deleted successfully.', 'success');
+                    hideDetails();
                     
                     // Refresh active view
                     if (currentFolderId) {
@@ -883,7 +930,7 @@
                     }
                 } catch (err) {
                     console.error(err);
-                    showToast('Deletion error: ' + err.message);
+                    showToast('Deletion error: ' + err.message, 'error');
                 }
             });
         }
@@ -929,7 +976,7 @@
             const targetFolderId = document.getElementById('transfer-target-folder').value.trim();
 
             if (!targetAccountId) {
-                showToast('Please select a target Google Drive account.');
+                showToast('Please select a target Google Drive account.', 'error');
                 return;
             }
 
@@ -950,8 +997,8 @@
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.error || 'Transfer failed');
                 
-                showToast(`Transfer complete! File successfully ${mode === 'copy' ? 'copied' : 'moved'}.`);
-                document.getElementById('details-panel').classList.add('hidden');
+                showToast(`Transfer complete! File successfully ${mode === 'copy' ? 'copied' : 'moved'}.`, 'success');
+                hideDetails();
 
                 // Refresh current view
                 if (currentFolderId) {
@@ -962,7 +1009,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                showToast('Transfer failed: ' + err.message);
+                showToast('Transfer failed: ' + err.message, 'error');
             }
         }
 
@@ -995,10 +1042,98 @@
                     await __confirmCallback();
                 } catch (err) {
                     console.error(err);
-                    showToast('Action failed: ' + err.message);
+                    showToast('Action failed: ' + err.message, 'error');
                 }
             }
             closeConfirm();
+        });
+
+        // --- Sidebar Resizer Controls ---
+        const leftSidebar = document.getElementById('left-sidebar');
+        const resizerLeft = document.getElementById('resizer-left');
+        const detailsPanel = document.getElementById('details-panel');
+        const resizerRight = document.getElementById('resizer-right');
+
+        // Apply saved sizes on init
+        leftSidebar.style.width = `${savedSidebarWidth}px`;
+
+        // Left Sidebar Resizer
+        resizerLeft.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            leftSidebar.classList.remove('resize-transition');
+            resizerLeft.classList.add('active');
+            
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100vw';
+            overlay.style.height = '100vh';
+            overlay.style.cursor = 'col-resize';
+            overlay.style.zIndex = '9999';
+            document.body.appendChild(overlay);
+
+            function onMouseMove(e) {
+                let newWidth = e.clientX - leftSidebar.getBoundingClientRect().left;
+                if (newWidth < 160) newWidth = 160;
+                if (newWidth > 480) newWidth = 480;
+                leftSidebar.style.width = `${newWidth}px`;
+            }
+
+            function onMouseUp() {
+                leftSidebar.classList.add('resize-transition');
+                resizerLeft.classList.remove('active');
+                localStorage.setItem('sidebar-width', parseInt(leftSidebar.style.width));
+                
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                overlay.remove();
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+
+        // Right Sidebar (Details Panel) Resizer
+        resizerRight.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            detailsPanel.classList.remove('resize-transition');
+            resizerRight.classList.add('active');
+
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100vw';
+            overlay.style.height = '100vh';
+            overlay.style.cursor = 'col-resize';
+            overlay.style.zIndex = '9999';
+            document.body.appendChild(overlay);
+
+            const initialWidth = detailsPanel.getBoundingClientRect().width;
+            const initialX = e.clientX;
+
+            function onMouseMove(e) {
+                let deltaX = initialX - e.clientX;
+                let newWidth = initialWidth + deltaX;
+                if (newWidth < 240) newWidth = 240;
+                if (newWidth > 500) newWidth = 500;
+                detailsPanel.style.width = `${newWidth}px`;
+            }
+
+            function onMouseUp() {
+                detailsPanel.classList.add('resize-transition');
+                resizerRight.classList.remove('active');
+                savedDetailsWidth = parseInt(detailsPanel.style.width);
+                localStorage.setItem('details-panel-width', savedDetailsWidth);
+
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                overlay.remove();
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
         });
 
         // Initialize Page
