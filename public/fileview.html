@@ -26,19 +26,77 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f1f5f9; }
+        
+        /* Premium custom scrollbars */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #232a3f; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; border: 1px solid transparent; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
         
-        .tree-chevron { transition: transform 0.2s ease; font-size: 0.75rem; width: 20px; text-align: center; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Folder Tree Styling */
+        .tree-chevron { transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); font-size: 0.75rem; width: 20px; text-align: center; }
         .tree-chevron.open { transform: rotate(90deg); }
-        .tree-node { display: flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.5rem; border-radius: 0.375rem; cursor: pointer; color: #cbd5e1; user-select: none; transition: background-color 0.15s; margin-bottom: 2px;}
-        .tree-node:hover { background-color: #151a28; color: #f8fafc; }
-        .tree-node.active { background-color: #2563eb; color: #ffffff !important; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .tree-node { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.6rem; border-radius: 0.5rem; cursor: pointer; color: #cbd5e1; user-select: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); margin-bottom: 2px; }
+        .tree-node:hover { background-color: #1e293b; color: #f8fafc; }
+        .tree-node.active { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff !important; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
         .tree-node.active .tree-chevron, .tree-node.active i { color: #ffffff !important; }
-        .tree-children { display: none; padding-left: 0.5rem; border-left: 1px solid #232a3f; margin-left: 0.8rem; margin-top: 2px; }
+        .tree-children { display: none; padding-left: 0.5rem; border-left: 1px solid #1e293b; margin-left: 0.8rem; margin-top: 2px; }
         .tree-children.open { display: block; }
+
+        /* Premium resizer handles */
+        .resizer-bar {
+            position: relative;
+            background-color: #1f293d;
+            transition: background-color 0.2s;
+        }
+        .resizer-bar:hover, .resizer-bar.active {
+            background-color: #3b82f6;
+        }
+        .resizer-bar::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 16px;
+            background-color: #475569;
+            border-radius: 1px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .resizer-bar:hover::after, .resizer-bar.active::after {
+            opacity: 1;
+            background-color: #ffffff;
+        }
+
+        /* Fluid sliding sidebar/panel transitions */
+        .resize-transition {
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+        }
+
+        /* File Card Hover Effects */
+        .file-card {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .file-card:hover {
+            transform: translateY(-2px);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 20px -10px rgba(59, 130, 246, 0.2);
+            background-color: #1a2235;
+        }
+
+        /* Smooth Entry Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden antialiased selection:bg-blue-500 selection:text-white">
@@ -97,11 +155,14 @@
         <div class="flex-1 flex overflow-hidden relative">
             
             <!-- Left Sidebar: Folder Tree -->
-            <aside class="w-64 bg-darksurface border-r border-darkborder flex flex-col shrink-0">
+            <aside id="left-sidebar" class="w-64 bg-darksurface flex flex-col shrink-0 relative resize-transition" style="overflow-x: hidden;">
                 <div class="flex-1 overflow-y-auto p-3 text-sm folder-tree" id="sidebar-tree">
                      <div class="text-slate-500 text-xs text-center py-4">Loading accounts...</div>
                 </div>
             </aside>
+
+            <!-- Left Resizer -->
+            <div id="resizer-left" class="w-1.5 resizer-bar cursor-col-resize shrink-0 z-10"></div>
 
             <!-- Center Pane: File Browser -->
             <section class="flex-1 flex flex-col bg-darkbg overflow-hidden relative">
@@ -149,48 +210,53 @@
                 </div>
             </section>
 
-            <!-- Right Sidebar: Details Panel -->
-            <aside class="w-80 bg-darksurface border-l border-darkborder flex flex-col shrink-0 hidden" id="details-panel">
-                <div class="p-4 border-b border-darkborder flex items-center justify-between">
-                    <h3 class="font-semibold text-sm text-slate-300">File Details</h3>
-                    <button class="text-slate-400 hover:text-white" id="btn-close-details"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                
-                <div class="p-6 flex flex-col items-center border-b border-darkborder text-center">
-                    <div class="w-16 h-16 rounded-2xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4 text-slate-400" id="detail-icon">
-                        <i class="fa-solid fa-file"></i>
-                    </div>
-                    <h4 class="text-white font-semibold break-all w-full leading-tight mb-2 text-sm" id="detail-name">-</h4>
-                    <div id="detail-badge" class="mt-1"></div>
-                </div>
+            <!-- Right Resizer -->
+            <div id="resizer-right" class="w-1.5 resizer-bar cursor-col-resize shrink-0 z-10 hidden"></div>
 
-                <div class="p-6 flex-1 overflow-y-auto space-y-4 text-xs">
-                    <div>
-                        <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Type</p>
-                        <p class="text-slate-300 font-medium" id="detail-type">-</p>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Size</p>
-                        <p class="text-slate-300 font-medium" id="detail-size">-</p>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Created</p>
-                        <p class="text-slate-300 font-medium" id="detail-date">-</p>
+            <!-- Right Sidebar: Details Panel -->
+            <aside id="details-panel" class="bg-darksurface flex flex-col shrink-0 hidden resize-transition" style="width: 0px; opacity: 0; overflow: hidden;">
+                <div class="w-80 h-full flex flex-col shrink-0 overflow-y-auto">
+                    <div class="p-4 border-b border-darkborder flex items-center justify-between">
+                        <h3 class="font-semibold text-sm text-slate-300">File Details</h3>
+                        <button class="text-slate-400 hover:text-white" id="btn-close-details"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     
-                    <div class="pt-4 mt-6 border-t border-darkborder space-y-2">
-                        <a href="#" target="_blank" id="btn-detail-download" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold shadow-sm text-center">
-                            <i class="fa-solid fa-cloud-arrow-down"></i> Download File
-                        </a>
-                        <button id="btn-detail-transfer" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold border border-darkborder">
-                            <i class="fa-solid fa-shuffle"></i> Copy or Move
-                        </button>
-                        <button id="btn-detail-delete" class="w-full py-2 bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-red-300 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold">
-                            <i class="fa-solid fa-trash-can"></i> Delete File
-                        </button>
-                        <a href="#" target="_blank" id="btn-drive-link" class="w-full py-2 bg-darkbg hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-darkborder font-semibold">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Drive
-                        </a>
+                    <div class="p-6 flex flex-col items-center border-b border-darkborder text-center">
+                        <div class="w-16 h-16 rounded-2xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4 text-slate-400" id="detail-icon">
+                            <i class="fa-solid fa-file"></i>
+                        </div>
+                        <h4 class="text-white font-semibold break-all w-full leading-tight mb-2 text-sm" id="detail-name">-</h4>
+                        <div id="detail-badge" class="mt-1"></div>
+                    </div>
+
+                    <div class="p-6 flex-1 space-y-4 text-xs">
+                        <div>
+                            <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Type</p>
+                            <p class="text-slate-300 font-medium" id="detail-type">-</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Size</p>
+                            <p class="text-slate-300 font-medium" id="detail-size">-</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Created</p>
+                            <p class="text-slate-300 font-medium" id="detail-date">-</p>
+                        </div>
+                        
+                        <div class="pt-4 mt-6 border-t border-darkborder space-y-2">
+                            <a href="#" target="_blank" id="btn-detail-download" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold shadow-sm text-center">
+                                <i class="fa-solid fa-cloud-arrow-down"></i> Download File
+                            </a>
+                            <button id="btn-detail-transfer" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold border border-darkborder">
+                                <i class="fa-solid fa-shuffle"></i> Copy or Move
+                            </button>
+                            <button id="btn-detail-delete" class="w-full py-2 bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-red-300 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold">
+                                <i class="fa-solid fa-trash-can"></i> Delete File
+                            </button>
+                            <a href="#" target="_blank" id="btn-drive-link" class="w-full py-2 bg-darkbg hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-darkborder font-semibold">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Drive
+                            </a>
+                        </div>
                     </div>
                 </div>
             </aside>
