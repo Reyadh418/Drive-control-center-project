@@ -4,41 +4,409 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accounts | Drive Mesh</title>
-    <link rel="stylesheet" href="/tailwind.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0b0f19',
+                        darksurface: '#151a28',
+                        darkborder: '#232a3f'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-dark: #0f111a; --surface: #1e2130; --text-main: #f8fafc; --text-muted: #94a3b8; --primary: #3b82f6; }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; display: flex; height: 100vh; overflow: hidden; margin:0; }
-        .sidebar { width: 260px; background-color: var(--surface); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; }
-        .nav-item { padding: 12px 20px; margin: 4px 12px; border-radius: 8px; color: var(--text-muted); display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 500; }
-        .nav-item:hover { background-color: rgba(255,255,255,0.03); color: var(--text-main); }
-        .nav-item.active { background-color: var(--primary); color: white; }
-        .main-content { flex: 1; display: flex; flex-direction: column; }
-        .topbar { height: 70px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; padding: 0 32px; background-color: rgba(15, 17, 26, 0.8); }
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f1f5f9; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body>
-    <aside class="sidebar py-6">
-        <div class="px-6 mb-8 flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center"><i class="fa-solid fa-cloud text-white"></i></div>
-            <span class="text-xl font-bold tracking-tight">Drive Mesh</span>
+<body class="flex h-screen overflow-hidden antialiased selection:bg-blue-500 selection:text-white">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-darksurface border-r border-darkborder flex flex-col transition-all duration-300 z-20">
+        <div class="h-16 flex items-center px-6 border-b border-darkborder">
+            <div class="w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-cloud text-white text-sm"></i>
+            </div>
+            <span class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Drive Mesh</span>
         </div>
-        <nav class="flex flex-col gap-1">
-            <a href="/index.html" class="nav-item"><i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard</a>
-            <a href="/accounts.html" class="nav-item active"><i class="fa-solid fa-users w-5 text-center"></i> Accounts</a>
-            <a href="/fileview.html" class="nav-item"><i class="fa-solid fa-folder-tree w-5 text-center"></i> File Explorer</a>
-            <a href="/settings.html" class="nav-item"><i class="fa-solid fa-gear w-5 text-center"></i> Settings</a>
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
+            <a href="/index.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
+            </a>
+            <a href="/fileview.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-folder-tree w-5 text-center"></i> All Files
+            </a>
+            <a href="/accounts.html" class="flex items-center gap-3 px-3 py-2.5 bg-blue-500/10 text-blue-400 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-users w-5 text-center"></i> Accounts
+            </a>
+            <a href="/settings.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-gear w-5 text-center"></i> Settings
+            </a>
         </nav>
+        <div class="p-4 border-t border-darkborder">
+            <div class="bg-blue-900/20 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-200">
+                <div class="flex border-b border-blue-500/20 pb-2 mb-2 font-semibold items-center gap-2 text-blue-400">
+                    <i class="fa-solid fa-shield-halved"></i> Privacy First
+                </div>
+                Running locally. Total control.
+            </div>
+        </div>
     </aside>
-    <main class="main-content">
-        <header class="topbar">
-            <div><h1 class="text-lg font-semibold">Manage Accounts</h1></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-darkbg relative">
+        <!-- Global Header -->
+        <header class="h-16 flex items-center justify-between px-8 bg-darksurface/50 backdrop-blur-md border-b border-darkborder sticky top-0 z-10">
+            <div class="relative w-full max-w-md">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+                <input id="global-search" type="text" placeholder="Search across all drives..." class="w-full bg-darkbg border border-darkborder text-sm rounded-full pl-10 pr-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200 placeholder-slate-500 transition-all">
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="btn-notifications" class="relative p-2 text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-darksurface"></span>
+                </button>
+                <div id="btn-profile" class="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border-2 border-darkborder flex items-center justify-center shadow-md cursor-pointer">
+                    <span class="text-xs font-bold text-white">DM</span>
+                </div>
+            </div>
         </header>
-        <div class="p-8">
-            <form method="POST" action="/accounts">
-                <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold border-0 shadow-lg shadow-blue-500/20"><i class="fa-solid fa-plus mr-2"></i> Add Account</button>
-            </form>
+
+        <!-- Accounts Grid Content -->
+        <div class="flex-1 overflow-y-auto p-8 space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-white">Google Drive Accounts</h1>
+                    <p class="text-sm text-slate-400 mt-1">Manage up to 5 connected accounts and verify cloud synchronization status.</p>
+                </div>
+                <button id="btn-add-account" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors shadow-lg shadow-blue-500/20 flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add Account
+                </button>
+            </div>
+
+            <!-- Dynamic Accounts List -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="accounts-grid">
+                <div class="col-span-full py-8 text-center text-slate-500 text-sm italic">Loading dynamic accounts...</div>
+            </section>
         </div>
     </main>
+
+    <!-- Add Account Modal -->
+    <div id="add-account-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-darksurface border border-darkborder rounded-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-lg font-semibold text-white">Link New Drive</h3>
+                <button onclick="closeAddAccountModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="add-account-form" action="/accounts" method="POST">
+                <div class="mb-4">
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Account Label</label>
+                    <input type="text" name="label" required placeholder="e.g. Work Drive, Personal" class="w-full bg-darkbg border border-darkborder text-sm rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200 transition-all">
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="closeAddAccountModal()" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/20">
+                        Continue to Google <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-darksurface border border-darkborder rounded-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
+            <div class="mb-4">
+                <h3 id="confirm-title" class="text-lg font-semibold text-white">Confirm</h3>
+                <p id="confirm-message" class="text-sm text-slate-400 mt-2">Are you sure?</p>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="confirm-cancel" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Cancel</button>
+                <button id="confirm-ok" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-medium rounded-lg transition-colors shadow-lg">Yes, unlink</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+
+    <script>
+        // UI Helpers
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let icon = 'fa-circle-info text-blue-400';
+            let borderClass = 'border-blue-500/20';
+            
+            if (type === 'error') {
+                icon = 'fa-circle-exclamation text-red-400';
+                borderClass = 'border-red-500/20';
+            } else if (type === 'success') {
+                icon = 'fa-circle-check text-emerald-400';
+                borderClass = 'border-emerald-500/20';
+            }
+            
+            toast.className = `flex items-center gap-3 bg-darksurface border ${borderClass} shadow-lg rounded-xl px-4 py-3 transform translate-x-full opacity-0 transition-all duration-300 max-w-sm`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><p class="text-sm text-slate-200 font-medium">${message}</p>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-x-full', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function openAddAccountModal() {
+            const modal = document.getElementById('add-account-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.firstElementChild.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeAddAccountModal() {
+            const modal = document.getElementById('add-account-modal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        document.getElementById('btn-add-account').addEventListener('click', openAddAccountModal);
+        document.getElementById('btn-notifications').addEventListener('click', () => showToast('You have no new notifications.'));
+        document.getElementById('btn-profile').addEventListener('click', () => showToast('Profile settings coming soon.'));
+        
+        document.getElementById('global-search').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                window.location.href = `/fileview.html?q=${encodeURIComponent(e.target.value.trim())}`;
+            }
+        });
+
+        // Formatter Utility
+        function formatBytes(bytes) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Never';
+            return new Date(dateStr).toLocaleString();
+        }
+
+        // Fetch & Populate Accounts
+        async function fetchAccounts() {
+            try {
+                const res = await fetch('/api/accounts');
+                const accounts = await res.json();
+                
+                const grid = document.getElementById('accounts-grid');
+                grid.innerHTML = '';
+                
+                if (accounts.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full py-8 text-center text-slate-500 text-sm">No linked accounts. Click "Add Account" to connect your Google Drive.</div>';
+                    return;
+                }
+
+                accounts.forEach(acc => {
+                    const used = parseInt(acc.storage_used || acc.storage_used_in_drive || 0) || 0;
+                    const total = parseInt(acc.storage_total || 0) || 0;
+                    const ratio = total > 0 ? ((used / total) * 100).toFixed(1) : 0;
+                    
+                    const isLinked = acc.sync_state === 'linked' || acc.sync_state === 'synced';
+                    const statusText = acc.sync_state.charAt(0).toUpperCase() + acc.sync_state.slice(1);
+                    const statusBadge = acc.sync_state === 'syncing'
+                        ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-400 text-xs font-semibold border border-blue-500/20"><i class="fa-solid fa-arrows-rotate animate-spin text-[10px]"></i>Syncing</span>`
+                        : isLinked
+                            ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse"></span>Connected</span>`
+                            : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-500/10 text-red-400 text-xs font-semibold border border-red-500/20"><span class="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"></span>${statusText}</span>`;
+
+                    const avatar = acc.picture_url 
+                        ? `<img src="${acc.picture_url}" class="w-10 h-10 rounded-full border border-darkborder shrink-0" referrerPolicy="no-referrer">`
+                        : `<div class="w-10 h-10 rounded-full bg-darkbg border border-darkborder flex items-center justify-center shrink-0"><i class="fa-brands fa-google text-slate-400"></i></div>`;
+
+                    let actionButtons = '';
+                    if (acc.sync_state === 'syncing') {
+                        actionButtons = `
+                            <button disabled class="px-3 py-1.5 text-xs font-semibold text-slate-400 bg-slate-800 border border-slate-700 rounded-lg cursor-not-allowed flex items-center gap-1">
+                                <i class="fa-solid fa-spinner animate-spin"></i> Syncing
+                            </button>
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-link-slash"></i> Unlink
+                            </button>
+                            <a href="/fileview.html?accountId=${acc.id}" class="px-3 py-1.5 text-xs font-semibold text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors inline-flex items-center gap-1">
+                                Browse <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        `;
+                    } else if (acc.sync_state === 'error' || acc.sync_state === 'needs-auth') {
+                        actionButtons = `
+                            <button onclick="relinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-lg shadow-blue-500/10">
+                                <i class="fa-solid fa-key"></i> Re-link
+                            </button>
+                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-arrows-rotate"></i> Sync
+                            </button>
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-link-slash"></i> Unlink
+                            </button>
+                        `;
+                    } else {
+                        actionButtons = `
+                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-arrows-rotate"></i> Sync
+                            </button>
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-link-slash"></i> Unlink
+                            </button>
+                            <a href="/fileview.html?accountId=${acc.id}" class="px-3 py-1.5 text-xs font-semibold text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors inline-flex items-center gap-1">
+                                Browse <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        `;
+                    }
+
+                    grid.insertAdjacentHTML('beforeend', `
+                        <div class="bg-darksurface border border-darkborder rounded-2xl p-6 hover:border-slate-700 transition-colors group relative flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-start mb-5 gap-2">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        ${avatar}
+                                        <div class="min-w-0">
+                                            <h4 class="text-sm font-semibold text-slate-200 truncate" title="${acc.display_name || acc.label}">${acc.display_name || acc.label}</h4>
+                                            <p class="text-xs text-slate-500 mt-0.5 truncate" title="${acc.email || 'Google Drive'}">${acc.email || 'Google Drive'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="shrink-0">
+                                        ${statusBadge}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-5 space-y-2">
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-slate-300 font-medium">${formatBytes(used)} <span class="text-slate-500 font-normal">used</span></span>
+                                        <span class="text-slate-400 font-semibold">${formatBytes(total)} <span class="text-slate-600 font-normal">total</span></span>
+                                    </div>
+                                    <div class="w-full bg-darkbg rounded-full h-2 overflow-hidden border border-darkborder">
+                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-700 shadow-lg shadow-blue-500/20" style="width: ${Math.min(ratio, 100)}%"></div>
+                                    </div>
+                                    <div class="text-[11px] text-slate-500 flex justify-between pt-1">
+                                        <span>Quota Ratio: ${ratio}%</span>
+                                        <span>Last sync: ${formatDate(acc.last_synced_at)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-4 border-t border-darkborder flex flex-wrap justify-between items-center gap-2">
+                                ${actionButtons}
+                            </div>
+                        </div>
+                    `);
+                });
+            } catch (err) {
+                console.error(err);
+                document.getElementById('accounts-grid').innerHTML = '<div class="col-span-full py-8 text-center text-red-400 text-sm">Failed to load accounts catalog.</div>';
+            }
+        }
+
+        // Sync Account
+        async function syncAccount(id) {
+            try {
+                showToast(`Starting synchronization...`, 'info');
+                const res = await fetch(`/api/accounts/${id}/sync`, { method: 'POST' });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || 'Sync failed');
+                showToast(`Sync completed! Indexed ${data.files_synced} files.`, 'success');
+                await fetchAccounts();
+            } catch (err) {
+                console.error(err);
+                showToast('Sync failed: ' + err.message, 'error');
+                await fetchAccounts();
+            }
+        }
+
+        // Unlink Confirmation dialog
+        let __confirmCallback = null;
+        function openConfirm(message, title = 'Confirm', callback) {
+            __confirmCallback = callback;
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.firstElementChild.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeConfirm() {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 250);
+            __confirmCallback = null;
+        }
+
+        document.getElementById('confirm-cancel').addEventListener('click', () => closeConfirm());
+        document.getElementById('confirm-ok').addEventListener('click', async () => {
+            if (typeof __confirmCallback === 'function') {
+                try {
+                    await __confirmCallback();
+                } catch (err) {
+                    console.error(err);
+                    showToast('Action failed: ' + err.message);
+                }
+            }
+            closeConfirm();
+        });
+
+        async function unlinkAccount(id) {
+            openConfirm('Unlink this Google Drive? This will remove all files belonging to this drive from the local database index.', 'Disconnect Drive Account', async () => {
+                const res = await fetch(`/api/accounts/${id}/unlink`, { method: 'POST' });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || 'Unlink failed');
+                showToast('Account unlinked successfully.', 'success');
+                await fetchAccounts();
+            });
+        }
+
+        function relinkAccount(id) {
+            showToast('Redirecting to Google for re-authorization...', 'info');
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/accounts/${id}/link`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        // Initialize Page
+        fetchAccounts();
+
+        // Handle error parameters in URL (e.g. missing scopes)
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMsg = urlParams.get('error');
+        if (errorMsg) {
+            if (errorMsg === 'missing_drive_scope') {
+                showToast('Authorization failed: Google Drive permission was not granted. Please make sure to check the Google Drive permission box during authorization.', 'error');
+            } else {
+                showToast('Error: ' + errorMsg, 'error');
+            }
+            // Clean up the URL query params so they don't persist on page reload
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    </script>
 </body>
 </html>

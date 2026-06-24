@@ -65,7 +65,7 @@ function createDriveClient(oauth2Client) {
   return google.drive({ version: 'v3', auth: oauth2Client });
 }
 
-function buildOAuthClientFromTokens(rootDir, redirectUri, tokenData) {
+function buildOAuthClientFromTokens(rootDir, redirectUri, tokenData, onTokenRefresh) {
   const oauth2Client = createOAuthClient(rootDir, redirectUri);
   oauth2Client.setCredentials({
     access_token: tokenData.access_token || undefined,
@@ -74,11 +74,16 @@ function buildOAuthClientFromTokens(rootDir, redirectUri, tokenData) {
     scope: tokenData.scope || undefined,
     token_type: tokenData.token_type || undefined
   });
+  if (onTokenRefresh) {
+    oauth2Client.on('tokens', (tokens) => {
+      onTokenRefresh(tokens);
+    });
+  }
   return oauth2Client;
 }
 
-async function syncDriveAccount(rootDir, redirectUri, account, onBatch) {
-  const oauth2Client = buildOAuthClientFromTokens(rootDir, redirectUri, account);
+async function syncDriveAccount(rootDir, redirectUri, account, onBatch, onTokenRefresh) {
+  const oauth2Client = buildOAuthClientFromTokens(rootDir, redirectUri, account, onTokenRefresh);
   const drive = createDriveClient(oauth2Client);
 
   const aboutResponse = await drive.about.get({
@@ -148,8 +153,8 @@ async function syncDriveAccount(rootDir, redirectUri, account, onBatch) {
   };
 }
 
-async function downloadDriveFile(rootDir, redirectUri, account, file) {
-  const oauth2Client = buildOAuthClientFromTokens(rootDir, redirectUri, account);
+async function downloadDriveFile(rootDir, redirectUri, account, file, onTokenRefresh) {
+  const oauth2Client = buildOAuthClientFromTokens(rootDir, redirectUri, account, onTokenRefresh);
   const drive = createDriveClient(oauth2Client);
 
   if (file.mime_type && file.mime_type.startsWith('application/vnd.google-apps.')) {
@@ -171,14 +176,14 @@ async function downloadDriveFile(rootDir, redirectUri, account, file) {
   );
 }
 
-async function deleteDriveFile(rootDir, redirectUri, account, file) {
-  const oauth2Client = buildOAuthClientFromTokens(rootDir, redirectUri, account);
+async function deleteDriveFile(rootDir, redirectUri, account, file, onTokenRefresh) {
+  const oauth2Client = buildOAuthClientFromTokens(rootDir, redirectUri, account, onTokenRefresh);
   const drive = createDriveClient(oauth2Client);
   await drive.files.delete({ fileId: file.drive_file_id, supportsAllDrives: true });
 }
 
-async function uploadDriveFile(rootDir, redirectUri, account, buffer, options) {
-  const oauth2Client = buildOAuthClientFromTokens(rootDir, redirectUri, account);
+async function uploadDriveFile(rootDir, redirectUri, account, buffer, options, onTokenRefresh) {
+  const oauth2Client = buildOAuthClientFromTokens(rootDir, redirectUri, account, onTokenRefresh);
   const drive = createDriveClient(oauth2Client);
 
   const response = await drive.files.create({
