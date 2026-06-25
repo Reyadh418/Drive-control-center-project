@@ -1256,9 +1256,7 @@
                             </div>
                         `;
                     } else {
-                        const canHaveThumbnail = item.dbId && (
-                            (item.mimeType && (item.mimeType.startsWith('image/') || item.mimeType.startsWith('video/') || item.mimeType === 'application/pdf'))
-                        );
+                        const canHaveThumbnail = checkCanHaveThumbnail(item);
 
                         let previewContent = `<i class="${icon} text-3xl group-hover:scale-105 transition-transform duration-200"></i>`;
                         if (canHaveThumbnail) {
@@ -1324,9 +1322,7 @@
                             </tr>
                         `;
                     } else {
-                        const canHaveThumbnail = item.dbId && (
-                            (item.mimeType && (item.mimeType.startsWith('image/') || item.mimeType.startsWith('video/') || item.mimeType === 'application/pdf'))
-                        );
+                        const canHaveThumbnail = checkCanHaveThumbnail(item);
 
                         let cellContent = `<i class="${icon} text-base"></i>`;
                         if (canHaveThumbnail) {
@@ -1442,9 +1438,7 @@
             }
 
             const icon = getFileIconClass(item.name, item.mimeType);
-            const canHaveThumbnail = item.dbId && (
-                (item.mimeType && (item.mimeType.startsWith('image/') || item.mimeType.startsWith('video/') || item.mimeType === 'application/pdf'))
-            );
+            const canHaveThumbnail = checkCanHaveThumbnail(item);
             
             const detailIconEl = document.getElementById('detail-icon');
             if (canHaveThumbnail) {
@@ -1853,11 +1847,27 @@
         function getFileIconClass(filename, mimeType = null) {
             if (mimeType === 'application/vnd.google-apps.folder') return 'fa-solid fa-folder text-blue-400';
             const ext = filename.split('.').pop().toLowerCase();
-            if (['mp4','mov','mkv','avi'].includes(ext)) return 'fa-solid fa-file-video text-indigo-400';
-            if (['png','jpg','jpeg','fig','gif'].includes(ext)) return 'fa-solid fa-file-image text-emerald-400';
+            if (['mp4','mov','mkv','avi','webm','3gp'].includes(ext)) return 'fa-solid fa-file-video text-indigo-400';
+            if (['png','jpg','jpeg','fig','gif','webp','heic','heif','tiff','bmp'].includes(ext)) return 'fa-solid fa-file-image text-emerald-400';
             if (['zip','tar','gz','iso','rar'].includes(ext)) return 'fa-solid fa-file-zipper text-amber-400';
             if (['pdf'].includes(ext)) return 'fa-solid fa-file-pdf text-red-400';
             return 'fa-solid fa-file-lines text-blue-400';
+        }
+
+        function checkCanHaveThumbnail(item) {
+            if (!item.dbId) return false;
+            const mime = item.mimeType || '';
+            if (mime.startsWith('image/') || mime.startsWith('video/') || mime === 'application/pdf') {
+                return true;
+            }
+            const name = (item.name || '').toLowerCase();
+            const ext = name.split('.').pop();
+            const imageExtensions = ['png','jpg','jpeg','fig','gif','webp','heic','heif','tiff','bmp'];
+            const videoExtensions = ['mp4','mov','mkv','avi','webm','3gp'];
+            if (imageExtensions.includes(ext) || videoExtensions.includes(ext) || ext === 'pdf') {
+                return true;
+            }
+            return false;
         }
 
         function handleThumbnailError(imgEl, iconClass, mode = 'grid') {
