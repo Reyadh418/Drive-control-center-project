@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings | Drive Mesh</title>
+    <title>Settings | Drive Mess</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,54 +11,68 @@
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#0b0f19',
-                        darksurface: '#151a28',
-                        darkborder: '#232a3f'
+                        darkbg: '#0b0c0b',
+                        darksurface: '#121412',
+                        darkborder: '#222622',
+                        blue: {
+                            50: '#f4f6f4',
+                            100: '#e5ebe5',
+                            200: '#d5e0d5',
+                            300: '#b7ccb7',
+                            400: '#8f9e8b',  // Sage
+                            500: '#8f9e8b',  // Sage
+                            600: '#798a75',  // Sage hover
+                            700: '#647361',
+                            800: '#505d4e',
+                            900: '#3d473b',
+                            950: '#1f251f'
+                        }
                     },
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        sans: ['Instrument Sans', 'system-ui', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'Georgia', 'serif']
                     }
                 }
             }
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/editorial.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f1f5f9; }
+        body { font-family: 'Instrument Sans', sans-serif; background-color: #0b0c0b; color: #e3e7e3; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden antialiased selection:bg-blue-500 selection:text-white">
+<body class="flex h-screen overflow-hidden antialiased selection:bg-blue-500/30 selection:text-white font-sans-editorial editorial-grid">
     <!-- Sidebar -->
     <aside class="w-64 bg-darksurface border-r border-darkborder flex flex-col transition-all duration-300 z-20">
         <div class="h-16 flex items-center px-6 border-b border-darkborder">
-            <div class="w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20">
-                <i class="fa-solid fa-cloud text-white text-sm"></i>
+            <div class="w-8 h-8 rounded bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mr-3">
+                <i class="fa-solid fa-cloud text-blue-400 text-sm"></i>
             </div>
-            <span class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Drive Mesh</span>
+            <span class="text-xl font-bold tracking-wide text-blue-400 font-serif-editorial italic">Drive Mess</span>
         </div>
-        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
-            <a href="/index.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+        <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto scrollbar-hide">
+            <a href="/index.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
             </a>
-            <a href="/fileview.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+            <a href="/fileview.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-folder-tree w-5 text-center"></i> All Files
             </a>
-            <a href="/accounts.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+            <a href="/accounts.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-users w-5 text-center"></i> Accounts
             </a>
-            <a href="/settings.html" class="flex items-center gap-3 px-3 py-2.5 bg-blue-500/10 text-blue-400 rounded-lg font-medium transition-colors">
+            <a href="/settings.html" class="flex items-center gap-3 px-3 py-2.5 bg-blue-500/10 text-blue-400 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-gear w-5 text-center"></i> Settings
             </a>
         </nav>
         <div class="p-4 border-t border-darkborder">
-            <div class="bg-blue-900/20 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-200">
-                <div class="flex border-b border-blue-500/20 pb-2 mb-2 font-semibold items-center gap-2 text-blue-400">
-                    <i class="fa-solid fa-shield-halved"></i> Privacy First
+            <div class="bg-blue-500/5 border border-blue-500/10 rounded-lg p-3 text-xs text-slate-400">
+                <div class="flex border-b border-darkborder pb-1.5 mb-1.5 font-semibold items-center gap-2 text-blue-400">
+                    <i class="fa-solid fa-shield-halved text-xs"></i> Local Archive
                 </div>
-                Running locally. Total control.
+                Running locally. Zero tracking.
             </div>
         </div>
     </aside>
@@ -84,74 +98,74 @@
 
         <!-- Settings Content -->
         <div class="flex-1 overflow-y-auto p-8 space-y-6">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight text-white">System Settings</h1>
-                <p class="text-sm text-slate-400 mt-1">Review the local application parameters and integration configuration values.</p>
+            <div class="border-b border-darkborder pb-4">
+                <h1 class="text-3xl font-bold font-serif-editorial italic text-slate-100">System Parameters</h1>
+                <p class="text-xs text-slate-500 mt-1.5 font-sans-editorial">Review localized parameters, security attributes, and active metadata caches.</p>
             </div>
 
             <section class="max-w-4xl space-y-6">
                 <!-- Server Status -->
-                <div class="bg-darksurface border border-darkborder rounded-2xl p-6 space-y-4">
-                    <h3 class="text-md font-semibold text-slate-200 flex items-center gap-2 border-b border-darkborder pb-3">
-                        <i class="fa-solid fa-heart-pulse text-emerald-400 animate-pulse"></i> Application Status
+                <div class="editorial-card rounded-xl p-6 space-y-4">
+                    <h3 class="text-xs uppercase tracking-wider font-semibold text-slate-400 flex items-center gap-2 border-b border-darkborder pb-3 font-sans-editorial">
+                        <i class="fa-solid fa-heart-pulse text-emerald-500 animate-pulse"></i> Application Status
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm" id="health-grid">
-                        <div class="bg-darkbg p-4 rounded-xl border border-darkborder">
-                            <span class="text-slate-500 text-xs block mb-1">Server API status</span>
-                            <span class="font-semibold text-emerald-400 flex items-center gap-1.5"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span>Running (Healthy)</span>
+                        <div class="bg-darkbg p-4 rounded-lg border border-darkborder">
+                            <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1">Server API status</span>
+                            <span class="font-semibold text-emerald-400 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Running (Healthy)</span>
                         </div>
-                        <div class="bg-darkbg p-4 rounded-xl border border-darkborder">
-                            <span class="text-slate-500 text-xs block mb-1">Local database status</span>
-                            <span class="font-semibold text-emerald-400 flex items-center gap-1.5" id="db-health-status"><span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>Connected</span>
+                        <div class="bg-darkbg p-4 rounded-lg border border-darkborder">
+                            <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1">Local database status</span>
+                            <span class="font-semibold text-emerald-400 flex items-center gap-1.5" id="db-health-status"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>Connected</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Parameters config -->
-                <div class="bg-darksurface border border-darkborder rounded-2xl p-6 space-y-4">
-                    <h3 class="text-md font-semibold text-slate-200 flex items-center gap-2 border-b border-darkborder pb-3">
+                <div class="editorial-card rounded-xl p-6 space-y-4">
+                    <h3 class="text-xs uppercase tracking-wider font-semibold text-slate-400 flex items-center gap-2 border-b border-darkborder pb-3 font-sans-editorial">
                         <i class="fa-solid fa-sliders text-blue-400"></i> Configuration Parameters
                     </h3>
-                    <div class="space-y-4 text-sm" id="config-params">
+                    <div class="space-y-4 text-sm font-sans-editorial" id="config-params">
                         <div>
-                            <span class="text-slate-500 text-xs block mb-1">Local Host URL</span>
+                            <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1.5">Local Host URL</span>
                             <div class="flex items-center gap-2">
-                                <input type="text" readonly id="cfg-app-url" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none">
-                                <button onclick="copyToClipboard('cfg-app-url')" class="px-3 py-2 bg-darkbg hover:bg-slate-800 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
+                                <input type="text" readonly id="cfg-app-url" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400">
+                                <button onclick="copyToClipboard('cfg-app-url')" class="px-3 py-2 bg-darkbg hover:bg-white/5 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
                             </div>
                         </div>
                         <div>
-                            <span class="text-slate-500 text-xs block mb-1">SQLite Database path</span>
+                            <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1.5">SQLite Database path</span>
                             <div class="flex items-center gap-2">
-                                <input type="text" readonly id="cfg-db-path" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none">
-                                <button onclick="copyToClipboard('cfg-db-path')" class="px-3 py-2 bg-darkbg hover:bg-slate-800 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
+                                <input type="text" readonly id="cfg-db-path" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400">
+                                <button onclick="copyToClipboard('cfg-db-path')" class="px-3 py-2 bg-darkbg hover:bg-white/5 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
                             </div>
                         </div>
                         <div>
-                            <span class="text-slate-500 text-xs block mb-1">Google OAuth Redirect URI</span>
+                            <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1.5">Google OAuth Redirect URI</span>
                             <div class="flex items-center gap-2">
-                                <input type="text" readonly id="cfg-redirect-uri" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none">
-                                <button onclick="copyToClipboard('cfg-redirect-uri')" class="px-3 py-2 bg-darkbg hover:bg-slate-800 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
+                                <input type="text" readonly id="cfg-redirect-uri" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400">
+                                <button onclick="copyToClipboard('cfg-redirect-uri')" class="px-3 py-2 bg-darkbg hover:bg-white/5 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
                             </div>
                         </div>
                         <div>
-                            <span class="text-slate-500 text-xs block mb-1">Google OAuth Client ID</span>
+                            <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1.5">Google OAuth Client ID</span>
                             <div class="flex items-center gap-2">
-                                <input type="text" readonly id="cfg-client-id" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none">
-                                <button onclick="copyToClipboard('cfg-client-id')" class="px-3 py-2 bg-darkbg hover:bg-slate-800 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
+                                <input type="text" readonly id="cfg-client-id" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400">
+                                <button onclick="copyToClipboard('cfg-client-id')" class="px-3 py-2 bg-darkbg hover:bg-white/5 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Info widget -->
-                <div class="bg-blue-950/20 border border-blue-500/20 rounded-2xl p-5 flex gap-4 text-xs text-blue-200">
-                    <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl shrink-0 h-10 w-10 flex items-center justify-center">
+                <div class="bg-blue-500/5 border border-blue-500/10 rounded-xl p-5 flex gap-4 text-xs text-slate-400">
+                    <div class="p-3 bg-blue-500/10 text-blue-400 rounded-lg shrink-0 h-10 w-10 flex items-center justify-center">
                         <i class="fa-solid fa-circle-info text-lg"></i>
                     </div>
                     <div>
-                        <h4 class="font-semibold text-blue-300 text-sm mb-1">Local & Private Security</h4>
-                        <p class="leading-relaxed">All configurations are stored locally on your device in the project root directory inside standard JSON secrets. The index values are saved in your local SQLite file. None of your OAuth keys, credentials, or synchronized metadata are uploaded to external search engines or cloud proxies.</p>
+                        <h4 class="font-semibold text-blue-400 text-sm mb-1 font-sans-editorial">Local & Private Security</h4>
+                        <p class="leading-relaxed font-sans-editorial">All configurations are stored locally on your device in the project root directory inside standard JSON secrets. The index values are saved in your local SQLite file. None of your OAuth keys, credentials, or synchronized metadata are uploaded to external search engines or cloud proxies.</p>
                     </div>
                 </div>
             </section>

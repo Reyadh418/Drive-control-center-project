@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accounts | Drive Mesh</title>
+    <title>Accounts | Drive Mess</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,54 +11,68 @@
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#0b0f19',
-                        darksurface: '#151a28',
-                        darkborder: '#232a3f'
+                        darkbg: '#0b0c0b',
+                        darksurface: '#121412',
+                        darkborder: '#222622',
+                        blue: {
+                            50: '#f4f6f4',
+                            100: '#e5ebe5',
+                            200: '#d5e0d5',
+                            300: '#b7ccb7',
+                            400: '#8f9e8b',  // Sage
+                            500: '#8f9e8b',  // Sage
+                            600: '#798a75',  // Sage hover
+                            700: '#647361',
+                            800: '#505d4e',
+                            900: '#3d473b',
+                            950: '#1f251f'
+                        }
                     },
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        sans: ['Instrument Sans', 'system-ui', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'Georgia', 'serif']
                     }
                 }
             }
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/editorial.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f1f5f9; }
+        body { font-family: 'Instrument Sans', sans-serif; background-color: #0b0c0b; color: #e3e7e3; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden antialiased selection:bg-blue-500 selection:text-white">
+<body class="flex h-screen overflow-hidden antialiased selection:bg-blue-500/30 selection:text-white font-sans-editorial editorial-grid">
     <!-- Sidebar -->
     <aside class="w-64 bg-darksurface border-r border-darkborder flex flex-col transition-all duration-300 z-20">
         <div class="h-16 flex items-center px-6 border-b border-darkborder">
-            <div class="w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20">
-                <i class="fa-solid fa-cloud text-white text-sm"></i>
+            <div class="w-8 h-8 rounded bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mr-3">
+                <i class="fa-solid fa-cloud text-blue-400 text-sm"></i>
             </div>
-            <span class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Drive Mesh</span>
+            <span class="text-xl font-bold tracking-wide text-blue-400 font-serif-editorial italic">Drive Mess</span>
         </div>
-        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
-            <a href="/index.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+        <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto scrollbar-hide">
+            <a href="/index.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
             </a>
-            <a href="/fileview.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+            <a href="/fileview.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-folder-tree w-5 text-center"></i> All Files
             </a>
-            <a href="/accounts.html" class="flex items-center gap-3 px-3 py-2.5 bg-blue-500/10 text-blue-400 rounded-lg font-medium transition-colors">
+            <a href="/accounts.html" class="flex items-center gap-3 px-3 py-2.5 bg-blue-500/10 text-blue-400 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-users w-5 text-center"></i> Accounts
             </a>
-            <a href="/settings.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+            <a href="/settings.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-gear w-5 text-center"></i> Settings
             </a>
         </nav>
         <div class="p-4 border-t border-darkborder">
-            <div class="bg-blue-900/20 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-200">
-                <div class="flex border-b border-blue-500/20 pb-2 mb-2 font-semibold items-center gap-2 text-blue-400">
-                    <i class="fa-solid fa-shield-halved"></i> Privacy First
+            <div class="bg-blue-500/5 border border-blue-500/10 rounded-lg p-3 text-xs text-slate-400">
+                <div class="flex border-b border-darkborder pb-1.5 mb-1.5 font-semibold items-center gap-2 text-blue-400">
+                    <i class="fa-solid fa-shield-halved text-xs"></i> Local Archive
                 </div>
-                Running locally. Total control.
+                Running locally. Zero tracking.
             </div>
         </div>
     </aside>
@@ -84,13 +98,13 @@
 
         <!-- Accounts Grid Content -->
         <div class="flex-1 overflow-y-auto p-8 space-y-6">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between border-b border-darkborder pb-4">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-white">Google Drive Accounts</h1>
-                    <p class="text-sm text-slate-400 mt-1">Manage up to 5 connected accounts and verify cloud synchronization status.</p>
+                    <h1 class="text-3xl font-bold font-serif-editorial italic text-slate-100">Accounts Registry</h1>
+                    <p class="text-xs text-slate-500 mt-1.5 font-sans-editorial">Manage connected Google Drive catalogs and view cloud synchronization indexes.</p>
                 </div>
-                <button id="btn-add-account" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors shadow-lg shadow-blue-500/20 flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i> Add Account
+                <button id="btn-add-account" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold uppercase tracking-wider rounded-lg transition-all border border-blue-400/20 flex items-center gap-2">
+                    <i class="fa-solid fa-plus text-[10px]"></i> Add Account
                 </button>
             </div>
 
@@ -102,23 +116,23 @@
     </main>
 
     <!-- Add Account Modal -->
-    <div id="add-account-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-darksurface border border-darkborder rounded-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
-            <div class="flex justify-between items-center mb-5">
-                <h3 class="text-lg font-semibold text-white">Link New Drive</h3>
+    <div id="add-account-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-darksurface border border-darkborder rounded-xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
+            <div class="flex justify-between items-center mb-5 border-b border-darkborder pb-3">
+                <h3 class="text-sm uppercase tracking-wider font-semibold text-white">Link New Drive</h3>
                 <button onclick="closeAddAccountModal()" class="text-slate-400 hover:text-white transition-colors">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
             <form id="add-account-form" action="/accounts" method="POST">
                 <div class="mb-4">
-                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Account Label</label>
-                    <input type="text" name="label" required placeholder="e.g. Work Drive, Personal" class="w-full bg-darkbg border border-darkborder text-sm rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200 transition-all">
+                    <label class="block text-[10px] font-medium text-slate-400 mb-2 uppercase tracking-widest">Account Label</label>
+                    <input type="text" name="label" required placeholder="e.g. Work Drive, Personal" class="w-full bg-darkbg border border-darkborder text-sm rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 text-slate-200 transition-all font-sans-editorial">
                 </div>
                 <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" onclick="closeAddAccountModal()" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/20">
-                        Continue to Google <i class="fa-solid fa-arrow-right ml-1"></i>
+                    <button type="button" onclick="closeAddAccountModal()" class="px-4 py-2 text-xs uppercase tracking-wider font-semibold text-slate-400 hover:text-white transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-xs uppercase tracking-wider font-semibold rounded-lg transition-all border border-blue-400/20">
+                        Continue to Google <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
                     </button>
                 </div>
             </form>
@@ -126,15 +140,15 @@
     </div>
 
     <!-- Confirmation Modal -->
-    <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-darksurface border border-darkborder rounded-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
+    <div id="confirm-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-darksurface border border-darkborder rounded-xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
             <div class="mb-4">
-                <h3 id="confirm-title" class="text-lg font-semibold text-white">Confirm</h3>
-                <p id="confirm-message" class="text-sm text-slate-400 mt-2">Are you sure?</p>
+                <h3 id="confirm-title" class="text-sm uppercase tracking-wider font-semibold text-white">Confirm</h3>
+                <p id="confirm-message" class="text-sm text-slate-400 mt-3 font-sans-editorial">Are you sure?</p>
             </div>
             <div class="flex justify-end gap-3 mt-6">
-                <button id="confirm-cancel" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Cancel</button>
-                <button id="confirm-ok" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-medium rounded-lg transition-colors shadow-lg">Yes, unlink</button>
+                <button id="confirm-cancel" class="px-4 py-2 text-xs uppercase tracking-wider font-semibold text-slate-400 hover:text-white transition-colors">Cancel</button>
+                <button id="confirm-ok" class="px-4 py-2 bg-red-950/20 hover:bg-red-900/30 text-red-400 border border-red-500/20 text-xs uppercase tracking-wider font-semibold rounded-lg transition-colors">Yes, unlink</button>
             </div>
         </div>
     </div>
@@ -243,47 +257,47 @@
                     let actionButtons = '';
                     if (acc.sync_state === 'syncing') {
                         actionButtons = `
-                            <button disabled class="px-3 py-1.5 text-xs font-semibold text-slate-400 bg-slate-800 border border-slate-700 rounded-lg cursor-not-allowed flex items-center gap-1">
+                            <button disabled class="px-3 py-1.5 text-xs font-semibold text-slate-500 bg-white/5 border border-darkborder rounded-lg cursor-not-allowed flex items-center gap-1">
                                 <i class="fa-solid fa-spinner animate-spin"></i> Syncing
                             </button>
-                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 rounded-lg transition-colors flex items-center gap-1">
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-red-400 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 rounded-lg transition-colors flex items-center gap-1">
                                 <i class="fa-solid fa-link-slash"></i> Unlink
                             </button>
-                            <a href="/fileview.html?accountId=${acc.id}" class="px-3 py-1.5 text-xs font-semibold text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors inline-flex items-center gap-1">
+                            <a href="/fileview.html?accountId=${acc.id}" class="px-3 py-1.5 text-xs font-semibold text-slate-200 bg-darkbg hover:bg-white/5 border border-darkborder rounded-lg transition-colors inline-flex items-center gap-1">
                                 Browse <i class="fa-solid fa-arrow-right"></i>
                             </a>
                         `;
                     } else if (acc.sync_state === 'error' || acc.sync_state === 'needs-auth') {
                         actionButtons = `
-                            <button onclick="relinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-lg shadow-blue-500/10">
+                            <button onclick="relinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-colors flex items-center gap-1">
                                 <i class="fa-solid fa-key"></i> Re-link
                             </button>
-                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors flex items-center gap-1">
+                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-colors flex items-center gap-1">
                                 <i class="fa-solid fa-arrows-rotate"></i> Sync
                             </button>
-                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 rounded-lg transition-colors flex items-center gap-1">
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-red-400 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 rounded-lg transition-colors flex items-center gap-1">
                                 <i class="fa-solid fa-link-slash"></i> Unlink
                             </button>
                         `;
                     } else {
                         actionButtons = `
-                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors flex items-center gap-1">
+                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-colors flex items-center gap-1">
                                 <i class="fa-solid fa-arrows-rotate"></i> Sync
                             </button>
-                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 rounded-lg transition-colors flex items-center gap-1">
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-red-400 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 rounded-lg transition-colors flex items-center gap-1">
                                 <i class="fa-solid fa-link-slash"></i> Unlink
                             </button>
-                            <a href="/fileview.html?accountId=${acc.id}" class="px-3 py-1.5 text-xs font-semibold text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors inline-flex items-center gap-1">
+                            <a href="/fileview.html?accountId=${acc.id}" class="px-3 py-1.5 text-xs font-semibold text-slate-200 bg-darkbg hover:bg-white/5 border border-darkborder rounded-lg transition-colors inline-flex items-center gap-1">
                                 Browse <i class="fa-solid fa-arrow-right"></i>
                             </a>
                         `;
                     }
 
                     grid.insertAdjacentHTML('beforeend', `
-                        <div class="bg-darksurface border border-darkborder rounded-2xl p-6 hover:border-slate-700 transition-colors group relative flex flex-col justify-between">
+                        <div class="editorial-card rounded-xl p-6 transition-colors group relative flex flex-col justify-between">
                             <div>
                                 <div class="flex justify-between items-start mb-5 gap-2">
-                                    <div class="flex items-center gap-3 min-w-0">
+                                    <div class="flex items-center gap-3 min-w-0 font-sans-editorial">
                                         ${avatar}
                                         <div class="min-w-0">
                                             <h4 class="text-sm font-semibold text-slate-200 truncate" title="${acc.display_name || acc.label}">${acc.display_name || acc.label}</h4>
@@ -296,16 +310,16 @@
                                 </div>
                                 
                                 <div class="mb-5 space-y-2">
-                                    <div class="flex justify-between text-xs">
+                                    <div class="flex justify-between text-xs font-sans-editorial">
                                         <span class="text-slate-300 font-medium">${formatBytes(used)} <span class="text-slate-500 font-normal">used</span></span>
                                         <span class="text-slate-400 font-semibold">${formatBytes(total)} <span class="text-slate-600 font-normal">total</span></span>
                                     </div>
-                                    <div class="w-full bg-darkbg rounded-full h-2 overflow-hidden border border-darkborder">
-                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-700 shadow-lg shadow-blue-500/20" style="width: ${Math.min(ratio, 100)}%"></div>
+                                    <div class="w-full bg-darkbg rounded-full h-1 overflow-hidden border border-darkborder">
+                                        <div class="bg-blue-400 h-1 rounded-full transition-all duration-700" style="width: ${Math.min(ratio, 100)}%"></div>
                                     </div>
-                                    <div class="text-[11px] text-slate-500 flex justify-between pt-1">
-                                        <span>Quota Ratio: ${ratio}%</span>
-                                        <span>Last sync: ${formatDate(acc.last_synced_at)}</span>
+                                    <div class="text-[10px] uppercase tracking-wider text-slate-500 flex justify-between pt-1.5 font-sans-editorial">
+                                        <span>Ratio: ${ratio}%</span>
+                                        <span>Synced: ${formatDate(acc.last_synced_at)}</span>
                                     </div>
                                 </div>
                             </div>

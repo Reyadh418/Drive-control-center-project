@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Explorer | Drive Mesh</title>
+    <title>File Explorer | Drive Mess</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,21 +11,35 @@
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#0b0f19',
-                        darksurface: '#151a28',
-                        darkborder: '#232a3f'
+                        darkbg: '#0b0c0b',
+                        darksurface: '#121412',
+                        darkborder: '#222622',
+                        blue: {
+                            50: '#f4f6f4',
+                            100: '#e5ebe5',
+                            200: '#d5e0d5',
+                            300: '#b7ccb7',
+                            400: '#8f9e8b',  // Sage
+                            500: '#8f9e8b',  // Sage
+                            600: '#798a75',  // Sage hover
+                            700: '#647361',
+                            800: '#505d4e',
+                            900: '#3d473b',
+                            950: '#1f251f'
+                        }
                     },
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        sans: ['Instrument Sans', 'system-ui', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'Georgia', 'serif']
                     }
                 }
             }
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/editorial.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f1f5f9; }
+        body { font-family: 'Instrument Sans', sans-serif; background-color: #0b0c0b; color: #e3e7e3; }
         
         /* Premium custom scrollbars */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -39,21 +53,21 @@
         /* Folder Tree Styling */
         .tree-chevron { transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); font-size: 0.75rem; width: 20px; text-align: center; }
         .tree-chevron.open { transform: rotate(90deg); }
-        .tree-node { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.6rem; border-radius: 0.5rem; cursor: pointer; color: #cbd5e1; user-select: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); margin-bottom: 2px; }
-        .tree-node:hover { background-color: #1e293b; color: #f8fafc; }
-        .tree-node.active { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff !important; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
-        .tree-node.active .tree-chevron, .tree-node.active i { color: #ffffff !important; }
-        .tree-children { display: none; padding-left: 0.5rem; border-left: 1px solid #1e293b; margin-left: 0.8rem; margin-top: 2px; }
+        .tree-node { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.6rem; border-radius: 0.25rem; cursor: pointer; color: #a4aaa4; user-select: none; transition: all 0.2s ease; margin-bottom: 2px; border: 1px solid transparent; }
+        .tree-node:hover { background-color: #161816; color: #e3e7e3; border-color: #222622; }
+        .tree-node.active { background: #222622; color: #8f9e8b !important; border-color: #8f9e8b; font-weight: 500; }
+        .tree-node.active .tree-chevron, .tree-node.active i { color: #8f9e8b !important; }
+        .tree-children { display: none; padding-left: 0.5rem; border-left: 1px solid #222622; margin-left: 0.8rem; margin-top: 2px; }
         .tree-children.open { display: block; }
 
         /* Premium resizer handles */
         .resizer-bar {
             position: relative;
-            background-color: #1f293d;
+            background-color: #222622;
             transition: background-color 0.2s;
         }
         .resizer-bar:hover, .resizer-bar.active {
-            background-color: #3b82f6;
+            background-color: #8f9e8b;
         }
         .resizer-bar::after {
             content: '';
@@ -63,7 +77,7 @@
             transform: translate(-50%, -50%);
             width: 2px;
             height: 16px;
-            background-color: #475569;
+            background-color: #435448;
             border-radius: 1px;
             opacity: 0;
             transition: opacity 0.2s;
@@ -81,12 +95,14 @@
         /* File Card Hover Effects */
         .file-card {
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            background-color: #121412;
+            border: 1px solid #222622;
         }
         .file-card:hover {
-            transform: translateY(-2px);
-            border-color: #3b82f6;
-            box-shadow: 0 10px 20px -10px rgba(59, 130, 246, 0.2);
-            background-color: #1a2235;
+            transform: translateY(-1px);
+            border-color: #8f9e8b;
+            background-color: #161816;
+            box-shadow: 0 4px 20px -6px rgba(143, 158, 139, 0.15);
         }
 
         /* Smooth Entry Animation */
@@ -99,35 +115,35 @@
         }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden antialiased selection:bg-blue-500 selection:text-white">
+<body class="h-screen flex overflow-hidden antialiased selection:bg-blue-500/30 selection:text-white font-sans-editorial editorial-grid">
     <!-- Primary Sidebar -->
     <aside class="w-64 bg-darksurface border-r border-darkborder flex flex-col transition-all duration-300 z-20 shrink-0">
         <div class="h-16 flex items-center px-6 border-b border-darkborder">
-            <div class="w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20">
-                <i class="fa-solid fa-cloud text-white text-sm"></i>
+            <div class="w-8 h-8 rounded bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mr-3">
+                <i class="fa-solid fa-cloud text-blue-400 text-sm"></i>
             </div>
-            <span class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Drive Mesh</span>
+            <span class="text-xl font-bold tracking-wide text-blue-400 font-serif-editorial italic">Drive Mess</span>
         </div>
-        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
-            <a href="/index.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+        <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto scrollbar-hide">
+            <a href="/index.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
             </a>
-            <a href="/fileview.html" class="flex items-center gap-3 px-3 py-2.5 bg-blue-500/10 text-blue-400 rounded-lg font-medium transition-colors">
+            <a href="/fileview.html" class="flex items-center gap-3 px-3 py-2.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-folder-tree w-5 text-center"></i> All Files
             </a>
-            <a href="/accounts.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+            <a href="/accounts.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-users w-5 text-center"></i> Accounts
             </a>
-            <a href="/settings.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-colors">
+            <a href="/settings.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-gear w-5 text-center"></i> Settings
             </a>
         </nav>
         <div class="p-4 border-t border-darkborder">
-            <div class="bg-blue-900/20 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-200">
-                <div class="flex border-b border-blue-500/20 pb-2 mb-2 font-semibold items-center gap-2 text-blue-400">
-                    <i class="fa-solid fa-shield-halved"></i> Privacy First
+            <div class="bg-blue-500/5 border border-blue-500/10 rounded-lg p-3 text-xs text-slate-400">
+                <div class="flex border-b border-darkborder pb-1.5 mb-1.5 font-semibold items-center gap-2 text-blue-400">
+                    <i class="fa-solid fa-shield-halved text-xs"></i> Local Archive
                 </div>
-                Running locally. Total control.
+                Running locally. Zero tracking.
             </div>
         </div>
     </aside>
@@ -214,22 +230,22 @@
             <div id="resizer-right" class="w-1.5 resizer-bar cursor-col-resize shrink-0 z-10 hidden"></div>
 
             <!-- Right Sidebar: Details Panel -->
-            <aside id="details-panel" class="bg-darksurface flex flex-col shrink-0 hidden resize-transition" style="width: 0px; opacity: 0; overflow: hidden;">
+            <aside id="details-panel" class="bg-darksurface border-l border-darkborder flex flex-col shrink-0 hidden resize-transition" style="width: 0px; opacity: 0; overflow: hidden;">
                 <div class="w-80 h-full flex flex-col shrink-0 overflow-y-auto">
                     <div class="p-4 border-b border-darkborder flex items-center justify-between">
-                        <h3 class="font-semibold text-sm text-slate-300">File Details</h3>
+                        <h3 class="text-xs uppercase tracking-wider font-semibold text-slate-400">File Details</h3>
                         <button class="text-slate-400 hover:text-white" id="btn-close-details"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     
                     <div class="p-6 flex flex-col items-center border-b border-darkborder text-center">
-                        <div class="w-16 h-16 rounded-2xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4 text-slate-400" id="detail-icon">
+                        <div class="w-16 h-16 rounded-xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4 text-slate-400" id="detail-icon">
                             <i class="fa-solid fa-file"></i>
                         </div>
                         <h4 class="text-white font-semibold break-all w-full leading-tight mb-2 text-sm" id="detail-name">-</h4>
                         <div id="detail-badge" class="mt-1"></div>
                     </div>
 
-                    <div class="p-6 flex-1 space-y-4 text-xs">
+                    <div class="p-6 flex-1 space-y-4 text-xs font-sans-editorial">
                         <div>
                             <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Type</p>
                             <p class="text-slate-300 font-medium" id="detail-type">-</p>
@@ -244,16 +260,16 @@
                         </div>
                         
                         <div class="pt-4 mt-6 border-t border-darkborder space-y-2">
-                            <a href="#" target="_blank" id="btn-detail-download" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold shadow-sm text-center">
+                            <a href="#" target="_blank" id="btn-detail-download" class="w-full py-2 bg-blue-50 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold shadow-sm text-center text-xs uppercase tracking-wider">
                                 <i class="fa-solid fa-cloud-arrow-down"></i> Download File
                             </a>
-                            <button id="btn-detail-transfer" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold border border-darkborder">
+                            <button id="btn-detail-transfer" class="w-full py-2 bg-white/5 border border-darkborder hover:bg-white/10 text-slate-200 hover:text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold text-xs uppercase tracking-wider">
                                 <i class="fa-solid fa-shuffle"></i> Copy or Move
                             </button>
-                            <button id="btn-detail-delete" class="w-full py-2 bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-red-300 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold">
+                            <button id="btn-detail-delete" class="w-full py-2 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-red-300 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold text-xs uppercase tracking-wider">
                                 <i class="fa-solid fa-trash-can"></i> Delete File
                             </button>
-                            <a href="#" target="_blank" id="btn-drive-link" class="w-full py-2 bg-darkbg hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-darkborder font-semibold">
+                            <a href="#" target="_blank" id="btn-drive-link" class="w-full py-2 bg-darkbg hover:bg-white/5 text-slate-400 hover:text-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-darkborder font-semibold text-xs uppercase tracking-wider">
                                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Drive
                             </a>
                         </div>
@@ -264,24 +280,24 @@
     </main>
 
     <!-- Transfer Modal -->
-    <div id="transfer-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-darksurface border border-darkborder rounded-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
+    <div id="transfer-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-darksurface border border-darkborder rounded-xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
             <div class="flex justify-between items-center mb-5 border-b border-darkborder pb-3">
-                <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                <h3 class="text-sm uppercase tracking-wider font-semibold text-white flex items-center gap-2">
                     <i class="fa-solid fa-shuffle text-blue-400"></i> Cross-Account Transfer
                 </h3>
                 <button onclick="closeTransferModal()" class="text-slate-400 hover:text-white transition-colors">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <div class="space-y-4 text-sm">
+            <div class="space-y-4 text-sm font-sans-editorial">
                 <div>
-                    <span class="text-slate-400 text-xs block mb-1">Source File</span>
-                    <div id="transfer-source-name" class="bg-darkbg p-2 rounded-lg text-slate-300 font-medium truncate">Name</div>
+                    <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1">Source File</span>
+                    <div id="transfer-source-name" class="bg-darkbg p-2.5 rounded-lg border border-darkborder text-slate-300 font-medium truncate">Name</div>
                 </div>
                 
                 <div>
-                    <span class="text-slate-400 text-xs block mb-2">Transfer Mode</span>
+                    <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-2">Transfer Mode</span>
                     <div class="flex gap-4">
                         <label class="flex items-center gap-2 text-slate-300 cursor-pointer">
                             <input type="radio" name="transfer-mode" value="copy" checked class="text-blue-500"> Copy (Keep source file)
@@ -293,21 +309,21 @@
                 </div>
 
                 <div>
-                    <label class="text-slate-400 text-xs block mb-1">Target Account</label>
-                    <select id="transfer-target-account" class="w-full bg-darkbg border border-darkborder rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-slate-200">
+                    <label class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1">Target Account</label>
+                    <select id="transfer-target-account" class="w-full bg-darkbg border border-darkborder rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400 text-slate-200">
                         <option value="">Select target account...</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="text-slate-400 text-xs block mb-1">Target Folder ID <span class="text-slate-600">(Optional, defaults to Root)</span></label>
-                    <input type="text" id="transfer-target-folder" placeholder="Enter folder ID or leave blank" class="w-full bg-darkbg border border-darkborder rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-slate-200">
+                    <label class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1">Target Folder ID <span class="text-slate-600">(Optional, defaults to Root)</span></label>
+                    <input type="text" id="transfer-target-folder" placeholder="Enter folder ID or leave blank" class="w-full bg-darkbg border border-darkborder rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400 text-slate-200">
                 </div>
 
                 <div class="flex justify-end gap-3 mt-6">
-                    <button onclick="closeTransferModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors">Cancel</button>
-                    <button onclick="executeTransfer()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition-colors shadow-lg shadow-blue-500/20">
-                        Start Transfer <i class="fa-solid fa-arrow-right ml-1"></i>
+                    <button onclick="closeTransferModal()" class="px-4 py-2 text-xs uppercase tracking-wider font-semibold text-slate-400 hover:text-white transition-colors">Cancel</button>
+                    <button onclick="executeTransfer()" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-xs uppercase tracking-wider font-semibold rounded-lg transition-all border border-blue-400/20">
+                        Start Transfer <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
                     </button>
                 </div>
             </div>
@@ -315,15 +331,15 @@
     </div>
 
     <!-- Confirmation Modal -->
-    <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-darksurface border border-darkborder rounded-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
+    <div id="confirm-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-darksurface border border-darkborder rounded-xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
             <div class="mb-4">
-                <h3 id="confirm-title" class="text-lg font-semibold text-white">Confirm Action</h3>
-                <p id="confirm-message" class="text-sm text-slate-400 mt-2">Are you sure?</p>
+                <h3 id="confirm-title" class="text-sm uppercase tracking-wider font-semibold text-white">Confirm Action</h3>
+                <p id="confirm-message" class="text-sm text-slate-400 mt-3 font-sans-editorial">Are you sure?</p>
             </div>
             <div class="flex justify-end gap-3 mt-6">
-                <button id="confirm-cancel" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors">Cancel</button>
-                <button id="confirm-ok" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold rounded-lg transition-colors shadow-lg">Confirm</button>
+                <button id="confirm-cancel" class="px-4 py-2 text-xs uppercase tracking-wider font-semibold text-slate-400 hover:text-white transition-colors">Cancel</button>
+                <button id="confirm-ok" class="px-4 py-2 bg-blue-50 hover:bg-blue-600 text-white text-xs uppercase tracking-wider font-semibold rounded-lg transition-colors">Confirm</button>
             </div>
         </div>
     </div>
