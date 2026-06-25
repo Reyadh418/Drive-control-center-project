@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Drive Mess</title>
+    <title>Drive Mess Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -19,8 +19,8 @@
                             100: '#e5ebe5',
                             200: '#d5e0d5',
                             300: '#b7ccb7',
-                            400: '#8f9e8b',  // Sage
-                            500: '#8f9e8b',  // Sage
+                            400: '#8f9e8b',  // Sage Green
+                            500: '#8f9e8b',  // Sage Green
                             600: '#798a75',  // Sage hover
                             700: '#647361',
                             800: '#505d4e',
@@ -43,11 +43,65 @@
         body { font-family: 'Instrument Sans', sans-serif; background-color: #0b0c0b; color: #e3e7e3; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Folder Tree Styling */
+        .tree-chevron { transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); font-size: 0.75rem; width: 20px; text-align: center; }
+        .tree-chevron.open { transform: rotate(90deg); }
+        .tree-node { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.6rem; border-radius: 0.25rem; cursor: pointer; color: #a4aaa4; user-select: none; transition: all 0.2s ease; margin-bottom: 2px; border: 1px solid transparent; }
+        .tree-node:hover { background-color: #161816; color: #e3e7e3; border-color: #222622; }
+        .tree-node.active { background: #222622; color: #8f9e8b !important; border-color: #8f9e8b; font-weight: 500; }
+        .tree-node.active .tree-chevron, .tree-node.active i { color: #8f9e8b !important; }
+        .tree-children { display: none; padding-left: 0.5rem; border-left: 1px solid #222622; margin-left: 0.8rem; margin-top: 2px; }
+        .tree-children.open { display: block; }
+
+        /* resizer handle */
+        .resizer-bar {
+            position: relative;
+            background-color: #222622;
+            transition: background-color 0.2s;
+        }
+        .resizer-bar:hover, .resizer-bar.active {
+            background-color: #8f9e8b;
+        }
+        .resizer-bar::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 16px;
+            background-color: #435448;
+            border-radius: 1px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .resizer-bar:hover::after, .resizer-bar.active::after {
+            opacity: 1;
+            background-color: #ffffff;
+        }
+
+        .resize-transition {
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+        }
+
+        .file-card {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            background-color: #121412;
+            border: 1px solid #222622;
+        }
+        .file-card:hover {
+            transform: translateY(-1px);
+            border-color: #8f9e8b;
+            background-color: #161816;
+            box-shadow: 0 4px 20px -6px rgba(143, 158, 139, 0.15);
+        }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden antialiased selection:bg-blue-500/30 selection:text-white font-sans-editorial editorial-grid">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-darksurface border-r border-darkborder flex flex-col transition-all duration-300 z-20">
+    
+    <!-- Unified Sidebar -->
+    <aside class="w-64 bg-darksurface border-r border-darkborder flex flex-col transition-all duration-300 z-20 shrink-0">
         <div class="h-16 flex items-center px-6 border-b border-darkborder">
             <div class="w-8 h-8 rounded bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mr-3">
                 <i class="fa-solid fa-cloud text-blue-400 text-sm"></i>
@@ -55,16 +109,16 @@
             <span class="text-xl font-bold tracking-wide text-blue-400 font-serif-editorial italic">Drive Mess</span>
         </div>
         <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto scrollbar-hide">
-            <a href="/index.html" class="flex items-center gap-3 px-3 py-2.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg font-medium transition-all">
+            <a href="#dashboard" onclick="navigateTab('dashboard', event)" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
             </a>
-            <a href="/fileview.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
+            <a href="#explorer" onclick="navigateTab('explorer', event)" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-folder-tree w-5 text-center"></i> All Files
             </a>
-            <a href="/accounts.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
+            <a href="#accounts" onclick="navigateTab('accounts', event)" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-users w-5 text-center"></i> Accounts
             </a>
-            <a href="/settings.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
+            <a href="#settings" onclick="navigateTab('settings', event)" class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all">
                 <i class="fa-solid fa-gear w-5 text-center"></i> Settings
             </a>
         </nav>
@@ -78,150 +132,424 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
+    <!-- Main Content Workspace -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden bg-darkbg relative">
+        
         <!-- Global Header -->
-        <header class="h-16 flex items-center justify-between px-8 bg-darksurface/50 backdrop-blur-md border-b border-darkborder sticky top-0 z-10">
+        <header class="h-16 flex items-center justify-between px-8 bg-darksurface/50 backdrop-blur-md border-b border-darkborder sticky top-0 z-10 shrink-0">
             <div class="relative w-full max-w-md">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
-                <input id="global-search" type="text" placeholder="Search across all drives..." class="w-full bg-darkbg border border-darkborder text-sm rounded-full pl-10 pr-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200 placeholder-slate-500 transition-all">
+                <input id="global-search" type="text" placeholder="Search across all drives..." class="w-full bg-darkbg border border-darkborder text-sm rounded-full pl-10 pr-4 py-2 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 text-slate-200 placeholder-slate-500 transition-all font-sans-editorial">
             </div>
             <div class="flex items-center gap-4">
                 <button id="btn-notifications" class="relative p-2 text-slate-400 hover:text-white transition-colors">
                     <i class="fa-regular fa-bell"></i>
                     <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-darksurface"></span>
                 </button>
-                <div id="btn-profile" class="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border-2 border-darkborder flex items-center justify-center shadow-md cursor-pointer">
+                <div id="btn-profile" class="h-8 w-8 rounded-full bg-gradient-to-tr from-blue-400 to-emerald-500 border-2 border-darkborder flex items-center justify-center shadow-md cursor-pointer">
                     <span class="text-xs font-bold text-white">DM</span>
                 </div>
             </div>
         </header>
 
-        <!-- Dashboard Content -->
-        <div class="flex-1 overflow-y-auto p-8 space-y-6">
-            
-            <!-- Hero Metric Section -->
-            <section class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <!-- Combined Storage Widget -->
-                <div class="lg:col-span-2 editorial-card rounded-xl p-6 relative overflow-hidden flex flex-col justify-center">
-                    <div class="absolute -right-10 -top-10 opacity-[0.02] pointer-events-none">
-                        <i class="fa-solid fa-hard-drive text-[12rem] text-blue-400"></i>
-                    </div>
-                    <div class="relative z-10 flex justify-between items-end mb-4">
-                        <div>
-                            <h2 class="text-slate-500 text-[10px] font-semibold uppercase tracking-widest font-sans-editorial mb-1">Global Storage</h2>
-                            <div class="text-3xl font-bold flex items-baseline gap-1 mt-2">
-                                <span id="global-used" class="font-serif-editorial italic text-slate-100">0 GB</span>
-                                <span class="text-xs font-normal text-slate-500 font-sans-editorial">/ <span id="global-total">0 GB</span></span>
+        <!-- Dynamic Views Router -->
+        <div class="flex-1 flex flex-col overflow-hidden relative">
+
+            <!-- TAB 1: DASHBOARD -->
+            <div id="view-dashboard" class="view-panel flex-1 overflow-y-auto p-8 space-y-6 animate-editorial-in">
+                <!-- Hero Metric Section -->
+                <section class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Combined Storage Widget -->
+                    <div class="lg:col-span-2 editorial-card rounded-xl p-6 relative overflow-hidden flex flex-col justify-center">
+                        <div class="absolute -right-10 -top-10 opacity-[0.02] pointer-events-none">
+                            <i class="fa-solid fa-hard-drive text-[12rem] text-blue-400"></i>
+                        </div>
+                        <div class="relative z-10 flex justify-between items-end mb-4">
+                            <div>
+                                <h2 class="text-slate-500 text-[10px] font-semibold uppercase tracking-widest font-sans-editorial mb-1">Global Storage</h2>
+                                <div class="text-3xl font-bold flex items-baseline gap-1 mt-2">
+                                    <span id="global-used" class="font-serif-editorial italic text-slate-100">0 GB</span>
+                                    <span class="text-xs font-normal text-slate-500 font-sans-editorial">/ <span id="global-total">0 GB</span></span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span id="global-percent" class="text-2xl font-serif-editorial italic font-bold text-blue-400">0%</span>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <span id="global-percent" class="text-2xl font-serif-editorial italic font-bold text-blue-400">0%</span>
+                        <div class="relative z-10">
+                            <div class="w-full bg-darkbg rounded-full h-1 mb-2 overflow-hidden border border-darkborder">
+                                <div id="global-progress" class="bg-blue-400 h-1 rounded-full transition-all duration-700" style="width: 0%"></div>
+                            </div>
+                            <p class="text-[10px] text-slate-500 text-right uppercase tracking-wider">Aggregated storage</p>
                         </div>
                     </div>
-                    <div class="relative z-10">
-                        <div class="w-full bg-darkbg rounded-full h-1 mb-2 overflow-hidden border border-darkborder">
-                            <div id="global-progress" class="bg-blue-400 h-1 rounded-full transition-all duration-700" style="width: 0%"></div>
+
+                    <!-- Quick Stats -->
+                    <div class="editorial-card rounded-xl p-6 flex flex-col justify-center">
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="p-3 bg-blue-500/10 text-blue-400 rounded-lg"><i class="fa-solid fa-file-lines text-lg"></i></div>
+                            <h3 class="text-slate-500 text-[10px] font-semibold uppercase tracking-widest font-sans-editorial">Total Files</h3>
                         </div>
-                        <p class="text-[10px] text-slate-500 text-right uppercase tracking-wider">Aggregated storage</p>
+                        <div class="text-3xl font-bold font-serif-editorial italic text-slate-100" id="stat-files">0</div>
                     </div>
+
+                    <!-- Duplicates card trigger drawer -->
+                    <div onclick="openDrawer('duplicates')" class="editorial-card rounded-xl p-6 flex flex-col justify-center cursor-pointer group">
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="p-3 bg-blue-500/15 text-blue-400 rounded-lg"><i class="fa-solid fa-clone text-lg"></i></div>
+                            <h3 class="text-slate-500 text-[10px] font-semibold uppercase tracking-widest font-sans-editorial">Duplicates</h3>
+                        </div>
+                        <div class="text-3xl font-bold font-serif-editorial italic text-slate-100" id="stat-duplicates">0</div>
+                    </div>
+                </section>
+
+                <!-- Dynamic Account Summary Grid -->
+                <section>
+                    <div class="flex items-center justify-between mb-4 border-b border-darkborder pb-2">
+                        <h2 class="text-sm font-semibold flex items-center gap-2 uppercase tracking-wider text-slate-400 font-sans-editorial">
+                            Connected Accounts <span class="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 text-xs font-bold font-serif-editorial italic" id="account-count-badge">0</span>
+                        </h2>
+                        <button onclick="openDrawer('add-account')" class="text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-wider"><i class="fa-solid fa-plus mr-1"></i> Add Account</button>
+                    </div>
+                    <div id="account-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <div class="col-span-full py-8 text-center text-slate-500 text-sm italic">Loading dynamic accounts...</div>
+                    </div>
+                </section>
+
+                <!-- Analytics Metrics Section -->
+                <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-8">
+                    <!-- Storage Doughnut Chart -->
+                    <div class="editorial-card rounded-xl p-6 flex flex-col items-center">
+                        <h3 class="text-slate-400 font-semibold mb-6 flex items-center gap-2 w-full text-xs uppercase tracking-wider font-sans-editorial"><i class="fa-solid fa-chart-pie text-slate-500"></i> Storage Distribution</h3>
+                        <div class="relative h-48 w-full flex items-center justify-center">
+                            <canvas id="typeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Largest Files catalog -->
+                    <div class="lg:col-span-2 editorial-card rounded-xl flex flex-col overflow-hidden">
+                        <div class="p-5 border-b border-darkborder flex justify-between items-center bg-darksurface/30">
+                            <h3 class="text-slate-400 font-semibold flex items-center gap-2 text-xs uppercase tracking-wider font-sans-editorial"><i class="fa-solid fa-weight-hanging text-slate-500"></i> Largest Files Across Accounts</h3>
+                            <button onclick="navigateTab('explorer')" class="text-[10px] uppercase tracking-wider text-slate-500 hover:text-white transition-colors">See All</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-[10px] text-slate-500 uppercase tracking-widest border-b border-darkborder">
+                                    <tr>
+                                        <th class="px-5 py-3 font-semibold">File Name</th>
+                                        <th class="px-5 py-3 font-semibold text-right font-sans-editorial">Size</th>
+                                        <th class="px-5 py-3 font-semibold">Origin Account</th>
+                                        <th class="px-5 py-3 font-semibold text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="largest-files-body" class="divide-y divide-darkborder">
+                                    <tr><td colspan="4" class="px-5 py-6 text-center text-slate-500">Loading metrics...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB 2: EXPLORER (FILES) -->
+            <div id="view-explorer" class="view-panel flex-1 hidden overflow-hidden relative flex">
+                <!-- Left Sidebar: Folder Tree -->
+                <aside id="left-sidebar" class="w-64 bg-darksurface flex flex-col shrink-0 relative resize-transition" style="overflow-x: hidden;">
+                    <div class="flex-1 overflow-y-auto p-3 text-sm folder-tree" id="sidebar-tree">
+                        <div class="text-slate-500 text-xs text-center py-4">Loading accounts...</div>
+                    </div>
+                </aside>
+
+                <!-- Resizer Bar -->
+                <div id="resizer-left" class="w-1.5 resizer-bar cursor-col-resize shrink-0 z-10"></div>
+
+                <!-- Center Workspace Pane -->
+                <section class="flex-1 flex flex-col bg-darkbg overflow-hidden relative">
+                    <!-- View Headers -->
+                    <header class="h-14 px-6 border-b border-darkborder flex items-center justify-between shrink-0">
+                        <div class="flex items-center gap-2 text-sm text-slate-400 min-w-0" id="breadcrumb-trail">
+                            <span>Select an account folder...</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-3 shrink-0">
+                            <!-- File Upload Controls -->
+                            <div id="upload-container" class="hidden">
+                                <input type="file" id="file-upload-input" class="hidden">
+                                <button id="btn-upload" onclick="triggerFileUpload()" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-md shadow-blue-400/10">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload File
+                                </button>
+                            </div>
+
+                            <!-- Filter input -->
+                            <div class="relative items-center">
+                                <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                                <input type="text" id="local-search" placeholder="Filter current view..." 
+                                    class="w-48 bg-darksurface border border-darkborder rounded-lg py-1 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-400 transition-colors">
+                            </div>
+
+                            <!-- Grid/List switches -->
+                            <div class="flex items-center gap-1 bg-darksurface border border-darkborder rounded-lg p-0.5">
+                                <button class="w-6 h-6 rounded text-white bg-darkbg shadow items-center justify-center flex transition text-xs" id="btn-view-grid" title="Grid View">
+                                    <i class="fa-solid fa-border-all"></i>
+                                </button>
+                                <button class="w-6 h-6 rounded text-slate-400 hover:text-white items-center justify-center flex transition text-xs" id="btn-view-list" title="List View">
+                                    <i class="fa-solid fa-list-ul"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- File List Pane -->
+                    <div class="flex-1 overflow-y-auto p-6" id="file-pane">
+                        <div class="h-full flex flex-col items-center justify-center text-slate-500">
+                            <i class="fa-brands fa-google-drive text-4xl mb-4 text-slate-600"></i>
+                            <p>Select a folder from the sidebar tree to view its contents.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB 3: ACCOUNTS REGISTRY -->
+            <div id="view-accounts" class="view-panel flex-1 hidden overflow-y-auto p-8 space-y-6 animate-editorial-in">
+                <div class="flex items-center justify-between border-b border-darkborder pb-4">
+                    <div>
+                        <h1 class="text-3xl font-bold font-serif-editorial italic text-slate-100">Accounts Registry</h1>
+                        <p class="text-xs text-slate-500 mt-1.5 font-sans-editorial">Manage connected Google Drive catalogs and view cloud synchronization indexes.</p>
+                    </div>
+                    <button onclick="openDrawer('add-account')" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold uppercase tracking-wider rounded-lg transition-all border border-blue-400/20 flex items-center gap-2">
+                        <i class="fa-solid fa-plus text-[10px]"></i> Add Account
+                    </button>
                 </div>
 
-                <!-- Quick Stats -->
-                <div class="editorial-card rounded-xl p-6 flex flex-col justify-center">
-                    <div class="flex items-center gap-4 mb-3">
-                        <div class="p-3 bg-blue-500/10 text-blue-400 rounded-lg"><i class="fa-solid fa-file-lines text-lg"></i></div>
-                        <h3 class="text-slate-500 text-[10px] font-semibold uppercase tracking-widest font-sans-editorial">Total Files</h3>
-                    </div>
-                    <div class="text-3xl font-bold font-serif-editorial italic text-slate-100" id="stat-files">0</div>
+                <!-- Accounts list cards grid -->
+                <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="accounts-tab-grid">
+                    <div class="col-span-full py-8 text-center text-slate-500 text-sm italic">Loading accounts registry...</div>
+                </section>
+            </div>
+
+            <!-- TAB 4: SYSTEM PARAMETERS (SETTINGS) -->
+            <div id="view-settings" class="view-panel flex-1 hidden overflow-y-auto p-8 space-y-6 animate-editorial-in">
+                <div class="border-b border-darkborder pb-4">
+                    <h1 class="text-3xl font-bold font-serif-editorial italic text-slate-100">System Parameters</h1>
+                    <p class="text-xs text-slate-500 mt-1.5 font-sans-editorial">Review localized parameters, security attributes, and active database cache settings.</p>
                 </div>
 
-                <div onclick="openDuplicatesModal()" class="editorial-card rounded-xl p-6 flex flex-col justify-center cursor-pointer group">
-                    <div class="flex items-center gap-4 mb-3">
-                        <div class="p-3 bg-blue-500/15 text-blue-400 rounded-lg"><i class="fa-solid fa-clone text-lg"></i></div>
-                        <h3 class="text-slate-500 text-[10px] font-semibold uppercase tracking-widest font-sans-editorial">Duplicates</h3>
+                <section class="max-w-4xl space-y-6">
+                    <!-- Status Cards -->
+                    <div class="editorial-card rounded-xl p-6 space-y-4">
+                        <h3 class="text-xs uppercase tracking-wider font-semibold text-slate-400 flex items-center gap-2 border-b border-darkborder pb-3 font-sans-editorial">
+                            <i class="fa-solid fa-heart-pulse text-emerald-500 animate-pulse"></i> Application Status
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm" id="health-grid">
+                            <div class="bg-darkbg p-4 rounded-lg border border-darkborder">
+                                <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1">Server API status</span>
+                                <span class="font-semibold text-emerald-400 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Running (Healthy)</span>
+                            </div>
+                            <div class="bg-darkbg p-4 rounded-lg border border-darkborder">
+                                <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1">Local database status</span>
+                                <span class="font-semibold text-emerald-400 flex items-center gap-1.5" id="db-health-status"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>Connected</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-3xl font-bold font-serif-editorial italic text-slate-100" id="stat-duplicates">0</div>
-                </div>
-            </section>
 
-            <!-- Dynamic Account Grid -->
-            <section>
-                <div class="flex items-center justify-between mb-4 border-b border-darkborder pb-2">
-                    <h2 class="text-sm font-semibold flex items-center gap-2 uppercase tracking-wider text-slate-400 font-sans-editorial">
-                        Connected Accounts <span class="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 text-xs font-bold font-serif-editorial italic" id="account-count-badge">0</span>
-                    </h2>
-                    <button id="btn-add-account" class="text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-wider"><i class="fa-solid fa-plus mr-1"></i> Add Account</button>
-                </div>
-                <div id="account-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    <!-- Accounts injected dynamically via JS -->
-                    <div class="col-span-full py-8 text-center text-slate-500 text-sm italic">Loading dynamic accounts...</div>
-                </div>
-            </section>
+                    <!-- Config parameters -->
+                    <div class="editorial-card rounded-xl p-6 space-y-4">
+                        <h3 class="text-xs uppercase tracking-wider font-semibold text-slate-400 flex items-center gap-2 border-b border-darkborder pb-3 font-sans-editorial">
+                            <i class="fa-solid fa-sliders text-blue-400"></i> Configuration Parameters
+                        </h3>
+                        <div class="space-y-4 text-sm font-sans-editorial" id="config-params">
+                            <div>
+                                <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1.5">Local Host URL</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="text" readonly id="cfg-app-url" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400">
+                                    <button onclick="copyToClipboard('cfg-app-url')" class="px-3 py-2 bg-darkbg hover:bg-white/5 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1.5">SQLite Database path</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="text" readonly id="cfg-db-path" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400">
+                                    <button onclick="copyToClipboard('cfg-db-path')" class="px-3 py-2 bg-darkbg hover:bg-white/5 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1.5">Google OAuth Redirect URI</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="text" readonly id="cfg-redirect-uri" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400">
+                                    <button onclick="copyToClipboard('cfg-redirect-uri')" class="px-3 py-2 bg-darkbg hover:bg-white/5 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1.5">Google OAuth Client ID</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="text" readonly id="cfg-client-id" value="Loading..." class="flex-1 bg-darkbg border border-darkborder text-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400">
+                                    <button onclick="copyToClipboard('cfg-client-id')" class="px-3 py-2 bg-darkbg hover:bg-white/5 border border-darkborder text-slate-300 rounded-lg text-xs transition-colors"><i class="fa-regular fa-copy"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- Analytics Section -->
-            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-8">
-                <!-- Left: Chart.js Canvas -->
-                <div class="editorial-card rounded-xl p-6 flex flex-col items-center">
-                    <h3 class="text-slate-400 font-semibold mb-6 flex items-center gap-2 w-full text-xs uppercase tracking-wider font-sans-editorial"><i class="fa-solid fa-chart-pie text-slate-500"></i> Storage Distribution</h3>
-                    <div class="relative h-48 w-full flex items-center justify-center">
-                        <canvas id="typeChart"></canvas>
+                    <!-- Security Alert box -->
+                    <div class="bg-blue-500/5 border border-blue-500/10 rounded-xl p-5 flex gap-4 text-xs text-slate-400">
+                        <div class="p-3 bg-blue-500/10 text-blue-400 rounded-lg shrink-0 h-10 w-10 flex items-center justify-center">
+                            <i class="fa-solid fa-circle-info text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-blue-400 text-sm mb-1 font-sans-editorial">Local & Private Security</h4>
+                            <p class="leading-relaxed font-sans-editorial">All configurations are stored locally on your device in the project root directory inside standard JSON secrets. The index values are saved in your local SQLite file. None of your OAuth keys, credentials, or synchronized metadata are uploaded to external search engines or cloud proxies.</p>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Right: Largest Files Table -->
-                <div class="lg:col-span-2 editorial-card rounded-xl flex flex-col overflow-hidden">
-                    <div class="p-5 border-b border-darkborder flex justify-between items-center bg-darksurface/30">
-                        <h3 class="text-slate-400 font-semibold flex items-center gap-2 text-xs uppercase tracking-wider font-sans-editorial"><i class="fa-solid fa-weight-hanging text-slate-500"></i> Largest Files Across Accounts</h3>
-                        <button onclick="window.location.href='/fileview.html'" class="text-[10px] uppercase tracking-wider text-slate-500 hover:text-white transition-colors">See All</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-[10px] text-slate-500 uppercase tracking-widest border-b border-darkborder">
-                                <tr>
-                                    <th class="px-5 py-3 font-semibold">File Name</th>
-                                    <th class="px-5 py-3 font-semibold text-right font-sans-editorial">Size</th>
-                                    <th class="px-5 py-3 font-semibold">Origin Account</th>
-                                    <th class="px-5 py-3 font-semibold text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="largest-files-body" class="divide-y divide-darkborder">
-                                <!-- Dynamic rows -->
-                                <tr><td colspan="4" class="px-5 py-6 text-center text-slate-500">Loading metrics...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
+                </section>
+            </div>
 
         </div>
     </main>
 
-    <!-- Add Account Modal -->
-    <div id="add-account-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-darksurface border border-darkborder rounded-xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
-            <div class="flex justify-between items-center mb-5 border-b border-darkborder pb-3">
-                <h3 class="text-sm uppercase tracking-wider font-semibold text-white">Link New Drive</h3>
-                <button onclick="closeAddAccountModal()" class="text-slate-400 hover:text-white transition-colors">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <form id="add-account-form" action="/accounts" method="POST">
-                <div class="mb-4">
-                    <label class="block text-[10px] font-medium text-slate-400 mb-2 uppercase tracking-widest">Account Label</label>
-                    <input type="text" name="label" required placeholder="e.g. Work Drive, Personal" class="w-full bg-darkbg border border-darkborder text-sm rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 text-slate-200 transition-all font-sans-editorial">
+    <!-- Drawer Side Trays System -->
+    <!-- Backdrop Overlay -->
+    <div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawers()"></div>
+
+    <!-- 1. Add Account Drawer -->
+    <div id="drawer-add-account" class="drawer-tray">
+        <div class="p-5 border-b border-darkborder flex justify-between items-center bg-darksurface/30 shrink-0">
+            <h3 class="text-xs uppercase tracking-widest font-semibold text-slate-200">Link New Drive</h3>
+            <button onclick="closeDrawers()" class="text-slate-500 hover:text-slate-300 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <div class="flex-1 p-6 space-y-6 overflow-y-auto font-sans-editorial">
+            <form id="add-account-form" action="/accounts" method="POST" onsubmit="submitAddAccount(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 mb-2 uppercase tracking-widest">Account Label</label>
+                        <input type="text" id="add-account-label" name="label" required placeholder="e.g. Personal Drive, Work" class="w-full bg-darkbg border border-darkborder text-xs rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400 text-slate-200 transition-all">
+                        <p class="text-[10px] text-slate-600 mt-2 font-normal">Give this connection a human-readable nickname.</p>
+                    </div>
                 </div>
-                <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" onclick="closeAddAccountModal()" class="px-4 py-2 text-xs uppercase tracking-wider font-semibold text-slate-400 hover:text-white transition-colors">Cancel</button>
-                    <button type="submit" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-xs uppercase tracking-wider font-semibold rounded-lg transition-all border border-blue-400/20">
-                        Continue to Google <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                <div class="flex justify-end gap-3 mt-8 border-t border-darkborder pt-5">
+                    <button type="button" onclick="closeDrawers()" class="px-4 py-2 text-xs uppercase tracking-wider font-semibold text-slate-500 hover:text-slate-300 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-xs uppercase tracking-wider font-semibold rounded-lg border border-blue-400/20 transition-all flex items-center gap-1.5">
+                        Link Account <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Confirmation Modal -->
+    <!-- 2. Transfer Drawer -->
+    <div id="drawer-transfer" class="drawer-tray">
+        <div class="p-5 border-b border-darkborder flex justify-between items-center bg-darksurface/30 shrink-0">
+            <h3 class="text-xs uppercase tracking-widest font-semibold text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-shuffle text-blue-400"></i> Cross-Account Transfer
+            </h3>
+            <button onclick="closeDrawers()" class="text-slate-500 hover:text-slate-300 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <div class="flex-1 p-6 space-y-5 overflow-y-auto font-sans-editorial">
+            <div>
+                <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1.5">Source File</span>
+                <div id="transfer-source-name" class="bg-darkbg p-3 rounded-lg border border-darkborder text-xs text-slate-300 font-medium truncate">Name</div>
+            </div>
+            
+            <div>
+                <span class="text-slate-500 text-[10px] uppercase tracking-wider block mb-2">Transfer Mode</span>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                        <input type="radio" name="transfer-mode" value="copy" checked class="text-blue-500"> Copy (Keep source file)
+                    </label>
+                    <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                        <input type="radio" name="transfer-mode" value="move" class="text-blue-500"> Move (Delete source file)
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1.5">Target Account</label>
+                <select id="transfer-target-account" class="w-full bg-darkbg border border-darkborder rounded-lg px-3 py-2.5 text-xs focus:outline-none focus:border-blue-400 text-slate-200">
+                    <option value="">Select target account...</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-slate-500 text-[10px] uppercase tracking-wider block mb-1.5">Target Folder ID <span class="text-slate-600">(Optional, defaults to Root)</span></label>
+                <input type="text" id="transfer-target-folder" placeholder="Enter folder ID or leave blank" class="w-full bg-darkbg border border-darkborder rounded-lg px-3 py-2.5 text-xs focus:outline-none focus:border-blue-400 text-slate-200">
+            </div>
+
+            <div class="flex justify-end gap-3 mt-8 border-t border-darkborder pt-5">
+                <button type="button" onclick="closeDrawers()" class="px-4 py-2 text-xs uppercase tracking-wider font-semibold text-slate-500 hover:text-white transition-colors">Cancel</button>
+                <button onclick="executeTransfer()" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-xs uppercase tracking-wider font-semibold rounded-lg border border-blue-400/20 transition-colors">
+                    Start Transfer <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Duplicates Drawer -->
+    <div id="drawer-duplicates" class="drawer-tray !w-[36rem]">
+        <div class="p-5 border-b border-darkborder flex justify-between items-center bg-darksurface/30 shrink-0">
+            <h3 class="text-xs uppercase tracking-widest font-semibold text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-clone text-blue-400"></i> Duplicate Catalog
+            </h3>
+            <button onclick="closeDrawers()" class="text-slate-500 hover:text-slate-300 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <div class="flex-1 p-6 space-y-4 overflow-y-auto scrollbar-hide font-sans-editorial" id="duplicates-modal-list">
+            <p class="text-slate-500 text-xs italic text-center py-4">Scanning archives...</p>
+        </div>
+    </div>
+
+    <!-- 4. File Details Drawer -->
+    <div id="drawer-details" class="drawer-tray">
+        <div class="p-5 border-b border-darkborder flex justify-between items-center bg-darksurface/30 shrink-0">
+            <h3 class="text-xs uppercase tracking-widest font-semibold text-slate-400">File Details</h3>
+            <button onclick="closeDrawers()" class="text-slate-500 hover:text-slate-300 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <div class="p-6 flex flex-col items-center border-b border-darkborder text-center bg-darksurface/10 shrink-0">
+                <div class="w-16 h-16 rounded-xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4 text-slate-400" id="detail-icon">
+                    <i class="fa-solid fa-file"></i>
+                </div>
+                <h4 class="text-white font-semibold break-all w-full leading-tight mb-2 text-sm" id="detail-name">-</h4>
+                <div id="detail-badge" class="mt-1"></div>
+            </div>
+
+            <div class="p-6 flex-1 space-y-4 text-xs font-sans-editorial">
+                <div>
+                    <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Type</p>
+                    <p class="text-slate-300 font-medium" id="detail-type">-</p>
+                </div>
+                <div>
+                    <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Size</p>
+                    <p class="text-slate-300 font-medium" id="detail-size">-</p>
+                </div>
+                <div>
+                    <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Created</p>
+                    <p class="text-slate-300 font-medium" id="detail-date">-</p>
+                </div>
+                
+                <div class="pt-4 mt-6 border-t border-darkborder space-y-2 shrink-0">
+                    <a href="#" target="_blank" id="btn-detail-download" class="w-full py-2 bg-blue-50 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold shadow-sm text-center text-xs uppercase tracking-wider">
+                        <i class="fa-solid fa-cloud-arrow-down"></i> Download File
+                    </a>
+                    <button id="btn-detail-transfer" class="w-full py-2 bg-white/5 border border-darkborder hover:bg-white/10 text-slate-200 hover:text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold text-xs uppercase tracking-wider">
+                        <i class="fa-solid fa-shuffle"></i> Copy or Move
+                    </button>
+                    <button id="btn-detail-delete" class="w-full py-2 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-red-300 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold text-xs uppercase tracking-wider">
+                        <i class="fa-solid fa-trash-can"></i> Delete File
+                    </button>
+                    <a href="#" target="_blank" id="btn-drive-link" class="w-full py-2 bg-darkbg hover:bg-white/5 text-slate-400 hover:text-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-darkborder font-semibold text-xs uppercase tracking-wider">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Drive
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Centered Confirmation Overlay Modal -->
     <div id="confirm-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
         <div class="bg-darksurface border border-darkborder rounded-xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300 shadow-2xl">
             <div class="mb-4">
@@ -230,237 +558,167 @@
             </div>
             <div class="flex justify-end gap-3 mt-6">
                 <button id="confirm-cancel" class="px-4 py-2 text-xs uppercase tracking-wider font-semibold text-slate-400 hover:text-white transition-colors">Cancel</button>
-                <button id="confirm-ok" class="px-4 py-2 bg-red-950/20 hover:bg-red-900/30 text-red-400 border border-red-500/20 text-xs uppercase tracking-wider font-semibold rounded-lg transition-colors">Yes, unlink</button>
+                <button id="confirm-ok" class="px-4 py-2 bg-blue-50 hover:bg-blue-600 text-white text-xs uppercase tracking-wider font-semibold rounded-lg transition-colors">Confirm</button>
             </div>
         </div>
     </div>
 
-    <!-- Duplicates Modal -->
-    <div id="duplicates-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-darksurface border border-darkborder rounded-xl w-full max-w-4xl p-6 transform scale-95 transition-transform duration-300 shadow-2xl flex flex-col max-h-[85vh]">
-            <div class="flex justify-between items-center mb-5 shrink-0 border-b border-darkborder pb-4">
-                <h3 class="text-sm uppercase tracking-wider font-semibold text-white flex items-center gap-2 font-sans-editorial">
-                    <i class="fa-solid fa-clone text-blue-400"></i> Duplicate File Catalog
-                </h3>
-                <button onclick="closeDuplicatesModal()" class="text-slate-400 hover:text-white transition-colors">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <div class="flex-1 overflow-y-auto scrollbar-hide space-y-4 pr-1" id="duplicates-modal-list">
-                <!-- Grouped duplicates injected dynamically -->
-                <p class="text-slate-500 text-sm italic text-center py-4">No duplicates found.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notifications -->
+    <!-- Toast Notifications Container -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
 
+    <!-- SPA Application Engine -->
     <script>
-        // UI Interaction Handlers
+        // --- GLOBAL STATE ---
+        let currentAccountId = null;
+        let currentFolderId = null;
+        let currentBreadcrumb = [];
+        let viewMode = 'grid'; // grid or list
+        let currentItems = []; // File list objects
+        let selectedFileObject = null;
+        let accountsCached = [];
+        let duplicateCandidatesGlobal = [];
+        let transferFileId = null;
+
+        // Apply saved sizes
+        let savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width')) || 256;
+
+        // --- TOAST NOTIFIER ---
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             let icon = 'fa-circle-info text-blue-400';
             let borderClass = 'border-blue-500/20';
             
-            toast.className = `flex items-center gap-3 bg-darksurface border ${borderClass} shadow-lg rounded-xl px-4 py-3 transform translate-x-full opacity-0 transition-all duration-300 max-w-sm`;
-            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><p class="text-sm text-slate-200 font-medium">${message}</p>`;
+            if (type === 'error') {
+                icon = 'fa-circle-exclamation text-red-400';
+                borderClass = 'border-red-500/20';
+            } else if (type === 'success') {
+                icon = 'fa-circle-check text-emerald-400';
+                borderClass = 'border-emerald-500/20';
+            }
+            
+            toast.className = `flex items-center gap-3 bg-darksurface border ${borderClass} shadow-lg rounded-xl px-4 py-3 transform translate-x-full opacity-0 transition-all duration-300 max-w-sm font-sans-editorial`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg shrink-0"></i><p class="text-xs text-slate-200 font-medium">${message}</p>`;
             
             container.appendChild(toast);
-            
-            // Animate in
-            setTimeout(() => {
-                toast.classList.remove('translate-x-full', 'opacity-0');
-            }, 10);
-            
-            // Auto remove
+            setTimeout(() => toast.classList.remove('translate-x-full', 'opacity-0'), 10);
             setTimeout(() => {
                 toast.classList.add('translate-x-full', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 3500);
         }
 
-        function openAddAccountModal() {
-            const modal = document.getElementById('add-account-modal');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modal.firstElementChild.classList.remove('scale-95');
-            }, 10);
+        // --- NAVIGATION ROUTER ---
+        function navigateTab(tab, event) {
+            if (event) event.preventDefault();
+            window.location.hash = tab;
         }
 
-        function closeAddAccountModal() {
-            const modal = document.getElementById('add-account-modal');
-            modal.classList.add('opacity-0');
-            modal.firstElementChild.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        document.getElementById('btn-add-account').addEventListener('click', openAddAccountModal);
-        document.getElementById('btn-notifications').addEventListener('click', () => showToast('You have no new notifications.'));
-        document.getElementById('btn-profile').addEventListener('click', () => showToast('Profile settings coming soon.'));
-        
-        document.getElementById('global-search').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && e.target.value.trim()) {
-                window.location.href = `/fileview.html?q=${encodeURIComponent(e.target.value.trim())}`;
+        function showView(viewName) {
+            closeDrawers();
+            
+            // Hide all tab views
+            document.querySelectorAll('.view-panel').forEach(v => v.classList.add('hidden'));
+            
+            // Show target view
+            const target = document.getElementById(`view-${viewName}`);
+            if (target) {
+                target.classList.remove('hidden');
             }
+            
+            // Update Navigation link highlights
+            document.querySelectorAll('aside nav a').forEach(a => {
+                a.className = "flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg font-medium transition-all";
+                const href = a.getAttribute('href');
+                if (href === `#${viewName}`) {
+                    a.className = "flex items-center gap-3 px-3 py-2.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg font-medium transition-all";
+                }
+            });
+
+            // Trigger action triggers based on active views
+            if (viewName === 'dashboard') {
+                fetchAccounts();
+                fetchAnalytics();
+            } else if (viewName === 'accounts') {
+                fetchAccountsTab();
+            } else if (viewName === 'explorer') {
+                loadSidebarAccounts();
+            } else if (viewName === 'settings') {
+                fetchConfig();
+            }
+        }
+
+        window.addEventListener('hashchange', () => {
+            const tab = window.location.hash.slice(1) || 'dashboard';
+            showView(tab);
         });
 
-        // Duplicates Modal logic
-        let duplicateCandidatesGlobal = [];
-
-        function openDuplicatesModal() {
-            const modal = document.getElementById('duplicates-modal');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modal.firstElementChild.classList.remove('scale-95');
-            }, 10);
-            loadDuplicatesList();
-        }
-
-        function closeDuplicatesModal() {
-            const modal = document.getElementById('duplicates-modal');
-            modal.classList.add('opacity-0');
-            modal.firstElementChild.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        async function loadDuplicatesList() {
-            const listEl = document.getElementById('duplicates-modal-list');
-            listEl.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-blue-500 mb-2"></i><p class="text-xs text-slate-400">Analyzing database checksums...</p></div>';
+        // --- DRAWERS SYSTEM ---
+        function openDrawer(drawerId) {
+            closeDrawers(false); // Close other drawers without blinking overlay
             
+            const overlay = document.getElementById('drawer-overlay');
+            const drawer = document.getElementById(`drawer-${drawerId}`);
+            if (drawer) {
+                overlay.classList.add('open');
+                drawer.classList.add('open');
+            }
+            
+            if (drawerId === 'duplicates') {
+                loadDuplicatesList();
+            }
+        }
+
+        function closeDrawers(hideOverlay = true) {
+            if (hideOverlay) {
+                const overlay = document.getElementById('drawer-overlay');
+                overlay.classList.remove('open');
+            }
+            document.querySelectorAll('.drawer-tray').forEach(d => d.classList.remove('open'));
+        }
+
+        // --- CONFIG & STATUS GET ---
+        async function fetchConfig() {
             try {
-                const res = await fetch('/api/dashboard');
-                const dash = await res.json();
-                const candidates = dash.duplicate_candidates || [];
-                duplicateCandidatesGlobal = candidates;
-                
-                if (candidates.length === 0) {
-                    listEl.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">No duplicate file candidates found. All files have unique checksums.</div>';
-                    return;
+                const resConfig = await fetch('/api/config');
+                const config = await resConfig.json();
+                if (config.ok) {
+                    document.getElementById('cfg-app-url').value = window.location.origin;
+                    document.getElementById('cfg-redirect-uri').value = config.redirectUri || '';
+                    document.getElementById('cfg-client-id').value = config.clientId || '';
                 }
-                
-                listEl.innerHTML = '';
-                
-                for (const candidate of candidates) {
-                    const groupContainerId = `dup-group-${candidate.md5_checksum}`;
-                    listEl.insertAdjacentHTML('beforeend', `
-                        <div class="bg-darkbg border border-darkborder rounded-xl p-4 space-y-3" id="${groupContainerId}">
-                            <div class="flex justify-between items-center border-b border-darkborder/50 pb-2">
-                                <div class="text-xs font-semibold text-amber-400 font-mono">MD5: ${candidate.md5_checksum}</div>
-                                <div class="text-[11px] text-slate-400 bg-darksurface px-2 py-0.5 rounded border border-darkborder">
-                                    ${candidate.copies} copies · Total Potential Waste: ${formatBytes(candidate.total_size - (candidate.total_size / candidate.copies))}
-                                </div>
-                            </div>
-                            <div class="divide-y divide-darkborder/30" id="files-list-${candidate.md5_checksum}">
-                                <div class="text-center py-2 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Loading copies...</div>
-                            </div>
-                        </div>
-                    `);
-                    
-                    // Fetch files details for this MD5 checksum asynchronously
-                    fetch(`/api/files/checksum/${candidate.md5_checksum}`)
-                        .then(r => r.json())
-                        .then(data => {
-                            const filesContainer = document.getElementById(`files-list-${candidate.md5_checksum}`);
-                            if (!filesContainer) return;
-                            filesContainer.innerHTML = '';
-                            
-                            if (!data.files || data.files.length === 0) {
-                                document.getElementById(groupContainerId).remove();
-                                return;
-                            }
-                            
-                            data.files.forEach(f => {
-                                filesContainer.insertAdjacentHTML('beforeend', `
-                                    <div class="py-2.5 flex items-center justify-between gap-4 text-xs hover:bg-darksurface/30 px-2 rounded-lg transition-colors">
-                                        <div class="min-w-0 flex-1">
-                                            <div class="font-medium text-slate-200 truncate flex items-center gap-2">
-                                                <i class="${getFileIcon(f.name)}"></i>
-                                                <span class="truncate text-[13px]">${f.name}</span>
-                                            </div>
-                                            <div class="text-slate-500 text-[11px] mt-0.5 truncate">${f.path || '/' + f.name}</div>
-                                        </div>
-                                        <div class="flex items-center gap-3 shrink-0">
-                                            <span class="text-slate-300 font-semibold">${formatBytes(f.size)}</span>
-                                            <span class="px-2 py-0.5 bg-darksurface text-[10px] text-slate-400 rounded-md border border-darkborder truncate max-w-[120px]" title="${f.account_label}">${f.account_label}</span>
-                                            <button onclick="deleteDuplicateCopy(${f.id}, '${candidate.md5_checksum}')" class="w-8 h-8 rounded-lg bg-red-950/20 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-red-300 transition-all flex items-center justify-center" title="Delete redundant copy from Google Drive">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                `);
-                            });
-                        })
-                        .catch(err => {
-                            const filesContainer = document.getElementById(`files-list-${candidate.md5_checksum}`);
-                            if (filesContainer) filesContainer.innerHTML = '<div class="text-red-400 py-2 text-xs">Failed to load copies.</div>';
-                        });
+                const resHealth = await fetch('/api/health');
+                const health = await resHealth.json();
+                if (health.ok) {
+                    document.getElementById('cfg-db-path').value = health.databasePath || '';
+                    document.getElementById('db-health-status').innerHTML = '<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>Connected';
                 }
             } catch (err) {
                 console.error(err);
-                listEl.innerHTML = '<div class="text-center py-8 text-red-400 text-sm">Failed to load duplicate catalog.</div>';
+                document.getElementById('db-health-status').innerHTML = '<span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>Offline';
             }
         }
 
-        async function deleteDuplicateCopy(fileId, checksum) {
-            openConfirm('Delete this duplicate file from Google Drive? This action cannot be undone.', 'Delete Duplicate Copy', async () => {
-                try {
-                    showToast('Deleting duplicate copy from Drive...');
-                    const res = await fetch(`/api/files/${fileId}/delete`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ confirm: true })
-                    });
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok) throw new Error(data.error || 'Deletion failed');
-                    
-                    showToast('File deleted successfully');
-                    
-                    // Refresh Dashboard counters
-                    await fetchAccounts();
-                    await fetchAnalytics();
-                    
-                    // Refresh Duplicates modal details
-                    await loadDuplicatesList();
-                } catch (err) {
-                    console.error(err);
-                    showToast('Delete error: ' + err.message);
-                }
-            });
-        }
-
-        // Formatter Utility
-        function formatBytes(bytes) {
-            if (!bytes || bytes === 0) return '0 B';
-            const k = 1024;
-            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // 1. Fetch Accounts
+        // --- DASHBOARD API BINDINGS ---
         async function fetchAccounts() {
             try {
                 const res = await fetch('/api/accounts');
                 const accounts = await res.json();
+                accountsCached = accounts;
                 
                 const grid = document.getElementById('account-grid');
                 document.getElementById('account-count-badge').innerText = accounts.length;
-                
                 grid.innerHTML = '';
                 
                 let globalUsed = 0;
                 let globalTotal = 0;
 
+                if (accounts.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full py-8 text-center text-slate-500 text-xs italic">No drives linked. Add one to start.</div>';
+                    return;
+                }
+
                 accounts.forEach(acc => {
-                    // Use server storage fields
                     const used = parseInt(acc.storage_used || acc.storage_used_in_drive || 0) || 0;
                     const total = parseInt(acc.storage_total || 0) || 0;
                     const ratio = total > 0 ? ((used / total) * 100).toFixed(1) : 0;
@@ -471,105 +729,73 @@
                     const isLinked = acc.sync_state === 'linked' || acc.sync_state === 'synced';
                     const statusText = acc.sync_state.charAt(0).toUpperCase() + acc.sync_state.slice(1);
                     const statusBadge = acc.sync_state === 'syncing'
-                        ? `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-500/10 text-blue-400 text-xs font-medium border border-blue-500/20"><i class="fa-solid fa-arrows-rotate animate-spin text-[10px]"></i><span class="truncate max-w-[5.5rem]">Syncing</span></span>`
+                        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[10px] font-semibold border border-blue-500/20"><i class="fa-solid fa-arrows-rotate animate-spin text-[8px]"></i>Syncing</span>`
                         : isLinked
-                            ? `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse"></span><span class="truncate max-w-[5.5rem]">Connected</span></span>`
-                            : `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-500/10 text-red-400 text-xs font-medium border border-red-500/20"><span class="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"></span><span class="truncate max-w-[5.5rem]">${statusText}</span></span>`;
+                            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-semibold border border-emerald-500/20"><span class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span>Connected</span>`
+                            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-500/10 text-red-400 text-[10px] font-semibold border border-red-500/20">${statusText}</span>`;
 
                     let actionButtons = '';
                     if (acc.sync_state === 'syncing') {
-                        actionButtons = `
-                            <button disabled class="px-3 py-1 text-xs font-medium text-slate-400 bg-slate-800 border border-slate-700 rounded-md cursor-not-allowed flex items-center gap-1">
-                                <i class="fa-solid fa-spinner animate-spin"></i> Syncing
-                            </button>
-                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1 text-xs font-medium text-slate-200 bg-red-600 hover:bg-red-500 rounded-md">Disconnect</button>
-                            <a href="/fileview.html?accountId=${acc.id}" class="px-4 py-1.5 text-xs font-medium text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors group-hover:border-slate-600 shadow-sm inline-block">
-                                Browse <i class="fa-solid fa-arrow-right ml-1 text-slate-400"></i>
-                            </a>
-                        `;
-                    } else if (acc.sync_state === 'error' || acc.sync_state === 'needs-auth') {
-                        actionButtons = `
-                            <button onclick="relinkAccount(${acc.id})" class="px-3 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-md flex items-center gap-1">
-                                <i class="fa-solid fa-key"></i> Re-link
-                            </button>
-                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1 text-xs font-medium text-slate-200 bg-emerald-600 hover:bg-emerald-500 rounded-md">Sync</button>
-                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1 text-xs font-medium text-slate-200 bg-red-600 hover:bg-red-500 rounded-md">Disconnect</button>
-                        `;
+                        actionButtons = `<button disabled class="px-2.5 py-1 text-[10px] font-semibold text-slate-500 bg-white/5 border border-darkborder rounded-md cursor-not-allowed flex items-center gap-1"><i class="fa-solid fa-spinner animate-spin"></i> Syncing</button>`;
                     } else {
-                        actionButtons = `
-                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1 text-xs font-medium text-slate-200 bg-emerald-600 hover:bg-emerald-500 rounded-md">Sync</button>
-                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1 text-xs font-medium text-slate-200 bg-red-600 hover:bg-red-500 rounded-md">Disconnect</button>
-                            <a href="/fileview.html?accountId=${acc.id}" class="px-4 py-1.5 text-xs font-medium text-white bg-darkbg hover:bg-slate-800 border border-darkborder rounded-lg transition-colors group-hover:border-slate-600 shadow-sm inline-block">
-                                Browse <i class="fa-solid fa-arrow-right ml-1 text-slate-400"></i>
-                            </a>
-                        `;
+                        actionButtons = `<button onclick="syncAccount(${acc.id})" class="px-2.5 py-1 text-[10px] font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-md transition-colors">Sync</button>`;
                     }
 
                     grid.insertAdjacentHTML('beforeend', `
-                        <div class="bg-darksurface border border-darkborder rounded-2xl p-5 hover:border-slate-700 transition-colors group relative overflow-hidden">
-                            <div class="flex justify-between items-start mb-4 gap-2">
-                                <div class="flex items-center gap-3 flex-1 min-w-0">
-                                    <div class="w-10 h-10 rounded-full bg-darkbg border border-darkborder flex items-center justify-center shrink-0">
-                                        <i class="fa-brands fa-google text-slate-300"></i>
+                        <div class="editorial-card rounded-xl p-5 relative overflow-hidden flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-start mb-4 gap-2 font-sans-editorial">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <div class="w-8 h-8 rounded-lg bg-darkbg border border-darkborder flex items-center justify-center text-slate-400 shrink-0"><i class="fa-brands fa-google text-xs"></i></div>
+                                        <div class="min-w-0">
+                                            <h4 class="text-xs font-semibold text-slate-200 truncate" title="${acc.label}">${acc.label}</h4>
+                                            <p class="text-[10px] text-slate-500 truncate" title="${acc.email || 'No email linked'}">${acc.email || 'Unlinked'}</p>
+                                        </div>
                                     </div>
-                                    <div class="min-w-0">
-                                        <h4 class="text-[13px] font-semibold text-slate-200 truncate" title="${acc.email}">${acc.email}</h4>
-                                        <p class="text-[11px] text-slate-500 mt-0.5">Google Drive</p>
-                                    </div>
+                                    <div class="shrink-0">${statusBadge}</div>
                                 </div>
-                                <div class="shrink-0 mt-0.5">
-                                    ${statusBadge}
+                                <div class="mb-4">
+                                    <div class="flex justify-between text-[11px] mb-1">
+                                        <span class="text-slate-300 font-medium">${formatBytes(used)} <span class="text-slate-500 font-normal">used</span></span>
+                                        <span class="text-slate-500">${formatBytes(total)}</span>
+                                    </div>
+                                    <div class="w-full bg-darkbg rounded-full h-1 overflow-hidden border border-darkborder">
+                                        <div class="bg-blue-400 h-1 rounded-full transition-all duration-700" style="width: ${Math.min(ratio, 100)}%"></div>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div class="mb-4">
-                                <div class="flex justify-between text-xs mb-1.5">
-                                    <span class="text-slate-300 font-medium">${formatBytes(used)} <span class="text-slate-500 font-normal">used</span></span>
-                                    <span class="text-slate-500">${formatBytes(total)} <span class="font-normal text-slate-600">total</span></span>
-                                </div>
-                                <div class="w-full bg-darkbg rounded-full h-1.5 overflow-hidden border border-darkborder">
-                                    <div class="bg-blue-400 h-1.5 rounded-full transition-all duration-700" style="width: ${Math.min(ratio, 100)}%"></div>
-                                </div>
-                            </div>
-                            
-                            <div class="pt-4 border-t border-darkborder flex justify-end items-center gap-3">
+                            <div class="pt-3 border-t border-darkborder flex justify-between items-center gap-2 shrink-0">
                                 ${actionButtons}
+                                <a href="#explorer" onclick="navigateToAccountFolder(${acc.id})" class="text-[10px] text-slate-400 hover:text-white uppercase tracking-wider font-semibold">Browse <i class="fa-solid fa-chevron-right ml-0.5 text-[8px]"></i></a>
                             </div>
                         </div>
                     `);
                 });
 
-                // Update Hero Metric
                 const globalRatio = globalTotal > 0 ? ((globalUsed / globalTotal) * 100).toFixed(1) : 0;
                 document.getElementById('global-used').innerText = formatBytes(globalUsed);
                 document.getElementById('global-total').innerText = formatBytes(globalTotal);
                 document.getElementById('global-percent').innerText = `${globalRatio}%`;
-                
-                // Allow a tiny delay for animation
                 setTimeout(() => {
                     document.getElementById('global-progress').style.width = `${Math.min(globalRatio, 100)}%`;
                 }, 50);
 
             } catch (err) {
-                console.error('Error fetching accounts:', err);
-                document.getElementById('account-grid').innerHTML = '<div class="col-span-full py-8 text-center text-red-400 text-sm">Failed to load accounts.</div>';
+                console.error(err);
+                document.getElementById('account-grid').innerHTML = '<div class="col-span-full py-8 text-center text-red-400 text-xs">Failed to load account summaries.</div>';
             }
         }
 
-        // 2. Fetch Analytics & Aggregates
         let typeChartInstance = null;
         async function fetchAnalytics() {
             try {
                 const res = await fetch('/api/storage-summary');
                 const data = await res.json();
-
+                
                 document.getElementById('stat-files').innerText = (data.totalFiles || 0).toLocaleString();
                 document.getElementById('stat-duplicates').innerText = (data.potentialDuplicates || 0).toLocaleString();
 
-                // Build Chart.js Pie
-                if (typeChartInstance) {
-                    typeChartInstance.destroy();
-                }
+                if (typeChartInstance) typeChartInstance.destroy();
                 const ctx = document.getElementById('typeChart').getContext('2d');
                 typeChartInstance = new Chart(ctx, {
                     type: 'doughnut',
@@ -602,67 +828,150 @@
                     }
                 });
 
-                // Populate Table
                 const tbody = document.getElementById('largest-files-body');
                 tbody.innerHTML = '';
                 if(data.largestFiles && data.largestFiles.length > 0) {
                     data.largestFiles.forEach(file => {
                         tbody.innerHTML += `
-                            <tr class="hover:bg-darkbg/50 transition-colors">
+                            <tr class="hover:bg-white/5 transition-colors border-t border-darkborder">
                                 <td class="px-5 py-3 font-medium flex items-center gap-3">
-                                    <i class="${getFileIcon(file.name)} text-slate-400 text-lg"></i>
+                                    <i class="${getFileIconClass(file.name)} text-slate-400 text-base"></i>
                                     <span class="truncate block max-w-[140px] lg:max-w-[200px] text-slate-200" title="${file.name}">${file.name}</span>
                                 </td>
-                                <td class="px-5 py-3 text-right font-medium text-slate-300">
+                                <td class="px-5 py-3 text-right font-medium text-slate-300 font-sans-editorial">
                                     ${formatBytes(file.size)}
                                 </td>
                                 <td class="px-5 py-3 text-slate-400">
-                                    <span class="px-2 py-0.5 rounded-md bg-darkbg border border-darkborder text-[11px] truncate block w-fit max-w-[140px]" title="${file.account}">
+                                    <span class="px-2 py-0.5 rounded border border-darkborder text-[10px] truncate block w-fit max-w-[140px]" title="${file.account}">
                                         ${file.account}
                                     </span>
                                 </td>
                                 <td class="px-5 py-3 text-center">
-                                    <button onclick="showToast('Opened options for \\'' + file.name + '\\'')" class="w-7 h-7 rounded-md bg-darkbg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors inline-flex items-center justify-center">
-                                        <i class="fa-solid fa-ellipsis"></i>
+                                    <button onclick="navigateToExplorerAndLocate('${file.name.replace(/'/g, "\\'")}')" class="w-6 h-6 rounded bg-darkbg hover:bg-white/5 border border-darkborder text-slate-400 hover:text-white transition-colors inline-flex items-center justify-center" title="Locate in Files Explorer">
+                                        <i class="fa-solid fa-magnifying-glass text-[10px]"></i>
                                     </button>
                                 </td>
                             </tr>
                         `;
                     });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-5 py-6 text-center text-slate-500 italic">No files cataloged. Sync accounts first.</td></tr>';
                 }
-
             } catch (err) {
-                console.error('Error fetching analytics:', err);
-                document.getElementById('largest-files-body').innerHTML = '<tr><td colspan="4" class="px-5 py-4 text-center text-red-400 text-sm border-t border-darkborder">Failed to load analytics data.</td></tr>';
+                console.error(err);
+                document.getElementById('largest-files-body').innerHTML = '<tr><td colspan="4" class="px-5 py-4 text-center text-red-400 text-xs">Failed to load largest files database index.</td></tr>';
             }
         }
 
-        function getFileIcon(filename) {
-            const ext = filename.split('.').pop().toLowerCase();
-            if (['mp4','mov','mkv'].includes(ext)) return 'fa-solid fa-file-video text-purple-400';
-            if (['png','jpg','jpeg','fig'].includes(ext)) return 'fa-solid fa-file-image text-emerald-400';
-            if (['zip','tar','gz','iso'].includes(ext)) return 'fa-solid fa-file-zipper text-amber-400';
-            return 'fa-solid fa-file-lines text-blue-400';
+        // --- ACCOUNTS REGISTRY TAB VIEW ---
+        async function fetchAccountsTab() {
+            try {
+                const res = await fetch('/api/accounts');
+                const accounts = await res.json();
+                accountsCached = accounts;
+                
+                const grid = document.getElementById('accounts-tab-grid');
+                grid.innerHTML = '';
+                
+                if (accounts.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full py-8 text-center text-slate-500 text-xs italic">No drives linked. Add Google Drive connection.</div>';
+                    return;
+                }
+
+                accounts.forEach(acc => {
+                    const used = parseInt(acc.storage_used || acc.storage_used_in_drive || 0) || 0;
+                    const total = parseInt(acc.storage_total || 0) || 0;
+                    const ratio = total > 0 ? ((used / total) * 100).toFixed(1) : 0;
+                    
+                    const isLinked = acc.sync_state === 'linked' || acc.sync_state === 'synced';
+                    const statusText = acc.sync_state.charAt(0).toUpperCase() + acc.sync_state.slice(1);
+                    const statusBadge = acc.sync_state === 'syncing'
+                        ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-blue-500/10 text-blue-400 text-[10px] font-semibold border border-blue-500/20"><i class="fa-solid fa-arrows-rotate animate-spin text-[8px]"></i>Syncing</span>`
+                        : isLinked
+                            ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-semibold border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse"></span>Connected</span>`
+                            : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-red-500/10 text-red-400 text-[10px] font-semibold border border-red-500/20">${statusText}</span>`;
+
+                    const avatar = acc.picture_url 
+                        ? `<img src="${acc.picture_url}" class="w-10 h-10 rounded-full border border-darkborder shrink-0" referrerPolicy="no-referrer">`
+                        : `<div class="w-10 h-10 rounded-lg bg-darkbg border border-darkborder flex items-center justify-center shrink-0 text-slate-400"><i class="fa-brands fa-google text-sm"></i></div>`;
+
+                    let actionButtons = '';
+                    if (acc.sync_state === 'syncing') {
+                        actionButtons = `
+                            <button disabled class="px-3 py-1.5 text-xs font-semibold text-slate-500 bg-white/5 border border-darkborder rounded-lg cursor-not-allowed flex items-center gap-1 shrink-0"><i class="fa-solid fa-spinner animate-spin"></i> Syncing</button>
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-red-400 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 rounded-lg transition-colors flex items-center gap-1 shrink-0"><i class="fa-solid fa-link-slash"></i> Unlink</button>
+                        `;
+                    } else if (acc.sync_state === 'error' || acc.sync_state === 'needs-auth') {
+                        actionButtons = `
+                            <button onclick="relinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-colors flex items-center gap-1"><i class="fa-solid fa-key"></i> Re-link</button>
+                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-colors flex items-center gap-1"><i class="fa-solid fa-arrows-rotate"></i> Sync</button>
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-red-400 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 rounded-lg transition-colors flex items-center gap-1"><i class="fa-solid fa-link-slash"></i> Unlink</button>
+                        `;
+                    } else {
+                        actionButtons = `
+                            <button onclick="syncAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-colors flex items-center gap-1"><i class="fa-solid fa-arrows-rotate"></i> Sync</button>
+                            <button onclick="unlinkAccount(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-red-400 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 rounded-lg transition-colors flex items-center gap-1"><i class="fa-solid fa-link-slash"></i> Unlink</button>
+                            <a href="#explorer" onclick="navigateToAccountFolder(${acc.id})" class="px-3 py-1.5 text-xs font-semibold text-slate-200 bg-darkbg hover:bg-white/5 border border-darkborder rounded-lg transition-colors inline-flex items-center gap-1">Browse <i class="fa-solid fa-arrow-right"></i></a>
+                        `;
+                    }
+
+                    grid.insertAdjacentHTML('beforeend', `
+                        <div class="editorial-card rounded-xl p-6 relative flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-start mb-5 gap-2">
+                                    <div class="flex items-center gap-3 min-w-0 font-sans-editorial">
+                                        ${avatar}
+                                        <div class="min-w-0">
+                                            <h4 class="text-sm font-semibold text-slate-200 truncate" title="${acc.display_name || acc.label}">${acc.display_name || acc.label}</h4>
+                                            <p class="text-xs text-slate-500 truncate" title="${acc.email || 'Unlinked'}">${acc.email || 'Unlinked'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="shrink-0">${statusBadge}</div>
+                                </div>
+                                <div class="mb-5 space-y-2">
+                                    <div class="flex justify-between text-xs font-sans-editorial">
+                                        <span class="text-slate-300 font-medium">${formatBytes(used)} <span class="text-slate-500 font-normal">used</span></span>
+                                        <span class="text-slate-400 font-semibold">${formatBytes(total)}</span>
+                                    </div>
+                                    <div class="w-full bg-darkbg rounded-full h-1 overflow-hidden border border-darkborder">
+                                        <div class="bg-blue-400 h-1 rounded-full transition-all duration-700" style="width: ${Math.min(ratio, 100)}%"></div>
+                                    </div>
+                                    <div class="text-[10px] uppercase tracking-wider text-slate-500 flex justify-between pt-1 font-sans-editorial">
+                                        <span>Ratio: ${ratio}%</span>
+                                        <span>Synced: ${formatDate(acc.last_synced_at)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-darkborder flex flex-wrap justify-between items-center gap-2">
+                                ${actionButtons}
+                            </div>
+                        </div>
+                    `);
+                });
+            } catch (err) {
+                console.error(err);
+                document.getElementById('accounts-tab-grid').innerHTML = '<div class="col-span-full py-8 text-center text-red-400 text-xs">Failed to load connected accounts.</div>';
+            }
         }
 
-        // Helpers for syncing and unlinking
+        // --- ACCOUNT LINK & UNLINK ACTIONS ---
         async function syncAccount(id) {
             try {
-                showToast('Starting sync for account ' + id + '...');
+                showToast('Initiating drive index synchronization...', 'info');
                 const res = await fetch(`/api/accounts/${id}/sync`, { method: 'POST' });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.error || 'Sync failed');
-                showToast('Sync completed: ' + (data.files_synced || 0) + ' files');
-                await fetchAccounts();
-                await fetchAnalytics();
+                showToast(`Sync completed! ${data.files_synced} files cataloged.`, 'success');
+                const activeTab = window.location.hash.slice(1) || 'dashboard';
+                showView(activeTab);
             } catch (err) {
                 console.error(err);
-                showToast('Sync error: ' + err.message);
+                showToast('Sync failed: ' + err.message, 'error');
             }
         }
 
         function relinkAccount(id) {
-            showToast('Redirecting to Google for re-authorization...', 'info');
+            showToast('Forwarding connection tokens to Google OAuth...', 'info');
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = `/accounts/${id}/link`;
@@ -670,7 +979,580 @@
             form.submit();
         }
 
-        // Confirmation modal helpers
+        async function unlinkAccount(id) {
+            openConfirm('Unlink this Google Drive account? All local file cache information for this drive will be deleted.', 'Disconnect Google Drive', async () => {
+                try {
+                    const res = await fetch(`/api/accounts/${id}/unlink`, { method: 'POST' });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.error || 'Unlink failed');
+                    showToast('Account successfully unlinked.', 'success');
+                    const activeTab = window.location.hash.slice(1) || 'dashboard';
+                    showView(activeTab);
+                } catch (err) {
+                    console.error(err);
+                    showToast('Disconnect failed: ' + err.message, 'error');
+                }
+            });
+        }
+
+        // --- DUPLICATE CATALOG ACTIONS ---
+        async function deleteDuplicateCopy(fileId, checksum) {
+            openConfirm('Delete this duplicate file from Google Drive? This copy will be permanently deleted.', 'Delete Copy', async () => {
+                try {
+                    showToast('Deleting duplicate copy from Google Drive...');
+                    const res = await fetch(`/api/files/${fileId}/delete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ confirm: true })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.error || 'Deletion failed');
+                    
+                    showToast('File deleted successfully', 'success');
+                    await fetchAccounts();
+                    await fetchAnalytics();
+                    await loadDuplicatesList();
+                } catch (err) {
+                    console.error(err);
+                    showToast('Deletion failed: ' + err.message, 'error');
+                }
+            });
+        }
+
+        // --- EXPLORER WORKSPACE LOGIC ---
+        function navigateToAccountFolder(accountId) {
+            window.location.hash = 'explorer';
+            // Wait slightly for tab rendering to locate DOM tree nodes
+            setTimeout(() => {
+                loadFolderContents(accountId, 'root');
+            }, 100);
+        }
+
+        function navigateToExplorerAndLocate(fileName) {
+            window.location.hash = 'explorer';
+            setTimeout(() => {
+                const searchInput = document.getElementById('global-search');
+                searchInput.value = fileName;
+                triggerGlobalSearch(fileName);
+            }, 100);
+        }
+
+        async function loadSidebarAccounts() {
+            const sb = document.getElementById('sidebar-tree');
+            sb.innerHTML = '<div class="text-slate-500 text-xs text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Loading drives...</div>';
+            
+            try {
+                const res = await fetch('/api/accounts');
+                const accounts = await res.json();
+                accountsCached = accounts;
+                
+                if(accounts.length === 0) {
+                    sb.innerHTML = '<div class="text-slate-500 text-xs text-center py-6">No connected drives.</div>';
+                    return;
+                }
+                
+                let html = '<ul class="space-y-1">';
+                accounts.forEach(acc => {
+                    html += `
+                        <li>
+                            <div class="tree-node group" data-account-id="${acc.id}" data-folder-id="root" id="node-${acc.id}-root" onclick="loadFolderContents(${acc.id}, 'root')">
+                                <div class="tree-chevron text-slate-500 hover:text-slate-300 flex-shrink-0" onclick="toggleNode(event, this, ${acc.id}, 'root')">
+                                    <i class="fa-solid fa-caret-right"></i>
+                                </div>
+                                <i class="fa-brands fa-google text-slate-400 group-[.active]:text-white flex-shrink-0"></i>
+                                <span class="truncate text-xs flex-1 text-slate-400 group-hover:text-slate-200 group-[.active]:text-white">${acc.label}</span>
+                            </div>
+                            <ul class="tree-children" id="children-${acc.id}-root" data-loaded="false"></ul>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+                sb.innerHTML = html;
+            } catch(e) {
+                console.error(e);
+                sb.innerHTML = '<div class="text-red-400 text-xs py-4 text-center">Failed to load tree.</div>';
+            }
+        }
+
+        async function toggleNode(e, chevronEl, accountId, folderId) {
+            e.stopPropagation();
+            const childrenContainer = document.getElementById(`children-${accountId}-${folderId}`);
+            if (!childrenContainer) return;
+
+            const isLoaded = childrenContainer.getAttribute('data-loaded') === 'true';
+            const isOpen = childrenContainer.classList.contains('open');
+            const iconEl = chevronEl.querySelector('i');
+
+            if (isOpen) {
+                childrenContainer.classList.remove('open');
+                chevronEl.classList.remove('open');
+                return;
+            }
+
+            chevronEl.classList.add('open');
+            childrenContainer.classList.add('open');
+
+            if (!isLoaded) {
+                if (iconEl) iconEl.className = 'fa-solid fa-spinner fa-spin text-blue-400';
+                
+                try {
+                    const res = await fetch(`/api/tree/subfolders?accountId=${accountId}&folderId=${folderId}`);
+                    const data = await res.json();
+                    
+                    if (data.folders && data.folders.length > 0) {
+                        let html = '';
+                        data.folders.forEach(f => {
+                            html += `
+                                <li class="mt-0.5">
+                                    <div class="tree-node group" data-account-id="${accountId}" data-folder-id="${f.id}" id="node-${accountId}-${f.id}" onclick="loadFolderContents(${accountId}, '${f.id}')">
+                                        <div class="tree-chevron text-slate-500 hover:text-slate-300 flex-shrink-0" onclick="toggleNode(event, this, ${accountId}, '${f.id}')">
+                                            <i class="fa-solid fa-caret-right"></i>
+                                        </div>
+                                        <i class="fa-solid fa-folder text-blue-400 group-[.active]:text-white flex-shrink-0 text-xs"></i>
+                                        <span class="truncate text-xs flex-1 text-slate-400 group-hover:text-slate-200 group-[.active]:text-white">${f.name}</span>
+                                    </div>
+                                    <ul class="tree-children" id="children-${accountId}-${f.id}" data-loaded="false"></ul>
+                                </li>
+                            `;
+                        });
+                        childrenContainer.innerHTML = html;
+                    } else {
+                        childrenContainer.innerHTML = '<li class="text-[10px] text-slate-600 ml-6 py-1 italic cursor-default">No subfolders</li>';
+                    }
+                    childrenContainer.setAttribute('data-loaded', 'true');
+                } catch (err) {
+                    childrenContainer.innerHTML = '<li class="text-xs text-red-500 ml-6 py-1">Failed to load</li>';
+                } finally {
+                    if (iconEl) iconEl.className = 'fa-solid fa-caret-right';
+                }
+            }
+        }
+
+        async function loadFolderContents(accountId, folderId) {
+            document.querySelectorAll('.tree-node.active').forEach(el => el.classList.remove('active'));
+            const activeNode = document.getElementById(`node-${accountId}-${folderId}`);
+            if (activeNode) activeNode.classList.add('active');
+
+            if (currentAccountId !== accountId) {
+                currentAccountId = accountId;
+                const accName = activeNode ? activeNode.querySelector('span').innerText : 'Account';
+                currentBreadcrumb = [{ name: accName, id: 'root' }];
+            }
+
+            const folderName = activeNode ? activeNode.querySelector('span').innerText : null;
+            await navigateTo(folderId, folderName);
+        }
+
+        async function navigateTo(folderId, folderName = null) {
+            currentFolderId = folderId;
+            document.getElementById('upload-container').classList.remove('hidden');
+
+            if (folderName && folderId !== 'root') {
+                const idx = currentBreadcrumb.findIndex(b => b.id === folderId);
+                if (idx !== -1) {
+                    currentBreadcrumb = currentBreadcrumb.slice(0, idx + 1);
+                } else {
+                    currentBreadcrumb.push({ name: folderName, id: folderId });
+                }
+            } else if (folderId === 'root') {
+                currentBreadcrumb = currentBreadcrumb.slice(0, 1);
+            }
+
+            renderBreadcrumbs();
+            document.getElementById('local-search').value = '';
+            
+            const pane = document.getElementById('file-pane');
+            pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-4 text-blue-400"></i><p>Scanning directory contents...</p></div>';
+
+            try {
+                const res = await fetch(`/api/browse?accountId=${currentAccountId}&folderId=${folderId}`);
+                if (!res.ok) throw new Error("Failed browse");
+                const data = await res.json();
+                
+                currentItems = data.items || [];
+                currentItems.sort((a, b) => {
+                    const aIsF = a.mimeType === 'application/vnd.google-apps.folder';
+                    const bIsF = b.mimeType === 'application/vnd.google-apps.folder';
+                    if (aIsF && !bIsF) return -1;
+                    if (!aIsF && bIsF) return 1;
+                    return a.name.localeCompare(b.name);
+                });
+
+                renderItems(currentItems);
+            } catch (err) {
+                pane.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-red-400"><i class="fa-solid fa-triangle-exclamation text-3xl mb-4"></i><p>Failed to scan directory catalog.</p></div>`;
+                console.error(err);
+            }
+        }
+
+        function renderBreadcrumbs() {
+            const bc = document.getElementById('breadcrumb-trail');
+            if (currentBreadcrumb.length === 0) {
+                bc.innerHTML = '<span>Select an account</span>';
+                return;
+            }
+            
+            let html = '';
+            currentBreadcrumb.forEach((item, index) => {
+                if (index > 0) html += ' <i class="fa-solid fa-chevron-right text-[8px] mx-1"></i> ';
+                if (index === currentBreadcrumb.length - 1) {
+                    html += `<span class="text-slate-200 font-semibold truncate max-w-[150px] inline-block font-sans-editorial">${item.name}</span>`;
+                } else {
+                    html += `<a href="#" onclick="navigateTo('${item.id}'); return false;" class="hover:text-blue-400 transition cursor-pointer font-sans-editorial">${item.name}</a>`;
+                }
+            });
+            bc.innerHTML = html;
+        }
+
+        function renderItems(itemsToRender, isSearchResults = false) {
+            const pane = document.getElementById('file-pane');
+            if (itemsToRender.length === 0) {
+                pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500 font-sans-editorial"><i class="fa-regular fa-folder-open text-4xl mb-4 text-slate-600"></i><p>No archives matching filter.</p></div>';
+                return;
+            }
+
+            if (viewMode === 'grid') {
+                let html = '<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-12 w-full font-sans-editorial">';
+                itemsToRender.forEach((item, index) => {
+                    const isFolder = item.mimeType === 'application/vnd.google-apps.folder';
+                    const icon = getFileIconClass(item.name, item.mimeType);
+                    const safeItem = encodeURIComponent(JSON.stringify(item));
+
+                    if (isFolder) {
+                        html += `
+                            <div class="file-card animate-fade-in rounded-lg p-4 cursor-pointer select-none flex flex-col items-center text-center group min-w-0"
+                                style="animation-delay: ${index * 15}ms; opacity: 0;"
+                                onclick="navigateTo('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                                <i class="${icon} text-3xl mb-2.5 group-hover:scale-105 transition-transform duration-200"></i>
+                                <span class="text-xs text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
+                                ${isSearchResults ? `<span class="text-[9px] bg-darkbg text-slate-500 border border-darkborder px-1.5 py-0.5 rounded mt-2 truncate w-full max-w-full">${item.accountLabel}</span>` : ''}
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="file-card animate-fade-in rounded-lg p-4 cursor-pointer select-none flex flex-col items-center text-center group min-w-0"
+                                style="animation-delay: ${index * 15}ms; opacity: 0;"
+                                onclick="selectFile('${safeItem}')">
+                                <i class="${icon} text-3xl mb-2.5 group-hover:scale-105 transition-transform duration-200"></i>
+                                <span class="text-xs text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
+                                <span class="text-[10px] text-slate-500 mt-1">${formatBytes(item.size)}</span>
+                                ${isSearchResults ? `<span class="text-[9px] bg-darkbg text-slate-500 border border-darkborder px-1.5 py-0.5 rounded mt-2 truncate w-full max-w-full">${item.accountLabel}</span>` : ''}
+                            </div>
+                        `;
+                    }
+                });
+                html += '</div>';
+                pane.innerHTML = html;
+            } else {
+                let html = `
+                <div class="bg-darksurface border border-darkborder rounded-xl overflow-hidden font-sans-editorial">
+                    <table class="w-full text-left" style="table-layout: fixed;">
+                        <thead class="bg-darkbg border-b border-darkborder text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
+                            <tr>
+                                <th class="px-4 py-2.5 w-10 text-center"></th>
+                                <th class="px-4 py-2.5">Name</th>
+                                ${isSearchResults ? '<th class="px-4 py-2.5 w-32">Origin</th>' : ''}
+                                <th class="px-4 py-2.5 w-24 text-right">Size</th>
+                                <th class="px-4 py-2.5 w-28">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs divide-y divide-darkborder">
+                `;
+                itemsToRender.forEach((item, index) => {
+                    const isFolder = item.mimeType === 'application/vnd.google-apps.folder';
+                    const icon = getFileIconClass(item.name, item.mimeType);
+                    const safeItem = encodeURIComponent(JSON.stringify(item));
+                    const dateStr = item.created ? new Date(item.created).toLocaleDateString() : '-';
+
+                    if (isFolder) {
+                        html += `
+                            <tr class="animate-fade-in hover:bg-white/5 cursor-pointer transition-colors"
+                                style="animation-delay: ${index * 15}ms; opacity: 0; display: table-row;"
+                                onclick="navigateTo('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                                <td class="px-4 py-2.5 text-center"><i class="${icon} text-base"></i></td>
+                                <td class="px-4 py-2.5 font-medium text-slate-200 truncate pr-4">${item.name}</td>
+                                ${isSearchResults ? `<td class="px-4 py-2.5 text-slate-500 truncate text-[11px]">${item.accountLabel}</td>` : ''}
+                                <td class="px-4 py-2.5 text-right text-slate-500">-</td>
+                                <td class="px-4 py-2.5 text-slate-500 truncate">${dateStr}</td>
+                            </tr>
+                        `;
+                    } else {
+                        html += `
+                            <tr class="animate-fade-in hover:bg-white/5 cursor-pointer transition-colors"
+                                style="animation-delay: ${index * 15}ms; opacity: 0; display: table-row;"
+                                onclick="selectFile('${safeItem}')">
+                                <td class="px-4 py-2.5 text-center"><i class="${icon} text-base"></i></td>
+                                <td class="px-4 py-2.5 font-medium text-slate-200 truncate pr-4">${item.name}</td>
+                                ${isSearchResults ? `<td class="px-4 py-2.5 text-slate-500 truncate text-[11px]">${item.accountLabel}</td>` : ''}
+                                <td class="px-4 py-2.5 text-right text-slate-400">${formatBytes(item.size)}</td>
+                                <td class="px-4 py-2.5 text-slate-500 truncate">${dateStr}</td>
+                            </tr>
+                        `;
+                    }
+                });
+                html += '</tbody></table></div>';
+                pane.innerHTML = html;
+            }
+        }
+
+        document.getElementById('local-search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = currentItems.filter(item => item.name.toLowerCase().includes(val));
+            renderItems(filtered, !currentFolderId);
+        });
+
+        // --- GLOBAL SEARCH ROUTER ---
+        document.getElementById('global-search').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = e.target.value.trim();
+                if (query) {
+                    window.location.hash = 'explorer';
+                    setTimeout(() => {
+                        triggerGlobalSearch(query);
+                    }, 100);
+                }
+            }
+        });
+
+        async function triggerGlobalSearch(query) {
+            document.getElementById('upload-container').classList.add('hidden');
+            document.querySelectorAll('.tree-node.active').forEach(el => el.classList.remove('active'));
+            
+            const bc = document.getElementById('breadcrumb-trail');
+            bc.innerHTML = `<span class="text-slate-500 font-sans-editorial">Search results for</span> <i class="fa-solid fa-chevron-right text-[8px] mx-1 text-slate-700"></i> <span class="text-blue-400 font-semibold font-sans-editorial">"${query}"</span>`;
+            bc.insertAdjacentHTML('beforeend', `
+                <button onclick="loadSidebarAccounts(); navigateToAccountFolder(${accountsCached[0]?.id || 1})" class="ml-4 px-2 py-0.5 border border-darkborder text-[9px] text-slate-500 hover:text-white rounded bg-darksurface transition font-sans-editorial uppercase tracking-wider">
+                    Clear Search
+                </button>
+            `);
+
+            const pane = document.getElementById('file-pane');
+            pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-4 text-blue-400"></i><p>Searching cross-account indexes...</p></div>';
+
+            try {
+                const res = await fetch(`/api/files?q=${encodeURIComponent(query)}&limit=150`);
+                const data = await res.json();
+                const files = data.files || [];
+                
+                currentItems = files.map(f => ({
+                    id: f.drive_file_id,
+                    dbId: f.id,
+                    name: f.name,
+                    mimeType: f.mime_type,
+                    size: f.size,
+                    created: f.created_time,
+                    driveUrl: f.web_view_link,
+                    accountLabel: f.account_label,
+                    accountId: f.account_id,
+                    filePath: f.path
+                }));
+
+                renderItems(currentItems, true);
+            } catch (err) {
+                console.error(err);
+                pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-red-400"><i class="fa-solid fa-circle-exclamation text-3xl mb-4"></i><p>Search execution failed.</p></div>';
+            }
+        }
+
+        // --- FILE SELECTION & DETAILS ---
+        async function selectFile(encodedItem) {
+            const item = JSON.parse(decodeURIComponent(encodedItem));
+            selectedFileObject = item;
+            
+            if (!item.dbId) {
+                try {
+                    const response = await fetch(`/api/files`);
+                    const data = await response.json();
+                    const matchedFile = data.files.find(f => f.drive_file_id === item.id);
+                    if (matchedFile) {
+                        item.dbId = matchedFile.id;
+                        item.accountId = matchedFile.account_id;
+                        item.accountLabel = matchedFile.account_label;
+                    }
+                } catch(e) {
+                    console.error('Failed to resolve db ID:', e);
+                }
+            }
+
+            const icon = getFileIconClass(item.name, item.mimeType);
+            document.getElementById('detail-icon').innerHTML = `<i class="${icon}"></i>`;
+            document.getElementById('detail-name').innerText = item.name;
+            document.getElementById('detail-type').innerText = item.mimeType || 'Unknown';
+            document.getElementById('detail-size').innerText = item.size ? formatBytes(item.size) : '-';
+            document.getElementById('detail-date').innerText = item.created ? new Date(item.created).toLocaleString() : '-';
+
+            let accountName = item.accountLabel;
+            if(!accountName && currentAccountId) {
+                const matchedAcc = accountsCached.find(a => a.id === currentAccountId);
+                accountName = matchedAcc ? matchedAcc.label : 'Unknown';
+            }
+            
+            const badgeHtml = `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[10px] font-semibold border border-blue-500/20 max-w-full truncate"><i class="fa-brands fa-google shrink-0"></i> <span class="truncate">${accountName}</span></span>`;
+            document.getElementById('detail-badge').innerHTML = badgeHtml;
+
+            const btnLink = document.getElementById('btn-drive-link');
+            if (item.driveUrl) {
+                btnLink.href = item.driveUrl;
+                btnLink.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                 btnLink.removeAttribute('href');
+                 btnLink.classList.add('opacity-50', 'pointer-events-none');
+            }
+
+            const btnDownload = document.getElementById('btn-detail-download');
+            if (item.dbId) {
+                btnDownload.href = `/api/files/${item.dbId}/download`;
+                btnDownload.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                btnDownload.removeAttribute('href');
+                btnDownload.classList.add('opacity-50', 'pointer-events-none');
+            }
+
+            const btnTransfer = document.getElementById('btn-detail-transfer');
+            const btnDelete = document.getElementById('btn-detail-delete');
+            [btnTransfer, btnDelete].forEach(btn => {
+                if (item.dbId) {
+                    btn.classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    btn.classList.add('opacity-50', 'pointer-events-none');
+                }
+            });
+
+            btnDelete.onclick = () => deleteSelectedFile(item.dbId);
+            btnTransfer.onclick = () => openTransferDrawer(item.dbId, item.name, item.accountId || currentAccountId);
+
+            openDrawer('details');
+        }
+
+        async function deleteSelectedFile(dbId) {
+            openConfirm('Delete this file from Google Drive? This action cannot be undone.', 'Delete File Connection', async () => {
+                try {
+                    showToast('Deleting file from Google Drive...');
+                    closeDrawers();
+                    const res = await fetch(`/api/files/${dbId}/delete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ confirm: true })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.error || 'Deletion failed');
+                    
+                    showToast('File successfully deleted', 'success');
+                    if (currentFolderId) {
+                        await navigateTo(currentFolderId);
+                    }
+                } catch(e) {
+                    console.error(e);
+                    showToast('Delete failed: ' + e.message, 'error');
+                }
+            });
+        }
+
+        // --- DYNAMIC UPLOAD HANDLING ---
+        function triggerFileUpload() {
+            document.getElementById('file-upload-input').click();
+        }
+
+        document.getElementById('file-upload-input').addEventListener('change', async (e) => {
+            const files = e.target.files;
+            if (files.length === 0) return;
+
+            const file = files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            if (currentFolderId && currentFolderId !== 'root') {
+                formData.append('folderId', currentFolderId);
+            }
+
+            try {
+                showToast(`Uploading "${file.name}" to Google Drive...`);
+                const res = await fetch(`/api/accounts/${currentAccountId}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || 'Upload failed');
+                showToast('Upload completed successfully!', 'success');
+                await navigateTo(currentFolderId);
+            } catch (err) {
+                console.error(err);
+                showToast('Upload failed: ' + err.message, 'error');
+            }
+        });
+
+        // --- DYNAMIC TRANSFER DRAWER HANDLING ---
+        function openTransferDrawer(fileId, fileName, sourceAccountId) {
+            transferFileId = fileId;
+            document.getElementById('transfer-source-name').innerText = fileName;
+            
+            const selectEl = document.getElementById('transfer-target-account');
+            selectEl.innerHTML = '<option value="">Select target account...</option>';
+            
+            accountsCached.forEach(acc => {
+                if (acc.id !== Number(sourceAccountId)) {
+                    selectEl.insertAdjacentHTML('beforeend', `<option value="${acc.id}">${acc.label} (${acc.email || 'No email'})</option>`);
+                }
+            });
+
+            document.getElementById('transfer-target-folder').value = '';
+            openDrawer('transfer');
+        }
+
+        async function executeTransfer() {
+            const targetAccountId = document.getElementById('transfer-target-account').value;
+            const mode = document.querySelector('input[name="transfer-mode"]:checked').value;
+            const targetFolderId = document.getElementById('transfer-target-folder').value.trim();
+
+            if (!targetAccountId) {
+                showToast('Please select a target account.', 'error');
+                return;
+            }
+
+            try {
+                showToast('Initiating file transfer. Downloading and uploading between drives...');
+                closeDrawers();
+                
+                const res = await fetch(`/api/files/${transferFileId}/transfer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        targetAccountId: Number(targetAccountId),
+                        mode: mode,
+                        targetFolderId: targetFolderId || 'root'
+                    })
+                });
+
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || 'Transfer failed');
+                
+                showToast(`Transfer complete! File successfully ${mode === 'copy' ? 'copied' : 'moved'}.`, 'success');
+
+                if (currentFolderId) {
+                    await navigateTo(currentFolderId);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Transfer failed: ' + err.message, 'error');
+            }
+        }
+
+        // --- GRID/LIST VIEW TOGGLING ---
+        document.getElementById('btn-view-grid').addEventListener('click', () => {
+            viewMode = 'grid';
+            document.getElementById('btn-view-grid').className = "w-6 h-6 rounded text-white bg-darkbg shadow items-center justify-center flex transition text-xs";
+            document.getElementById('btn-view-list').className = "w-6 h-6 rounded text-slate-400 hover:text-white items-center justify-center flex transition text-xs";
+            renderItems(currentItems);
+        });
+
+        document.getElementById('btn-view-list').addEventListener('click', () => {
+            viewMode = 'list';
+            document.getElementById('btn-view-list').className = "w-6 h-6 rounded text-white bg-darkbg shadow items-center justify-center flex transition text-xs";
+            document.getElementById('btn-view-grid').className = "w-6 h-6 rounded text-slate-400 hover:text-white items-center justify-center flex transition text-xs";
+            renderItems(currentItems);
+        });
+
+        // --- CONFIRM DIALOG LOGIC ---
         let __confirmCallback = null;
         function openConfirm(message, title = 'Confirm', callback) {
             __confirmCallback = callback;
@@ -699,31 +1581,98 @@
                     await __confirmCallback();
                 } catch (err) {
                     console.error(err);
-                    showToast('Action failed: ' + (err.message || String(err)));
+                    showToast('Action failed: ' + err.message, 'error');
                 }
             }
             closeConfirm();
         });
 
-        async function unlinkAccount(id) {
-            openConfirm('Unlink this account? This will remove its files from the catalog.', 'Unlink account', async () => {
-                try {
-                    const res = await fetch(`/api/accounts/${id}/unlink`, { method: 'POST' });
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok) throw new Error(data.error || 'Unlink failed');
-                    showToast('Account unlinked');
-                    await fetchAccounts();
-                    await fetchAnalytics();
-                } catch (err) {
-                    console.error(err);
-                    showToast('Unlink error: ' + err.message);
-                }
-            });
+        // --- TREE SIDEBAR DRAGGING RESIZER ---
+        const leftSidebar = document.getElementById('left-sidebar');
+        const resizerLeft = document.getElementById('resizer-left');
+        leftSidebar.style.width = `${savedSidebarWidth}px`;
+
+        resizerLeft.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            leftSidebar.classList.remove('resize-transition');
+            resizerLeft.classList.add('active');
+            
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100vw';
+            overlay.style.height = '100vh';
+            overlay.style.cursor = 'col-resize';
+            overlay.style.zIndex = '9999';
+            document.body.appendChild(overlay);
+
+            function onMouseMove(e) {
+                let newWidth = e.clientX - leftSidebar.getBoundingClientRect().left;
+                if (newWidth < 160) newWidth = 160;
+                if (newWidth > 480) newWidth = 480;
+                leftSidebar.style.width = `${newWidth}px`;
+            }
+
+            function onMouseUp() {
+                leftSidebar.classList.add('resize-transition');
+                resizerLeft.classList.remove('active');
+                localStorage.setItem('sidebar-width', parseInt(leftSidebar.style.width));
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                overlay.remove();
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+
+        // --- UTILITY FORMATTERS ---
+        function formatBytes(bytes) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Boot
-        fetchAccounts();
-        fetchAnalytics();
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Never';
+            return new Date(dateStr).toLocaleDateString();
+        }
+
+        function getFileIconClass(filename, mimeType = null) {
+            if (mimeType === 'application/vnd.google-apps.folder') return 'fa-solid fa-folder text-blue-400';
+            const ext = filename.split('.').pop().toLowerCase();
+            if (['mp4','mov','mkv','avi'].includes(ext)) return 'fa-solid fa-file-video text-indigo-400';
+            if (['png','jpg','jpeg','fig','gif'].includes(ext)) return 'fa-solid fa-file-image text-emerald-400';
+            if (['zip','tar','gz','iso','rar'].includes(ext)) return 'fa-solid fa-file-zipper text-amber-400';
+            if (['pdf'].includes(ext)) return 'fa-solid fa-file-pdf text-red-400';
+            return 'fa-solid fa-file-lines text-blue-400';
+        }
+
+        // --- APPLICATION INITIALIZATION ---
+        document.getElementById('btn-notifications').addEventListener('click', () => showToast('Application index is up to date.', 'info'));
+        document.getElementById('btn-profile').addEventListener('click', () => showToast('Drive Mess Account Center is offline.', 'info'));
+
+        // Handle OAuth callback parameters (e.g. linked=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('linked') === '1') {
+            showToast('Google Drive account linked successfully!', 'success');
+            window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+        } else if (urlParams.get('error')) {
+            const err = urlParams.get('error');
+            if (err === 'missing_drive_scope') {
+                showToast('Authorization failed: Please grant permissions to view and manage Google Drive files.', 'error');
+            } else {
+                showToast(`Authorization failed: ${err.replace(/_/g, ' ')}`, 'error');
+            }
+            window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+        }
+        
+        // Initial route resolution
+        const initTab = window.location.hash.slice(1) || 'dashboard';
+        showView(initTab);
     </script>
 </body>
 </html>
