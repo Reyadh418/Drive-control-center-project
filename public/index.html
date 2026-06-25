@@ -254,7 +254,10 @@
             <!-- TAB 2: EXPLORER (FILES) -->
             <div id="view-explorer" class="view-panel flex-1 hidden overflow-hidden relative flex">
                 <!-- Left Sidebar: Folder Tree -->
-                <aside id="left-sidebar" class="w-64 bg-darksurface flex flex-col shrink-0 relative resize-transition" style="overflow-x: hidden;">
+                <aside id="left-sidebar" class="w-64 bg-darksurface flex flex-col shrink-0 relative resize-transition border-r border-darkborder" style="overflow-x: hidden;">
+                    <div class="p-4 border-b border-darkborder bg-darksurface/30 shrink-0">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block font-sans-editorial">Directory Hierarchy</span>
+                    </div>
                     <div class="flex-1 overflow-y-auto p-3 text-sm folder-tree" id="sidebar-tree">
                         <div class="text-slate-500 text-xs text-center py-4">Loading accounts...</div>
                     </div>
@@ -266,17 +269,22 @@
                 <!-- Center Workspace Pane -->
                 <section class="flex-1 flex flex-col bg-darkbg overflow-hidden relative">
                     <!-- View Headers -->
-                    <header class="h-14 px-6 border-b border-darkborder flex items-center justify-between shrink-0">
-                        <div class="flex items-center gap-2 text-sm text-slate-400 min-w-0" id="breadcrumb-trail">
-                            <span>Select an account folder...</span>
+                    <header class="h-16 px-6 border-b border-darkborder flex items-center justify-between shrink-0 bg-darksurface/10">
+                        <div class="flex flex-col min-w-0 font-sans-editorial">
+                            <div class="flex items-center gap-1.5 text-xs text-slate-400 min-w-0" id="breadcrumb-trail">
+                                <span>Select an account folder...</span>
+                            </div>
+                            <div id="folder-stats-summary" class="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-sans-editorial hidden">
+                                0 folders • 0 files • 0 B total
+                            </div>
                         </div>
                         
                         <div class="flex items-center gap-3 shrink-0">
                             <!-- File Upload Controls -->
                             <div id="upload-container" class="hidden">
                                 <input type="file" id="file-upload-input" class="hidden">
-                                <button id="btn-upload" onclick="triggerFileUpload()" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-md shadow-blue-400/10">
-                                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload File
+                                <button id="btn-upload" onclick="triggerFileUpload()" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-md shadow-blue-400/10 uppercase tracking-wider">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload
                                 </button>
                             </div>
 
@@ -284,7 +292,7 @@
                             <div class="relative items-center">
                                 <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
                                 <input type="text" id="local-search" placeholder="Filter current view..." 
-                                    class="w-48 bg-darksurface border border-darkborder rounded-lg py-1 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-400 transition-colors">
+                                    class="w-48 bg-darksurface border border-darkborder rounded-lg py-1.5 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-400 transition-colors">
                             </div>
 
                             <!-- Grid/List switches -->
@@ -307,6 +315,55 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Right Column: Inline Collapsible Details Panel (Migrated from floating overlay) -->
+                <aside id="drawer-details" class="details-panel bg-darksurface border-l border-darkborder flex flex-col shrink-0 overflow-hidden z-20">
+                    <div class="p-5 border-b border-darkborder flex justify-between items-center bg-darksurface/30 shrink-0">
+                        <h3 class="text-xs uppercase tracking-widest font-semibold text-slate-400">File Details</h3>
+                        <button onclick="closeDrawers()" class="text-slate-500 hover:text-slate-300 transition-colors">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+                    <div class="flex-1 flex flex-col overflow-y-auto">
+                        <div class="p-6 flex flex-col items-center border-b border-darkborder text-center bg-darksurface/10 shrink-0">
+                            <div class="w-16 h-16 rounded-xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4 text-slate-400" id="detail-icon">
+                                <i class="fa-solid fa-file"></i>
+                            </div>
+                            <h4 class="text-white font-semibold break-all w-full leading-tight mb-2 text-sm" id="detail-name">-</h4>
+                            <div id="detail-badge" class="mt-1"></div>
+                        </div>
+
+                        <div class="p-6 flex-1 space-y-4 text-xs font-sans-editorial">
+                            <div>
+                                <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Type</p>
+                                <p class="text-slate-300 font-medium" id="detail-type">-</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Size</p>
+                                <p class="text-slate-300 font-medium" id="detail-size">-</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Created</p>
+                                <p class="text-slate-300 font-medium" id="detail-date">-</p>
+                            </div>
+                            
+                            <div class="pt-4 mt-6 border-t border-darkborder space-y-2 shrink-0">
+                                <a href="#" target="_blank" id="btn-detail-download" class="w-full py-2 bg-blue-50 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold shadow-sm text-center text-xs uppercase tracking-wider">
+                                    <i class="fa-solid fa-cloud-arrow-down"></i> Download File
+                                </a>
+                                <button id="btn-detail-transfer" class="w-full py-2 bg-white/5 border border-darkborder hover:bg-white/10 text-slate-200 hover:text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold text-xs uppercase tracking-wider">
+                                    <i class="fa-solid fa-shuffle"></i> Copy or Move
+                                </button>
+                                <button id="btn-detail-delete" class="w-full py-2 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-red-300 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold text-xs uppercase tracking-wider">
+                                    <i class="fa-solid fa-trash-can"></i> Delete File
+                                </button>
+                                <a href="#" target="_blank" id="btn-drive-link" class="w-full py-2 bg-darkbg hover:bg-white/5 text-slate-400 hover:text-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-darkborder font-semibold text-xs uppercase tracking-wider">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Drive
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
             </div>
 
             <!-- TAB 3: ACCOUNTS REGISTRY -->
@@ -500,54 +557,6 @@
         </div>
     </div>
 
-    <!-- 4. File Details Drawer -->
-    <div id="drawer-details" class="drawer-tray">
-        <div class="p-5 border-b border-darkborder flex justify-between items-center bg-darksurface/30 shrink-0">
-            <h3 class="text-xs uppercase tracking-widest font-semibold text-slate-400">File Details</h3>
-            <button onclick="closeDrawers()" class="text-slate-500 hover:text-slate-300 transition-colors">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-        </div>
-        <div class="flex-1 flex flex-col overflow-y-auto">
-            <div class="p-6 flex flex-col items-center border-b border-darkborder text-center bg-darksurface/10 shrink-0">
-                <div class="w-16 h-16 rounded-xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4 text-slate-400" id="detail-icon">
-                    <i class="fa-solid fa-file"></i>
-                </div>
-                <h4 class="text-white font-semibold break-all w-full leading-tight mb-2 text-sm" id="detail-name">-</h4>
-                <div id="detail-badge" class="mt-1"></div>
-            </div>
-
-            <div class="p-6 flex-1 space-y-4 text-xs font-sans-editorial">
-                <div>
-                    <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Type</p>
-                    <p class="text-slate-300 font-medium" id="detail-type">-</p>
-                </div>
-                <div>
-                    <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Size</p>
-                    <p class="text-slate-300 font-medium" id="detail-size">-</p>
-                </div>
-                <div>
-                    <p class="text-slate-500 font-medium mb-0.5 uppercase tracking-wider text-[10px]">Created</p>
-                    <p class="text-slate-300 font-medium" id="detail-date">-</p>
-                </div>
-                
-                <div class="pt-4 mt-6 border-t border-darkborder space-y-2 shrink-0">
-                    <a href="#" target="_blank" id="btn-detail-download" class="w-full py-2 bg-blue-50 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold shadow-sm text-center text-xs uppercase tracking-wider">
-                        <i class="fa-solid fa-cloud-arrow-down"></i> Download File
-                    </a>
-                    <button id="btn-detail-transfer" class="w-full py-2 bg-white/5 border border-darkborder hover:bg-white/10 text-slate-200 hover:text-white rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold text-xs uppercase tracking-wider">
-                        <i class="fa-solid fa-shuffle"></i> Copy or Move
-                    </button>
-                    <button id="btn-detail-delete" class="w-full py-2 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-red-300 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-semibold text-xs uppercase tracking-wider">
-                        <i class="fa-solid fa-trash-can"></i> Delete File
-                    </button>
-                    <a href="#" target="_blank" id="btn-drive-link" class="w-full py-2 bg-darkbg hover:bg-white/5 text-slate-400 hover:text-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-darkborder font-semibold text-xs uppercase tracking-wider">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Drive
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Centered Confirmation Overlay Modal -->
     <div id="confirm-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
@@ -660,7 +669,9 @@
             const overlay = document.getElementById('drawer-overlay');
             const drawer = document.getElementById(`drawer-${drawerId}`);
             if (drawer) {
-                overlay.classList.add('open');
+                if (drawerId !== 'details') {
+                    overlay.classList.add('open');
+                }
                 drawer.classList.add('open');
             }
             
@@ -674,7 +685,7 @@
                 const overlay = document.getElementById('drawer-overlay');
                 overlay.classList.remove('open');
             }
-            document.querySelectorAll('.drawer-tray').forEach(d => d.classList.remove('open'));
+            document.querySelectorAll('.drawer-tray, .details-panel').forEach(d => d.classList.remove('open'));
         }
 
         // --- CONFIG & STATUS GET ---
@@ -1162,6 +1173,7 @@
             document.getElementById('local-search').value = '';
             
             const pane = document.getElementById('file-pane');
+            pane.classList.remove('folder-fade');
             pane.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-500"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-4 text-blue-400"></i><p>Scanning directory contents...</p></div>';
 
             try {
@@ -1178,6 +1190,19 @@
                     return a.name.localeCompare(b.name);
                 });
 
+                // Compute stats for folder stats header
+                const filesCount = currentItems.filter(item => item.mimeType !== 'application/vnd.google-apps.folder').length;
+                const foldersCount = currentItems.filter(item => item.mimeType === 'application/vnd.google-apps.folder').length;
+                const totalSize = currentItems.reduce((acc, item) => acc + (parseInt(item.size) || 0), 0);
+
+                const statsEl = document.getElementById('folder-stats-summary');
+                if (statsEl) {
+                    statsEl.innerText = `${foldersCount} folder${foldersCount !== 1 ? 's' : ''} • ${filesCount} file${filesCount !== 1 ? 's' : ''} • ${formatBytes(totalSize)} total`;
+                    statsEl.classList.remove('hidden');
+                }
+
+                // Add transition and render items
+                pane.classList.add('folder-fade');
                 renderItems(currentItems);
             } catch (err) {
                 pane.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-red-400"><i class="fa-solid fa-triangle-exclamation text-3xl mb-4"></i><p>Failed to scan directory catalog.</p></div>`;

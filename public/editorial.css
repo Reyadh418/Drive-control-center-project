@@ -177,3 +177,51 @@ body {
     opacity: 1;
     pointer-events: auto;
 }
+
+/* Three-Column Explorer & Split-Pane Details Panel */
+.details-panel {
+    width: 320px;
+    margin-right: -320px;
+    transition: margin-right 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+.details-panel.open {
+    margin-right: 0;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Directory Tree Branch Lines */
+.tree-children {
+    position: relative;
+    padding-left: 1.25rem;
+    margin-left: 0.65rem;
+    border-left: 1px dashed rgba(143, 158, 139, 0.15); /* Soft Sage dash */
+}
+
+/* Tactile File Grid Card Interactions */
+.file-card-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.file-card:hover .file-card-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Folder Switch transitions */
+.folder-fade {
+    animation: folderFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes folderFade {
+    from { opacity: 0.5; transform: translateY(2px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
