@@ -74,6 +74,17 @@ function initDatabase(dbPath) {
     CREATE INDEX IF NOT EXISTS idx_files_md5 ON files(md5_checksum);
   `);
 
+  try {
+    db.exec(`ALTER TABLE files ADD COLUMN thumbnail_link TEXT;`);
+  } catch (e) {
+    // Ignore error if column already exists
+  }
+  try {
+    db.exec(`ALTER TABLE files ADD COLUMN thumbnail_expires_at INTEGER DEFAULT 0;`);
+  } catch (e) {
+    // Ignore error if column already exists
+  }
+
   return db;
 }
 

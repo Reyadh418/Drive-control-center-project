@@ -1862,8 +1862,12 @@
             }
             const name = (item.name || '').toLowerCase();
             const ext = name.split('.').pop();
-            const imageExtensions = ['png','jpg','jpeg','fig','gif','webp','heic','heif','tiff','bmp'];
-            const videoExtensions = ['mp4','mov','mkv','avi','webm','3gp'];
+            const imageExtensions = [
+                'png','jpg','jpeg','fig','gif','webp','heic','heif','tiff','bmp','psd','ai','svg','raw','cr2','nef','orf','sr2','ico'
+            ];
+            const videoExtensions = [
+                'mp4','mov','mkv','avi','webm','3gp','flv','wmv','m4v','mpg','mpeg','divx','ogv','vob'
+            ];
             if (imageExtensions.includes(ext) || videoExtensions.includes(ext) || ext === 'pdf') {
                 return true;
             }

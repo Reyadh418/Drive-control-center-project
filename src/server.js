@@ -574,6 +574,11 @@ app.get('/api/files/:id/thumbnail', async (req, res) => {
     return res.status(404).json({ error: 'File not found.' });
   }
 
+  // If we have a cached thumbnail link that is not expired, redirect directly
+  if (file.thumbnail_link && file.thumbnail_expires_at > Date.now()) {
+    return res.redirect(file.thumbnail_link);
+  }
+
   if (!file.account_id) {
     return res.status(400).json({ error: 'File is missing its account mapping.' });
   }
@@ -594,6 +599,14 @@ app.get('/api/files/:id/thumbnail', async (req, res) => {
     );
 
     if (thumbnailLink) {
+      // Cache thumbnail for 1 hour
+      const expiresAt = Date.now() + 60 * 60 * 1000;
+      db.prepare(`
+        UPDATE files 
+        SET thumbnail_link = ?, thumbnail_expires_at = ? 
+        WHERE id = ?
+      `).run(thumbnailLink, expiresAt, file.id);
+
       res.redirect(thumbnailLink);
     } else {
       res.status(404).send('No thumbnail available.');
