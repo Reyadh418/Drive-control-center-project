@@ -1139,32 +1139,60 @@
             }
         }
 
+        function getBreadcrumbPathFromTree(activeNode, accountId) {
+            const path = [];
+            let currentEl = activeNode;
+            while (currentEl) {
+                const parentChildrenUl = currentEl.closest('ul.tree-children');
+                if (!parentChildrenUl) {
+                    break;
+                }
+                const parts = parentChildrenUl.id.split('-');
+                const parentFolderId = parts.slice(2).join('-');
+                const parentNode = document.getElementById(`node-${accountId}-${parentFolderId}`);
+                if (parentNode) {
+                    const name = parentNode.querySelector('span').innerText;
+                    path.unshift({ name, id: parentFolderId });
+                    currentEl = parentNode;
+                } else {
+                    break;
+                }
+            }
+            // Add the active node itself
+            const activeName = activeNode.querySelector('span').innerText;
+            const activeFolderId = activeNode.getAttribute('data-folder-id') || 'root';
+            path.push({ name: activeName, id: activeFolderId });
+            return path;
+        }
+
         async function loadFolderContents(accountId, folderId) {
             document.querySelectorAll('.tree-node.active').forEach(el => el.classList.remove('active'));
             const activeNode = document.getElementById(`node-${accountId}-${folderId}`);
-            if (activeNode) activeNode.classList.add('active');
-
-            if (currentAccountId !== accountId) {
+            if (activeNode) {
+                activeNode.classList.add('active');
                 currentAccountId = accountId;
-                const accName = activeNode ? activeNode.querySelector('span').innerText : 'Account';
-                currentBreadcrumb = [{ name: accName, id: 'root' }];
+                currentBreadcrumb = getBreadcrumbPathFromTree(activeNode, accountId);
+            } else {
+                if (currentAccountId !== accountId) {
+                    currentAccountId = accountId;
+                    currentBreadcrumb = [{ name: 'Account', id: 'root' }];
+                }
             }
 
-            const folderName = activeNode ? activeNode.querySelector('span').innerText : null;
-            await navigateTo(folderId, folderName);
+            await navigateTo(folderId, null);
         }
 
         async function navigateTo(folderId, folderName = null) {
             currentFolderId = folderId;
             document.getElementById('upload-container').classList.remove('hidden');
 
-            if (folderName && folderId !== 'root') {
-                const idx = currentBreadcrumb.findIndex(b => b.id === folderId);
-                if (idx !== -1) {
-                    currentBreadcrumb = currentBreadcrumb.slice(0, idx + 1);
-                } else {
-                    currentBreadcrumb.push({ name: folderName, id: folderId });
-                }
+            const idx = currentBreadcrumb.findIndex(b => b.id === folderId);
+            if (idx !== -1) {
+                // If the folder is already in the breadcrumb trail, truncate to it
+                currentBreadcrumb = currentBreadcrumb.slice(0, idx + 1);
+            } else if (folderName) {
+                // Otherwise, if we have a name, push it as a new child folder
+                currentBreadcrumb.push({ name: folderName, id: folderId });
             } else if (folderId === 'root') {
                 currentBreadcrumb = currentBreadcrumb.slice(0, 1);
             }
