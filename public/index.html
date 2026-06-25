@@ -1627,6 +1627,132 @@
             document.addEventListener('mouseup', onMouseUp);
         });
 
+        // --- MISSING UI FUNCTIONALITIES ---
+        function copyToClipboard(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            el.select();
+            el.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(el.value)
+                .then(() => {
+                    showToast('Copied to clipboard!', 'success');
+                })
+                .catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    showToast('Failed to copy to clipboard', 'error');
+                });
+        }
+
+        async function submitAddAccount(event) {
+            event.preventDefault();
+            const labelInput = document.getElementById('add-account-label');
+            const label = labelInput.value.trim();
+            if (!label) return;
+
+            try {
+                showToast('Initiating drive connection...');
+                const response = await fetch('/accounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ label })
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    const text = await response.text();
+                    throw new Error(text || 'Failed to initiate linking');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to link account: ' + err.message, 'error');
+            }
+        }
+
+        async function loadDuplicatesList() {
+            const listEl = document.getElementById('duplicates-modal-list');
+            listEl.innerHTML = '<div class="text-slate-500 text-xs text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Scanning database cache...</div>';
+
+            try {
+                const resDash = await fetch('/api/dashboard');
+                const dash = await resDash.json();
+                const candidates = dash.duplicate_candidates || [];
+
+                if (candidates.length === 0) {
+                    listEl.innerHTML = '<div class="text-slate-500 text-xs text-center py-8 italic">No duplicate files cataloged.</div>';
+                    return;
+                }
+
+                const detailedCandidates = await Promise.all(
+                    candidates.map(async (c) => {
+                        try {
+                            const resFile = await fetch(`/api/files/checksum/${c.md5_checksum}`);
+                            const fileData = await resFile.json();
+                            return {
+                                md5: c.md5_checksum,
+                                size: c.total_size / c.copies,
+                                total_size: c.total_size,
+                                copiesCount: c.copies,
+                                files: fileData.files || []
+                            };
+                        } catch (e) {
+                            console.error('Failed to load copies for checksum ' + c.md5_checksum, e);
+                            return null;
+                        }
+                    })
+                );
+
+                const validCandidates = detailedCandidates.filter(Boolean);
+                listEl.innerHTML = '';
+
+                validCandidates.forEach(cand => {
+                    if (cand.files.length === 0) return;
+                    const primaryFile = cand.files[0];
+                    const icon = getFileIconClass(primaryFile.name);
+
+                    let copiesHtml = '';
+                    cand.files.forEach(f => {
+                        copiesHtml += `
+                            <div class="flex items-center justify-between p-3 bg-darkbg border border-darkborder rounded-lg text-xs font-sans-editorial">
+                                <div class="min-w-0 flex-1 pr-3">
+                                    <div class="flex items-center gap-1.5 text-slate-300 font-medium">
+                                        <i class="fa-brands fa-google text-slate-500 text-[10px]"></i>
+                                        <span class="truncate block max-w-[200px]" title="${f.account_label}">${f.account_label}</span>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 truncate mt-0.5" title="${f.path}">${f.path || '/'}</p>
+                                </div>
+                                <div class="shrink-0 flex items-center gap-2">
+                                    <button onclick="navigateToExplorerAndLocate('${f.name.replace(/'/g, "\\'")}')" class="px-2.5 py-1 text-[10px] bg-white/5 border border-darkborder hover:bg-white/10 text-slate-300 rounded transition-colors" title="Locate in Files Tree">Locate</button>
+                                    <button onclick="deleteDuplicateCopy(${f.id}, '${cand.md5}')" class="px-2.5 py-1 text-[10px] bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 text-red-400 hover:text-red-300 rounded transition-colors" title="Delete copy from Drive">Delete</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    listEl.insertAdjacentHTML('beforeend', `
+                        <div class="editorial-card rounded-xl p-5 space-y-4">
+                            <div class="flex items-start gap-4 border-b border-darkborder pb-4 font-sans-editorial">
+                                <div class="w-12 h-12 rounded bg-darkbg border border-darkborder flex items-center justify-center text-xl text-slate-400">
+                                    <i class="${icon}"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <h4 class="text-xs font-bold text-slate-200 truncate" title="${primaryFile.name}">${primaryFile.name}</h4>
+                                    <p class="text-[10px] text-slate-500 mt-1 font-medium">${formatBytes(cand.size)} • <span class="text-blue-400">${cand.copiesCount} copies</span> (${formatBytes(cand.total_size)} total)</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 mt-4">
+                                ${copiesHtml}
+                            </div>
+                        </div>
+                    `);
+                });
+
+            } catch (err) {
+                console.error(err);
+                listEl.innerHTML = '<div class="text-red-400 text-xs text-center py-4">Failed to load duplicate catalog index.</div>';
+            }
+        }
+
         // --- UTILITY FORMATTERS ---
         function formatBytes(bytes) {
             if (!bytes || bytes === 0) return '0 B';
