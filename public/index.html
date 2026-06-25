@@ -1248,20 +1248,38 @@
                             <div class="file-card animate-fade-in rounded-lg p-4 cursor-pointer select-none flex flex-col items-center text-center group min-w-0"
                                 style="animation-delay: ${index * 15}ms; opacity: 0;"
                                 onclick="navigateTo('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
-                                <i class="${icon} text-3xl mb-2.5 group-hover:scale-105 transition-transform duration-200"></i>
+                                <div class="w-full h-24 flex items-center justify-center bg-blue-500/5 rounded-md mb-3 border border-blue-500/10 group-hover:bg-blue-500/10 group-hover:border-blue-500/20 transition-all duration-200">
+                                    <i class="${icon} text-3xl group-hover:scale-105 transition-transform duration-200"></i>
+                                </div>
                                 <span class="text-xs text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
-                                ${isSearchResults ? `<span class="text-[9px] bg-darkbg text-slate-500 border border-darkborder px-1.5 py-0.5 rounded mt-2 truncate w-full max-w-full">${item.accountLabel}</span>` : ''}
+                                ${isSearchResults ? `<span class="text-[9px] bg-darkbg text-slate-500 border border-darkborder px-1.5 py-0.5 rounded mt-2 truncate w-full max-w-full font-sans-editorial">${item.accountLabel}</span>` : ''}
                             </div>
                         `;
                     } else {
+                        const canHaveThumbnail = item.dbId && (
+                            (item.mimeType && (item.mimeType.startsWith('image/') || item.mimeType.startsWith('video/') || item.mimeType === 'application/pdf'))
+                        );
+
+                        let previewContent = `<i class="${icon} text-3xl group-hover:scale-105 transition-transform duration-200"></i>`;
+                        if (canHaveThumbnail) {
+                            previewContent = `
+                                <img src="/api/files/${item.dbId}/thumbnail" 
+                                     alt="${item.name}" 
+                                     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                                     onerror="handleThumbnailError(this, '${icon}', 'grid')" />
+                            `;
+                        }
+
                         html += `
                             <div class="file-card animate-fade-in rounded-lg p-4 cursor-pointer select-none flex flex-col items-center text-center group min-w-0"
                                 style="animation-delay: ${index * 15}ms; opacity: 0;"
                                 onclick="selectFile('${safeItem}')">
-                                <i class="${icon} text-3xl mb-2.5 group-hover:scale-105 transition-transform duration-200"></i>
+                                <div class="w-full h-24 flex items-center justify-center bg-black/30 rounded-md mb-3 border border-darkborder overflow-hidden relative transition-all duration-200 group-hover:border-slate-500/30">
+                                    ${previewContent}
+                                </div>
                                 <span class="text-xs text-slate-200 font-medium truncate w-full" title="${item.name}">${item.name}</span>
                                 <span class="text-[10px] text-slate-500 mt-1">${formatBytes(item.size)}</span>
-                                ${isSearchResults ? `<span class="text-[9px] bg-darkbg text-slate-500 border border-darkborder px-1.5 py-0.5 rounded mt-2 truncate w-full max-w-full">${item.accountLabel}</span>` : ''}
+                                ${isSearchResults ? `<span class="text-[9px] bg-darkbg text-slate-500 border border-darkborder px-1.5 py-0.5 rounded mt-2 truncate w-full max-w-full font-sans-editorial">${item.accountLabel}</span>` : ''}
                             </div>
                         `;
                     }
@@ -1274,7 +1292,7 @@
                     <table class="w-full text-left" style="table-layout: fixed;">
                         <thead class="bg-darkbg border-b border-darkborder text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
                             <tr>
-                                <th class="px-4 py-2.5 w-10 text-center"></th>
+                                <th class="px-4 py-2.5 w-12 text-center"></th>
                                 <th class="px-4 py-2.5">Name</th>
                                 ${isSearchResults ? '<th class="px-4 py-2.5 w-32">Origin</th>' : ''}
                                 <th class="px-4 py-2.5 w-24 text-right">Size</th>
@@ -1294,21 +1312,45 @@
                             <tr class="animate-fade-in hover:bg-white/5 cursor-pointer transition-colors"
                                 style="animation-delay: ${index * 15}ms; opacity: 0; display: table-row;"
                                 onclick="navigateTo('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
-                                <td class="px-4 py-2.5 text-center"><i class="${icon} text-base"></i></td>
+                                <td class="px-4 py-2.5 text-center">
+                                    <div class="flex items-center justify-center h-6">
+                                        <i class="${icon} text-base"></i>
+                                    </div>
+                                </td>
                                 <td class="px-4 py-2.5 font-medium text-slate-200 truncate pr-4">${item.name}</td>
-                                ${isSearchResults ? `<td class="px-4 py-2.5 text-slate-500 truncate text-[11px]">${item.accountLabel}</td>` : ''}
+                                ${isSearchResults ? `<td class="px-4 py-2.5 text-slate-500 truncate text-[11px] font-sans-editorial">${item.accountLabel}</td>` : ''}
                                 <td class="px-4 py-2.5 text-right text-slate-500">-</td>
                                 <td class="px-4 py-2.5 text-slate-500 truncate">${dateStr}</td>
                             </tr>
                         `;
                     } else {
+                        const canHaveThumbnail = item.dbId && (
+                            (item.mimeType && (item.mimeType.startsWith('image/') || item.mimeType.startsWith('video/') || item.mimeType === 'application/pdf'))
+                        );
+
+                        let cellContent = `<i class="${icon} text-base"></i>`;
+                        if (canHaveThumbnail) {
+                            cellContent = `
+                                <div class="w-6 h-6 rounded bg-black/30 border border-darkborder overflow-hidden flex items-center justify-center">
+                                    <img src="/api/files/${item.dbId}/thumbnail" 
+                                         alt="${item.name}" 
+                                         class="w-full h-full object-cover" 
+                                         onerror="handleThumbnailError(this, '${icon}', 'list')" />
+                                </div>
+                            `;
+                        }
+
                         html += `
                             <tr class="animate-fade-in hover:bg-white/5 cursor-pointer transition-colors"
                                 style="animation-delay: ${index * 15}ms; opacity: 0; display: table-row;"
                                 onclick="selectFile('${safeItem}')">
-                                <td class="px-4 py-2.5 text-center"><i class="${icon} text-base"></i></td>
+                                <td class="px-4 py-2.5 text-center">
+                                    <div class="flex items-center justify-center h-6">
+                                        ${cellContent}
+                                    </div>
+                                </td>
                                 <td class="px-4 py-2.5 font-medium text-slate-200 truncate pr-4">${item.name}</td>
-                                ${isSearchResults ? `<td class="px-4 py-2.5 text-slate-500 truncate text-[11px]">${item.accountLabel}</td>` : ''}
+                                ${isSearchResults ? `<td class="px-4 py-2.5 text-slate-500 truncate text-[11px] font-sans-editorial">${item.accountLabel}</td>` : ''}
                                 <td class="px-4 py-2.5 text-right text-slate-400">${formatBytes(item.size)}</td>
                                 <td class="px-4 py-2.5 text-slate-500 truncate">${dateStr}</td>
                             </tr>
@@ -1400,7 +1442,23 @@
             }
 
             const icon = getFileIconClass(item.name, item.mimeType);
-            document.getElementById('detail-icon').innerHTML = `<i class="${icon}"></i>`;
+            const canHaveThumbnail = item.dbId && (
+                (item.mimeType && (item.mimeType.startsWith('image/') || item.mimeType.startsWith('video/') || item.mimeType === 'application/pdf'))
+            );
+            
+            const detailIconEl = document.getElementById('detail-icon');
+            if (canHaveThumbnail) {
+                detailIconEl.innerHTML = `
+                    <img src="/api/files/${item.dbId}/thumbnail" 
+                         alt="${item.name}" 
+                         class="w-full h-full object-cover rounded-xl" 
+                         onerror="handleThumbnailError(this, '${icon}', 'detail')" />
+                `;
+                detailIconEl.className = "w-24 h-24 rounded-xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4 text-slate-400 overflow-hidden";
+            } else {
+                detailIconEl.innerHTML = `<i class="${icon}"></i>`;
+                detailIconEl.className = "w-16 h-16 rounded-xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4 text-slate-400";
+            }
             document.getElementById('detail-name').innerText = item.name;
             document.getElementById('detail-type').innerText = item.mimeType || 'Unknown';
             document.getElementById('detail-size').innerText = item.size ? formatBytes(item.size) : '-';
@@ -1800,6 +1858,18 @@
             if (['zip','tar','gz','iso','rar'].includes(ext)) return 'fa-solid fa-file-zipper text-amber-400';
             if (['pdf'].includes(ext)) return 'fa-solid fa-file-pdf text-red-400';
             return 'fa-solid fa-file-lines text-blue-400';
+        }
+
+        function handleThumbnailError(imgEl, iconClass, mode = 'grid') {
+            if (mode === 'list') {
+                imgEl.parentElement.replaceWith(document.createRange().createContextualFragment(`<i class="${iconClass} text-base"></i>`));
+            } else if (mode === 'detail') {
+                const container = imgEl.parentElement;
+                container.className = "w-16 h-16 rounded-xl bg-darkbg border border-darkborder flex items-center justify-center text-3xl mb-4 text-slate-400";
+                imgEl.replaceWith(document.createRange().createContextualFragment(`<i class="${iconClass}"></i>`));
+            } else {
+                imgEl.replaceWith(document.createRange().createContextualFragment(`<i class="${iconClass} text-3xl group-hover:scale-105 transition-transform duration-200"></i>`));
+            }
         }
 
         // --- APPLICATION INITIALIZATION ---

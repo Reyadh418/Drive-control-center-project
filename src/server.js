@@ -27,7 +27,8 @@ const {
   syncDriveAccount,
   downloadDriveFile,
   deleteDriveFile,
-  uploadDriveFile
+  uploadDriveFile,
+  fetchThumbnailLink
 } = require('./google');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -436,7 +437,7 @@ app.get('/api/browse', (req, res) => {
     if (folderId === 'root') {
       // Root means the first parent ID is null, or points to an ID not in our DB (which usually means the top-level Drive root)
       query = `
-        SELECT drive_file_id, name, mime_type, size, created_time, web_view_link, parents_json
+        SELECT id, drive_file_id, name, mime_type, size, created_time, web_view_link, parents_json
         FROM files
         WHERE account_id = ?
           AND (
@@ -449,7 +450,7 @@ app.get('/api/browse', (req, res) => {
       params = [accountId, accountId];
     } else {
       query = `
-        SELECT drive_file_id, name, mime_type, size, created_time, web_view_link, parents_json
+        SELECT id, drive_file_id, name, mime_type, size, created_time, web_view_link, parents_json
         FROM files
         WHERE account_id = ? AND json_extract(parents_json, '$[0]') = ?
       `;
@@ -460,6 +461,7 @@ app.get('/api/browse', (req, res) => {
 
     const items = rows.map((row) => ({
       id: row.drive_file_id,
+      dbId: row.id,
       name: row.name,
       mimeType: row.mime_type,
       size: row.size,
@@ -563,6 +565,43 @@ app.get('/api/files/:id', (req, res) => {
   }
 
   res.json({ file });
+});
+
+app.get('/api/files/:id/thumbnail', async (req, res) => {
+  const file = getFileById(db, Number(req.params.id));
+
+  if (!file) {
+    return res.status(404).json({ error: 'File not found.' });
+  }
+
+  if (!file.account_id) {
+    return res.status(400).json({ error: 'File is missing its account mapping.' });
+  }
+
+  const account = getAccount(db, file.account_id);
+
+  if (!account?.refresh_token) {
+    return res.status(400).json({ error: 'Linked account is missing a refresh token.' });
+  }
+
+  try {
+    const thumbnailLink = await fetchThumbnailLink(
+      ROOT_DIR,
+      REDIRECT_URI,
+      account,
+      file,
+      makeTokenRefreshHandler(account.id)
+    );
+
+    if (thumbnailLink) {
+      res.redirect(thumbnailLink);
+    } else {
+      res.status(404).send('No thumbnail available.');
+    }
+  } catch (error) {
+    console.error('Error fetching thumbnail link:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.get('/api/files/:id/download', async (req, res) => {

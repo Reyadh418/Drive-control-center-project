@@ -203,6 +203,19 @@ async function uploadDriveFile(rootDir, redirectUri, account, buffer, options, o
   return response.data;
 }
 
+async function fetchThumbnailLink(rootDir, redirectUri, account, file, onTokenRefresh) {
+  const oauth2Client = buildOAuthClientFromTokens(rootDir, redirectUri, account, onTokenRefresh);
+  const drive = createDriveClient(oauth2Client);
+
+  const response = await drive.files.get({
+    fileId: file.drive_file_id,
+    fields: 'thumbnailLink',
+    supportsAllDrives: true
+  });
+
+  return response.data.thumbnailLink || null;
+}
+
 module.exports = {
   loadCredentials,
   buildAuthUrl,
@@ -211,5 +224,6 @@ module.exports = {
   syncDriveAccount,
   downloadDriveFile,
   deleteDriveFile,
-  uploadDriveFile
+  uploadDriveFile,
+  fetchThumbnailLink
 };
