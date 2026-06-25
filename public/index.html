@@ -270,12 +270,23 @@
                 <section class="flex-1 flex flex-col bg-darkbg overflow-hidden relative">
                     <!-- View Headers -->
                     <header class="h-16 px-6 border-b border-darkborder flex items-center justify-between shrink-0 bg-darksurface/10">
-                        <div class="flex flex-col min-w-0 font-sans-editorial">
-                            <div class="flex items-center gap-1.5 text-xs text-slate-400 min-w-0" id="breadcrumb-trail">
-                                <span>Select an account folder...</span>
+                        <div class="flex items-center gap-3.5 min-w-0 font-sans-editorial">
+                            <!-- Back and Forward Buttons -->
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button id="btn-nav-back" onclick="historyBack()" class="w-7 h-7 flex items-center justify-center rounded bg-darkbg border border-darkborder text-slate-400 hover:text-white disabled:opacity-25 disabled:pointer-events-none hover:bg-white/5 transition-all" title="Back" disabled>
+                                    <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                                </button>
+                                <button id="btn-nav-forward" onclick="historyForward()" class="w-7 h-7 flex items-center justify-center rounded bg-darkbg border border-darkborder text-slate-400 hover:text-white disabled:opacity-25 disabled:pointer-events-none hover:bg-white/5 transition-all" title="Forward" disabled>
+                                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                </button>
                             </div>
-                            <div id="folder-stats-summary" class="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-sans-editorial hidden">
-                                0 folders • 0 files • 0 B total
+                            <div class="flex flex-col min-w-0">
+                                <div class="flex items-center gap-1.5 text-xs text-slate-400 min-w-0" id="breadcrumb-trail">
+                                    <span>Select an account folder...</span>
+                                </div>
+                                <div id="folder-stats-summary" class="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-sans-editorial hidden">
+                                    0 folders • 0 files • 0 B total
+                                </div>
                             </div>
                         </div>
                         
@@ -1139,6 +1150,70 @@
             }
         }
 
+        // --- EXPLORER BACK/FORWARD HISTORY ---
+        let explorerHistory = [];
+        let explorerHistoryIndex = -1;
+        let isNavigatingHistory = false;
+
+        function pushExplorerHistory(accountId, folderId, breadcrumb) {
+            if (isNavigatingHistory) return;
+
+            // Clear any forward history
+            if (explorerHistoryIndex < explorerHistory.length - 1) {
+                explorerHistory = explorerHistory.slice(0, explorerHistoryIndex + 1);
+            }
+
+            // Push new state
+            explorerHistory.push({
+                accountId,
+                folderId,
+                breadcrumb: JSON.parse(JSON.stringify(breadcrumb)) // deep copy
+            });
+            explorerHistoryIndex = explorerHistory.length - 1;
+
+            updateHistoryButtons();
+        }
+
+        function updateHistoryButtons() {
+            const btnBack = document.getElementById('btn-nav-back');
+            const btnForward = document.getElementById('btn-nav-forward');
+            if (btnBack && btnForward) {
+                btnBack.disabled = explorerHistoryIndex <= 0;
+                btnForward.disabled = explorerHistoryIndex >= explorerHistory.length - 1;
+            }
+        }
+
+        async function historyBack() {
+            if (explorerHistoryIndex > 0) {
+                explorerHistoryIndex--;
+                const state = explorerHistory[explorerHistoryIndex];
+                await applyHistoryState(state);
+            }
+        }
+
+        async function historyForward() {
+            if (explorerHistoryIndex < explorerHistory.length - 1) {
+                explorerHistoryIndex++;
+                const state = explorerHistory[explorerHistoryIndex];
+                await applyHistoryState(state);
+            }
+        }
+
+        async function applyHistoryState(state) {
+            isNavigatingHistory = true;
+            currentAccountId = state.accountId;
+            currentBreadcrumb = JSON.parse(JSON.stringify(state.breadcrumb));
+            
+            // Set active node in sidebar tree
+            document.querySelectorAll('.tree-node.active').forEach(el => el.classList.remove('active'));
+            const activeNode = document.getElementById(`node-${state.accountId}-${state.folderId}`);
+            if (activeNode) activeNode.classList.add('active');
+
+            await navigateTo(state.folderId, null);
+            isNavigatingHistory = false;
+            updateHistoryButtons();
+        }
+
         function getBreadcrumbPathFromTree(activeNode, accountId) {
             const path = [];
             let currentEl = activeNode;
@@ -1232,6 +1307,7 @@
                 // Add transition and render items
                 pane.classList.add('folder-fade');
                 renderItems(currentItems);
+                pushExplorerHistory(currentAccountId, folderId, currentBreadcrumb);
             } catch (err) {
                 pane.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-red-400"><i class="fa-solid fa-triangle-exclamation text-3xl mb-4"></i><p>Failed to scan directory catalog.</p></div>`;
                 console.error(err);
